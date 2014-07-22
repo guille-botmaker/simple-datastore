@@ -14,3 +14,6 @@ hs_err_pid*
 .idea
 
 simple-datastore.iml
+
+src/main/java/com/zupcat/temp/
+
