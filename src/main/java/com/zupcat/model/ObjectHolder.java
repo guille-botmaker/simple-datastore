@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
 
 @AvroGenerated
 public class ObjectHolder extends SpecificRecordBase implements SpecificRecord {
@@ -138,21 +140,21 @@ public class ObjectHolder extends SpecificRecordBase implements SpecificRecord {
         objectsList.add(var);
     }
 
-    public byte[] serialize() {
+    public byte[] serialize(final boolean compressing) {
         try {
-            return serializeImpl();
+            return serializeImpl(compressing);
         } catch (final Exception _exception) {
             throw new RuntimeException("Problems serializing ObjectHolder [" + this + "]: " + _exception.getMessage(), _exception);
         }
     }
 
-    private byte[] serializeImpl() throws Exception {
+    private byte[] serializeImpl(final boolean compressing) throws Exception {
         ByteArrayOutputStream byteOutputStream = null;
 
         try {
             byteOutputStream = new ByteArrayOutputStream(1024);
 
-            final Encoder encoder = EncoderFactory.get().binaryEncoder(byteOutputStream, reusableBinaryEncoder);
+            final Encoder encoder = EncoderFactory.get().binaryEncoder(compressing ? new DeflaterOutputStream(byteOutputStream) : byteOutputStream, reusableBinaryEncoder);
             final SpecificDatumWriter<ObjectHolder> writer = new SpecificDatumWriter<>(ObjectHolder.class);
 
             writer.write(this, encoder);
@@ -209,18 +211,18 @@ public class ObjectHolder extends SpecificRecordBase implements SpecificRecord {
         }
     }
 
-    public static ObjectHolder deserialize(final InputStream inputStream) {
+    public static ObjectHolder deserialize(final InputStream inputStream, final boolean compressed) {
         try {
-            return deserialize(IOUtils.toByteArray(inputStream));
+            return deserialize(IOUtils.toByteArray(inputStream), compressed);
         } catch (final IOException _ioException) {
             throw new RuntimeException("Problems when deserializing ObjectHolder: " + _ioException.getMessage(), _ioException);
         }
     }
 
-    public static ObjectHolder deserialize(final byte[] bytes) {
+    public static ObjectHolder deserialize(final byte[] bytes, final boolean compressed) {
         try {
             final SpecificDatumReader<ObjectHolder> reader = new SpecificDatumReader<>(ObjectHolder.class);
-            final Decoder decoder = DecoderFactory.get().binaryDecoder(new ByteArrayInputStream(bytes), reusableBinaryDecoder);
+            final Decoder decoder = DecoderFactory.get().binaryDecoder(compressed ? new InflaterInputStream(new ByteArrayInputStream(bytes)) : new ByteArrayInputStream(bytes), reusableBinaryDecoder);
 
             return reader.read(null, decoder);
 

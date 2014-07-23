@@ -1,5 +1,6 @@
 package com.zupcat.util;
 
+import com.zupcat.dao.RetryingHandler;
 import com.zupcat.exception.NoMoreRetriesException;
 
 import java.util.logging.Level;

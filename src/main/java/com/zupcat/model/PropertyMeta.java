@@ -31,6 +31,18 @@ public abstract class PropertyMeta<E extends Serializable> implements Serializab
         return result == null ? initialValue : result;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public boolean isIndexable() {
+        return indexable;
+    }
+
+    public E getInitialValue() {
+        return initialValue;
+    }
+
     public void set(final E value) {
         if (auditable) {
             AuditHandlerService.getAuditHandler().logPropertyDataChanged(this, value, owner.getId());

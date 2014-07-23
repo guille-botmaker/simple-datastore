@@ -12,7 +12,7 @@ public abstract class MemCache {
 
     private final static Object LOCK_OBJECT = new Object();
 
-    protected Logger logger = Logger.getLogger(MemCache.class.getName());
+    protected static final Logger logger = Logger.getLogger(MemCache.class.getName());
     protected Cache cache;
 
 
@@ -21,8 +21,11 @@ public abstract class MemCache {
             try {
                 final Map props = new HashMap();
                 configure(props);
-                final CacheFactory factory = CacheManager.getInstance().getCacheFactory();
-                cache = factory.createCache(props);
+
+                if (!props.isEmpty()) {
+                    final CacheFactory factory = CacheManager.getInstance().getCacheFactory();
+                    cache = factory.createCache(props);
+                }
             } catch (final CacheException ex) {
                 logger.log(Level.SEVERE, "Error creating Memcache: " + ex.getMessage(), ex);
             }

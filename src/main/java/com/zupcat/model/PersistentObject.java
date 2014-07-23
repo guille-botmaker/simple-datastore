@@ -1,58 +1,57 @@
 package com.zupcat.model;
 
-import com.google.appengine.api.datastore.KeyFactory;
+import com.zupcat.cache.CacheStrategy;
 import com.zupcat.util.RandomUtils;
-import com.zupcat.util.TimeUtils;
 
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class PersistentObject implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
-    private static final int MAX_GROUPS = 100;
 
     public static final String DATE_FORMAT = "yyMMddHHmmssSSS";
 
     private String id;
-    private long groupId;
-    private long lastModification;
     private final ObjectHolder objectHolder = new ObjectHolder();
+    private final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();
     private final String entityName;
-    private final boolean useSessionCache;
+    private final CacheStrategy cacheStrategy;
 
 
-    protected PersistentObject(final boolean useSessionCache) {
+    protected PersistentObject(final CacheStrategy cacheStrategy) {
         final String className = this.getClass().getName();
 
-        this.useSessionCache = useSessionCache;
+        this.cacheStrategy = cacheStrategy;
         entityName = className.substring(className.lastIndexOf("."));
-        id = KeyFactory.createKeyString(entityName, RandomUtils.getInstance().getRandomLong());
-        groupId = id.hashCode() % MAX_GROUPS;
+        id = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
         setModified();
     }
 
-    public void setModified() {
-        this.lastModification = TimeUtils.buildStandardModificationTime();
-    }
+    public abstract void setModified();
 
     public String getId() {
         return id;
+    }
+
+    protected void setIdForDeserializationProcess(final String id) {
+        this.id = id;
     }
 
     public String getEntityName() {
         return entityName;
     }
 
-    public long getLastModification() {
-        return lastModification;
+    public Map<String, PropertyMeta> getPropertiesMetadata() {
+        return propertiesMetadata;
     }
 
-    public long getGroupId() {
-        return groupId;
+    protected void addPropertyMeta(final String name, final PropertyMeta propertyMeta) {
+        if (propertyMeta.isIndexable() && propertyMeta.getInitialValue() == null) {
+            throw new RuntimeException("Property [" + name + "] of Entity [" + entityName + "] is indexable and has null default value. This is not allowed. Please change then initialValue to be not null");
+        }
+        propertiesMetadata.put(name, propertyMeta);
     }
 
     /**
@@ -62,46 +61,8 @@ public abstract class PersistentObject implements Serializable {
         return objectHolder;
     }
 
-    public int getDaysSinceLastModification() {
-        return getMinutesSinceLastModification() / (60 * 24);
-    }
-
-    public int getMinutesSinceLastModification() {
-        final long lm = getLastModification();
-
-        if (lm == 0l) {
-            return 0;
-        }
-
-        final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-
-        final GregorianCalendar now = new GregorianCalendar();
-        final GregorianCalendar modified = new GregorianCalendar();
-
-        try {
-            now.setTime(dateFormat.parse(Long.toString(TimeUtils.buildStandardModificationTime())));
-            modified.setTime(dateFormat.parse(Long.toString(lm)));
-
-        } catch (final ParseException _parseException) {
-            throw new RuntimeException("Problems when getting minutesSinceLastModification with value [" + lm + "]. Expected format [" + DATE_FORMAT + "]: " + _parseException.getMessage(), _parseException);
-        }
-
-        return ((int) (Math.abs((now.getTime().getTime() - modified.getTime().getTime())) / 60000));
-    }
-
-    public Date getLastModificationAsDate() {
-        try {
-            return new SimpleDateFormat(DATE_FORMAT).parse(Long.toString(getLastModification()));
-        } catch (final ParseException _parseException) {
-            throw new RuntimeException("Problems parsing date with value [" + getLastModification() + "]. Expected format [" + DATE_FORMAT + "]: " + _parseException.getMessage(), _parseException);
-        }
-    }
-
-    public boolean hasAccessedToday() {
-        final String lastAccessDate = Long.toString(this.lastModification).substring(0, 6);
-        final String today = Long.toString(TimeUtils.buildStandardModificationTime()).substring(0, 6);
-
-        return lastAccessDate.equals(today);
+    public CacheStrategy getCacheStrategy() {
+        return cacheStrategy;
     }
 
     @Override
@@ -113,8 +74,6 @@ public abstract class PersistentObject implements Serializable {
                 .append(entityName)
                 .append("|")
                 .append(id)
-                .append("|")
-                .append(lastModification)
                 .append("|")
                 .append(objectHolder.toString(builder));
 
