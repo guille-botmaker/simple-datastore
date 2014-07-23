@@ -24,9 +24,8 @@ public abstract class PersistentObject implements Serializable {
         final String className = this.getClass().getName();
 
         this.cacheStrategy = cacheStrategy;
-        entityName = className.substring(className.lastIndexOf("."));
+        entityName = className.substring(className.lastIndexOf(".") + 1);
         id = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
-        setModified();
     }
 
     public abstract void setModified();

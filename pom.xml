@@ -13,9 +13,40 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <appengine.target.version>1.9.7</appengine.target.version>
     </properties>
 
     <dependencies>
+        <!-- =============== App Engine Dependencies START =============== -->
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-1.0-sdk</artifactId>
+            <version>${appengine.target.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-testing</artifactId>
+            <version>${appengine.target.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-labs</artifactId>
+            <version>${appengine.target.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-stubs</artifactId>
+            <version>${appengine.target.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- =============== App Engine Dependencies END =============== -->
+
         <dependency>
             <groupId>org.apache.avro</groupId>
             <artifactId>avro</artifactId>
@@ -38,12 +69,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
             <version>4.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api-1.0-sdk</artifactId>
-            <version>1.9.7</version>
         </dependency>
 
         <dependency>
