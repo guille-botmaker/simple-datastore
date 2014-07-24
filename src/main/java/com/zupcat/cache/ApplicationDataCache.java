@@ -1,13 +1,9 @@
 package com.zupcat.cache;
 
-import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.stdimpl.GCacheFactory;
-
-import java.util.Map;
-
 public final class ApplicationDataCache extends MemCache {
 
     private final static Object LOCK = new Object();
+    private final static int A_DAY = 60 * 60 * 24;
 
     private static ApplicationDataCache INSTANCE;
 
@@ -22,11 +18,13 @@ public final class ApplicationDataCache extends MemCache {
         return INSTANCE;
     }
 
+    private ApplicationDataCache() {
+        // nothing to do
+    }
+
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    protected void configure(final Map props) {
-        props.put(MemcacheService.SetPolicy.SET_ALWAYS, true);
-        props.put(GCacheFactory.EXPIRATION_DELTA, 86400); // a day
+    protected int getCacheTimeoutSecs() {
+        return A_DAY;
     }
 }

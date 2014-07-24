@@ -73,7 +73,7 @@ public final class RandomUtils {
     }
 
     public int[] getRandomsInRange(final int minInclusiveValue, final int maxInclusiveValue, final int randomQty) {
-        final Set<Integer> tempSet = new HashSet<Integer>(randomQty);
+        final Set<Integer> tempSet = new HashSet<>(randomQty);
 
         while (tempSet.size() < randomQty) {
             tempSet.add(getIntBetweenInclusive(minInclusiveValue, maxInclusiveValue));

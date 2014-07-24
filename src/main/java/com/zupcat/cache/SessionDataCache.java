@@ -1,13 +1,9 @@
 package com.zupcat.cache;
 
-import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.stdimpl.GCacheFactory;
-
-import java.util.Map;
-
 public final class SessionDataCache extends MemCache {
 
     private final static Object LOCK = new Object();
+    private final static int MINUTES_15 = 60 * 15;
 
     private static SessionDataCache INSTANCE;
 
@@ -22,9 +18,12 @@ public final class SessionDataCache extends MemCache {
         return INSTANCE;
     }
 
+    private SessionDataCache() {
+        // nothing to do
+    }
+
     @Override
-    protected void configure(final Map props) {
-        props.put(MemcacheService.SetPolicy.SET_ALWAYS, true);
-        props.put(GCacheFactory.EXPIRATION_DELTA, 900); // 15 minutes
+    protected int getCacheTimeoutSecs() {
+        return MINUTES_15;
     }
 }

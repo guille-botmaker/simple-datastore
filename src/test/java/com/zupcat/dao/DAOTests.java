@@ -10,6 +10,8 @@ import java.util.List;
 
 public class DAOTests extends AbstractTest {
 
+    //serializationhelp
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();

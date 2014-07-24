@@ -15,11 +15,11 @@ public final class MemcacheManager implements Serializable {
     private static final long serialVersionUID = 9497964351314234L;
 
     public static final int ITEM_SIZE_LIMIT = 1024 * 1024 - 96; // took from https://code.google.com/p/googleappengine/source/browse/trunk/java/src/main/com/google/appengine/api/memcache/AsyncMemcacheServiceImpl.java
+    private static final Logger log = Logger.getLogger(MemcacheManager.class.getName());
 
     private static MemcacheManager instance;
     private static final Object LOCK_OBJECT = new Object();
 
-    private static final Logger log = Logger.getLogger(MemcacheManager.class.getName());
 
     public static MemcacheManager getInstance() {
         if (instance == null) {

@@ -1,8 +1,5 @@
 package com.zupcat.cache;
 
-import javax.cache.CacheStatistics;
-import java.util.Map;
-
 public final class NoMemCache extends MemCache {
 
     private final static Object LOCK = new Object();
@@ -25,30 +22,22 @@ public final class NoMemCache extends MemCache {
     }
 
     @Override
-    protected void configure(final Map props) {
+    protected int getCacheTimeoutSecs() {
+        return 0;
     }
 
+    @Override
     public Object get(final String key) {
         return null;
     }
 
-    public boolean contains(final String key) {
-        return false;
-    }
-
-    public void put(final String key, final Object value) {
-        // nothing to do
-    }
-
+    @Override
     public void remove(final String key) {
         // nothing to do
     }
 
-    public CacheStatistics getStats() {
-        return null;
-    }
-
-    public void invalidate() {
+    @Override
+    public void put(final String key, final Object value) {
         // nothing to do
     }
 }

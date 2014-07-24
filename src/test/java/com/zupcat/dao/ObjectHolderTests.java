@@ -7,8 +7,8 @@ public class ObjectHolderTests extends AbstractTest {
 
 
     /*
-    tests:
-
+    RetryingExecutor
+    Resource
      */
 
     @Override
