@@ -9,7 +9,7 @@ import com.zupcat.dao.SerializationHelper;
 
 import java.io.Serializable;
 
-public final class Resource<T> implements Serializable {
+public final class Resource implements Serializable {
 
     private static final long serialVersionUID = -2259862423311176614L;
     private static final String ENTITY_NAME = "Resource";
@@ -25,8 +25,8 @@ public final class Resource<T> implements Serializable {
         return type;
     }
 
-    public T getJavaObject() {
-        return rawValue == null ? null : (T) SerializationHelper.getObjectFromCompressedBytes(rawValue);
+    public Object getJavaObject() {
+        return rawValue == null ? null : SerializationHelper.getObjectFromCompressedBytes(rawValue);
     }
 
     public byte[] getRawValue() {
@@ -65,8 +65,8 @@ public final class Resource<T> implements Serializable {
         }
     }
 
-    public static Resource load(final String key) {
-        return load(key, true);
+    public static Resource load(final String id) {
+        return load(id, true);
     }
 
     public static Resource load(final String id, final boolean exceptionOnNotFound) {

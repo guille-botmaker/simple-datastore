@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 public enum CacheStrategy implements Serializable {
 
-    NO_CACHE(NoMemCache.getInstance()),
-    APPLICATION_CACHE(ApplicationDataCache.getInstance()),
-    SESSION_CACHE(SessionDataCache.getInstance());
+    NO_CACHE(new NoMemCache()), // NullObject pattern
+    APPLICATION_CACHE(new MemCache(60 * 60 * 24)), // a day
+    SESSION_CACHE(new MemCache(60 * 15)); // 15 minutes
 
     private final MemCache strategy;
 

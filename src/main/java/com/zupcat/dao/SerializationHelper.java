@@ -51,7 +51,7 @@ public final class SerializationHelper {
 
                 objectOutputStream = new ObjectOutputStream(new DeflaterOutputStream(byteOutputStream));
                 objectOutputStream.writeObject(obj);
-                objectOutputStream.flush();
+                objectOutputStream.close();
 
                 result = byteOutputStream.toByteArray();
 
@@ -177,7 +177,7 @@ public final class SerializationHelper {
         }
     }
 
-    private static void saveObject2FileImpl(final Object object, final File file) throws IOException {
+    private static void saveObject2FileImpl(final Serializable object, final File file) throws IOException {
         ObjectOutputStream output = null;
 
         try {

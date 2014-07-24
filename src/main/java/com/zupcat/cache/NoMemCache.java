@@ -2,28 +2,8 @@ package com.zupcat.cache;
 
 public final class NoMemCache extends MemCache {
 
-    private final static Object LOCK = new Object();
-
-    private static NoMemCache INSTANCE;
-
-    public static MemCache getInstance() {
-        if (INSTANCE == null) {
-            synchronized (LOCK) {
-                if (INSTANCE == null) {
-                    INSTANCE = new NoMemCache();
-                }
-            }
-        }
-        return INSTANCE;
-    }
-
-    private NoMemCache() {
-        // nothing to do
-    }
-
-    @Override
-    protected int getCacheTimeoutSecs() {
-        return 0;
+    protected NoMemCache() {
+        super(0);
     }
 
     @Override

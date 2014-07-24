@@ -5,17 +5,6 @@ import com.zupcat.model.ObjectHolder;
 
 public class ObjectHolderTests extends AbstractTest {
 
-
-    /*
-    RetryingExecutor
-    Resource
-     */
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
     public void testSimpleCompressSerialization() {
         trySimpleSerialization(true);
     }

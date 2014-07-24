@@ -6,14 +6,18 @@ import com.zupcat.sample.SampleUser;
 import com.zupcat.sample.SampleUserDAO;
 import com.zupcat.service.SimpleDatastoreService;
 import com.zupcat.service.SimpleDatastoreServiceFactory;
+import com.zupcat.util.RandomUtils;
 import junit.framework.TestCase;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractTest extends TestCase {
 
     protected SimpleDatastoreService service;
     protected final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+    protected TestClass testClass;
 
     @Override
     protected void setUp() throws Exception {
@@ -23,6 +27,19 @@ public abstract class AbstractTest extends TestCase {
         service.registerDAO(new SampleUserDAO());
 
         helper.setUp();
+
+        testClass = new TestClass();
+        testClass.other = new TestClass();
+
+        final RandomUtils randomUtils = RandomUtils.getInstance();
+
+        testClass.s = randomUtils.getRandomSafeAlphaNumberString(5);
+        testClass.i = randomUtils.getRandomInt(1000000);
+        testClass.l = randomUtils.getRandomLong();
+
+        testClass.other.s = randomUtils.getRandomSafeAlphaNumberString(5);
+        testClass.other.i = randomUtils.getRandomInt(1000000);
+        testClass.other.l = randomUtils.getRandomLong();
     }
 
     @Override
@@ -30,5 +47,50 @@ public abstract class AbstractTest extends TestCase {
         super.tearDown();
 
         helper.tearDown();
+    }
+
+    protected static List<SampleUser> buildUsers() {
+        final int samples = 100;
+        final List<SampleUser> result = new ArrayList<>(samples);
+        final RandomUtils randomUtils = RandomUtils.getInstance();
+
+        for (int i = 0; i < samples; i++) {
+            final SampleUser sample = new SampleUser();
+            sample.NAME.set("User Name " + randomUtils.getRandomSafeString(10));
+            sample.AGE.set(randomUtils.getIntBetweenInclusive(1, 100));
+
+            result.add(sample);
+        }
+        return result;
+    }
+
+
+    public static final class TestClass implements Serializable {
+
+        private static final long serialVersionUID = 471847964351314234L;
+
+        public String s;
+        public int i;
+        public long l;
+        public TestClass other;
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            final TestClass testClass = (TestClass) o;
+
+            return i == testClass.i && l == testClass.l && !(other != null ? !other.equals(testClass.other) : testClass.other != null) && !(s != null ? !s.equals(testClass.s) : testClass.s != null);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = s != null ? s.hashCode() : 0;
+            result = 31 * result + i;
+            result = 31 * result + (int) (l ^ (l >>> 32));
+            result = 31 * result + (other != null ? other.hashCode() : 0);
+            return result;
+        }
     }
 }

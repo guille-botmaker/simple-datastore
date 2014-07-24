@@ -8,19 +8,15 @@ import com.zupcat.service.SimpleDatastoreServiceFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public abstract class MemCache {
+public class MemCache {
 
-    private final static Object LOCK_OBJECT = new Object();
+    private static final Logger logger = Logger.getLogger(MemCache.class.getName());
 
-    protected static final Logger logger = Logger.getLogger(MemCache.class.getName());
+    private final int cacheTimeoutSecs;
 
-
-    protected MemCache() {
-        // nothing to do
+    protected MemCache(final int cacheTimeoutSecs) {
+        this.cacheTimeoutSecs = cacheTimeoutSecs;
     }
-
-    protected abstract int getCacheTimeoutSecs();
-
 
     public Object get(final String key) {
         final boolean loggingActivated = SimpleDatastoreServiceFactory.getSimpleDatastoreService().isDatastoreCallsLoggingActivated();
@@ -43,9 +39,7 @@ public abstract class MemCache {
             if (loggingActivated) {
                 logger.log(Level.SEVERE, "PERF - MemCache.remove", new Exception());
             }
-            synchronized (LOCK_OBJECT) {
-                MemcacheServiceFactory.getAsyncMemcacheService().delete(key);
-            }
+            MemcacheServiceFactory.getAsyncMemcacheService().delete(key);
         } catch (final Throwable e) {
             logger.log(Level.WARNING, "Problems when putting object to MemCache. Key [" + key + "]: " + e.getMessage(), e);
         }
@@ -58,9 +52,7 @@ public abstract class MemCache {
             if (loggingActivated) {
                 logger.log(Level.SEVERE, "PERF - MemCache.put", new Exception());
             }
-            synchronized (LOCK_OBJECT) {
-                MemcacheServiceFactory.getAsyncMemcacheService().put(key, value, Expiration.byDeltaSeconds(getCacheTimeoutSecs()), MemcacheService.SetPolicy.SET_ALWAYS);
-            }
+            MemcacheServiceFactory.getAsyncMemcacheService().put(key, value, Expiration.byDeltaSeconds(cacheTimeoutSecs), MemcacheService.SetPolicy.SET_ALWAYS);
         } catch (final Throwable e) {
             logger.log(Level.WARNING, "Problems when putting object to MemCache. Key [" + key + "]: " + e.getMessage(), e);
         }
