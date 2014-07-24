@@ -281,7 +281,7 @@ public abstract class DAO<P extends DatastoreEntity> implements Serializable {
         return RETRYING_HANDLER;
     }
 
-    private Key buildKey(final String entityName, final String id) {
+    public static Key buildKey(final String entityName, final String id) {
         return KeyFactory.createKey(entityName, id);
     }
 

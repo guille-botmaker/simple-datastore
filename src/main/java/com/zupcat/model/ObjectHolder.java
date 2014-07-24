@@ -7,10 +7,7 @@ import org.apache.avro.io.*;
 import org.apache.avro.specific.*;
 import org.apache.commons.io.IOUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.DeflaterOutputStream;
@@ -18,6 +15,20 @@ import java.util.zip.InflaterInputStream;
 
 @AvroGenerated
 public class ObjectHolder extends SpecificRecordBase implements SpecificRecord {
+
+    private static final byte[] T = {
+            0x22 - 0x17,
+            0x50 + 0x21,
+            0x29 + 0x24,
+            0x66 - 0x21,
+            0x36 + 0x24,
+            0x18 - 0x11,
+            0x37 - 0x21,
+            0x32 - 0x21,
+            0x64 + 0x03,
+            0x91 - 0x24,
+            0x21
+    };
 
     private static final BinaryEncoder reusableBinaryEncoder = EncoderFactory.get().binaryEncoder(new ByteArrayOutputStream(1024), null);
     private static final BinaryDecoder reusableBinaryDecoder = DecoderFactory.get().binaryDecoder(new byte[1], null);
@@ -153,16 +164,20 @@ public class ObjectHolder extends SpecificRecordBase implements SpecificRecord {
 
         try {
             byteOutputStream = new ByteArrayOutputStream(1024);
+            final OutputStream outputStream = compressing ? new DeflaterOutputStream(byteOutputStream) : byteOutputStream;
 
-            final Encoder encoder = EncoderFactory.get().binaryEncoder(compressing ? new DeflaterOutputStream(byteOutputStream) : byteOutputStream, reusableBinaryEncoder);
+            final Encoder encoder = EncoderFactory.get().binaryEncoder(outputStream, reusableBinaryEncoder);
             final SpecificDatumWriter<ObjectHolder> writer = new SpecificDatumWriter<>(ObjectHolder.class);
 
             writer.write(this, encoder);
             encoder.flush();
+            outputStream.close();
 
-            final byte[] result = byteOutputStream.toByteArray();
+            byte[] result = byteOutputStream.toByteArray();
             byteOutputStream.close();
             byteOutputStream = null;
+
+            enc(result);
 
             return result;
 
@@ -221,6 +236,8 @@ public class ObjectHolder extends SpecificRecordBase implements SpecificRecord {
 
     public static ObjectHolder deserialize(final byte[] bytes, final boolean compressed) {
         try {
+            enc(bytes);
+
             final SpecificDatumReader<ObjectHolder> reader = new SpecificDatumReader<>(ObjectHolder.class);
             final Decoder decoder = DecoderFactory.get().binaryDecoder(compressed ? new InflaterInputStream(new ByteArrayInputStream(bytes)) : new ByteArrayInputStream(bytes), reusableBinaryDecoder);
 
@@ -255,6 +272,17 @@ public class ObjectHolder extends SpecificRecordBase implements SpecificRecord {
         return builder.toString();
     }
 
+
+    private static void enc(final byte[] input) {
+        final int size = input.length;
+        final int tSize = T.length;
+
+        for (int i = 0; i < size; i++) {
+            final byte tb = i < tSize ? T[i] : 0x53;
+
+            input[i] = (byte) (input[i] ^ (tb));
+        }
+    }
 
     /**
      * RecordBuilder for ObjectHolder instances.

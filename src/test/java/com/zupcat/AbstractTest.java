@@ -31,11 +31,4 @@ public abstract class AbstractTest extends TestCase {
 
         helper.tearDown();
     }
-
-
-    public void testQueryAllObjects() {
-        final List<SampleUser> allUsers = service.getDAO(SampleUserDAO.class).getAll();
-
-        assertFalse(allUsers.isEmpty());
-    }
 }
