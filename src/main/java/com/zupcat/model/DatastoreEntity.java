@@ -27,7 +27,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         GROUP_ID = propInt("gi", null, false, false, true);
         LAST_MODIFICATION = propLong("lm", null, false, false, true);
 
-        GROUP_ID.set(getId().hashCode() % MAX_GROUPS);
+        GROUP_ID.set(Math.abs(getId().hashCode() % MAX_GROUPS));
 
         setModified();
     }

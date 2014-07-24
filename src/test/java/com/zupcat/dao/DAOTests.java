@@ -60,8 +60,9 @@ public class DAOTests extends AbstractTest {
             }
         }
 
+        final int allSize = sampleUserDAO.getAll().size();
         assertTrue(specificFound);
-        assertTrue(totalEntities >= 100);
+        assertTrue(totalEntities >= 100 && totalEntities == allSize);
     }
 
     public void testUpdateOrPersistAndQueries() {
