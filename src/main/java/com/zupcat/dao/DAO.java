@@ -9,7 +9,6 @@ import org.apache.commons.collections4.Predicate;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 public abstract class DAO<P extends DatastoreEntity> implements Serializable {
@@ -18,7 +17,7 @@ public abstract class DAO<P extends DatastoreEntity> implements Serializable {
     private static final RetryingHandler RETRYING_HANDLER = new RetryingHandler();
     protected static final Logger log = Logger.getLogger(DAO.class.getName());
 
-    private final P sample;
+    protected final P sample;
     private final EntityPersistentObjectConverter<P> entityPersistentObjectConverter;
 
 
@@ -139,23 +138,17 @@ public abstract class DAO<P extends DatastoreEntity> implements Serializable {
         }
     }
 
-    public Map<String, P> findUniqueIdMultiple(final Collection<String> keys) {
-        final Map<String, P> result = new HashMap<>(keys.size());
-        final List<Key> realKeys = new ArrayList<>(keys.size());
+    public Map<String, P> findUniqueIdMultiple(final Collection<String> ids) {
+        final Map<String, P> result = new HashMap<>(ids.size());
+        final List<Key> realKeys = new ArrayList<>(ids.size());
         final String entityName = sample.getEntityName();
 
-        for (final String key : keys) {
-            realKeys.add(buildKey(key, entityName));
+        for (final String key : ids) {
+            realKeys.add(buildKey(entityName, key));
         }
 
-        final Future<Map<Key, Entity>> mapFuture = getRetryingHandler().tryDSGetMultipleAsync(realKeys);
-
-        try {
-            for (final Map.Entry<Key, Entity> entry : mapFuture.get().entrySet()) {
-                result.put(entry.getKey().getName(), buildPersistentObjectFromEntity(entry.getValue()));
-            }
-        } catch (final Exception _exception) {
-            throw new RuntimeException("Problems when finding multiple ids [" + Arrays.toString(keys.toArray()) + "]: " + _exception.getMessage(), _exception);
+        for (final Map.Entry<Key, Entity> entry : getRetryingHandler().tryDSGetMultiple(realKeys).entrySet()) {
+            result.put(entry.getKey().getName(), buildPersistentObjectFromEntity(entry.getValue()));
         }
         return result;
     }
@@ -191,7 +184,7 @@ public abstract class DAO<P extends DatastoreEntity> implements Serializable {
             keys.add(buildKey(entityName, id));
         }
 
-        getRetryingHandler().tryDSRemoveAsync(keys);
+        getRetryingHandler().tryDSRemove(keys);
     }
 
 //    public Iterator<C> getByGroupId(final int groupId, final BuildQuery _buildQuery) {

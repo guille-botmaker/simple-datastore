@@ -34,7 +34,7 @@ public abstract class PersistentObject implements Serializable {
         return id;
     }
 
-    protected void setIdForDeserializationProcess(final String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
@@ -47,9 +47,9 @@ public abstract class PersistentObject implements Serializable {
     }
 
     protected void addPropertyMeta(final String name, final PropertyMeta propertyMeta) {
-        if (propertyMeta.isIndexable() && propertyMeta.getInitialValue() == null) {
-            throw new RuntimeException("Property [" + name + "] of Entity [" + entityName + "] is indexable and has null default value. This is not allowed. Please change then initialValue to be not null");
-        }
+//        if (propertyMeta.isIndexable() && propertyMeta.getInitialValue() == null) {
+//            throw new RuntimeException("Property [" + name + "] of Entity [" + entityName + "] is indexable and has null default value. This is not allowed. Please change then initialValue to be not null");
+//        }
         propertiesMetadata.put(name, propertyMeta);
     }
 

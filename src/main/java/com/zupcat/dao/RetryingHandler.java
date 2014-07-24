@@ -6,6 +6,7 @@ import com.zupcat.service.SimpleDatastoreServiceFactory;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -145,20 +146,6 @@ public final class RetryingHandler implements Serializable {
     }
 
 
-    public void tryDSRemoveAsync(final Collection<Key> entityKeys) {
-        tryClosureAsync(new AsyncClosure<Void>() {
-
-            public Future<Void> execute(final AsyncDatastoreService datastore, final boolean loggingActivated) throws ExecutionException, InterruptedException {
-                if (loggingActivated) {
-                    log.log(Level.SEVERE, "PERF - tryDSRemoveAsyncMultiple", new Exception());
-                }
-
-                return datastore.delete(entityKeys);
-            }
-        });
-    }
-
-
     public void tryDSPutMultipleAsync(final Iterable<Entity> entities) {
         tryClosureAsync(new AsyncClosure<List<Key>>() {
 
@@ -177,33 +164,35 @@ public final class RetryingHandler implements Serializable {
     }
 
 
-    public Future<Map<Key, Entity>> tryDSGetMultipleAsync(final Collection<Key> keys) {
-        return tryClosureAsync(new AsyncClosure<Map<Key, Entity>>() {
+    public Map<Key, Entity> tryDSGetMultiple(final Collection<Key> keys) {
+        final Map<Key, Entity> result = new HashMap<>();
 
-            public Future<Map<Key, Entity>> execute(final AsyncDatastoreService datastore, final boolean loggingActivated) throws ExecutionException, InterruptedException {
-                if (loggingActivated) {
-                    log.log(Level.SEVERE, "PERF - tryDSGetMultipleAsync", new Exception());
+        if (keys != null && !keys.isEmpty()) {
+            tryClosure(new Closure() {
+
+                @Override
+                public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
+                    if (loggingActivated) {
+                        log.log(Level.SEVERE, "PERF - tryDSGetMultiple", new Exception());
+                    }
+                    result.putAll(datastore.get(keys));
                 }
-                final Future<Map<Key, Entity>> listFuture = datastore.get(keys);
-
-                listFuture.get();
-
-                return listFuture;
-            }
-        });
+            }, null);
+        }
+        return result;
     }
 
 
-    public void tryDSPutMultiple(final Iterable<Entity> entities) {
-        tryClosure(new Closure() {
-            public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
-                if (loggingActivated) {
-                    log.log(Level.SEVERE, "PERF - tryDSPutMultiple", new Exception());
-                }
-                datastore.put(entities);
-            }
-        }, null);
-    }
+//    public void tryDSPutMultiple(final Iterable<Entity> entities) {
+//        tryClosure(new Closure() {
+//            public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
+//                if (loggingActivated) {
+//                    log.log(Level.SEVERE, "PERF - tryDSPutMultiple", new Exception());
+//                }
+//                datastore.put(entities);
+//            }
+//        }, null);
+//    }
 
 
     public void tryDSPut(final Entity entity) {

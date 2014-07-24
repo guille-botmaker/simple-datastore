@@ -56,11 +56,24 @@ public abstract class AbstractTest extends TestCase {
 
         for (int i = 0; i < samples; i++) {
             final SampleUser sample = new SampleUser();
-            sample.NAME.set("User Name " + randomUtils.getRandomSafeString(10));
+            sample.FIRSTNAME.set("First Name " + randomUtils.getRandomSafeString(10));
+            sample.LASTNAME.set("LAST Name " + randomUtils.getRandomSafeString(10));
             sample.AGE.set(randomUtils.getIntBetweenInclusive(1, 100));
+            sample.LONG_VALUE.set(randomUtils.getRandomLong());
+            sample.IS_FAKE.set(randomUtils.getRandomBoolean());
 
             result.add(sample);
         }
+
+        final SampleUser sample = new SampleUser();
+        sample.FIRSTNAME.set("hernan");
+        sample.LASTNAME.set("liendo");
+        sample.AGE.set(18);
+        sample.LONG_VALUE.set(23123213l);
+        sample.IS_FAKE.set(false);
+
+        result.add(sample);
+
         return result;
     }
 

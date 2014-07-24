@@ -3,6 +3,9 @@ package com.zupcat.model;
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
 import com.zupcat.dao.DAO;
+import com.zupcat.property.IntegerProperty;
+
+import java.io.Serializable;
 
 public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
 
@@ -33,13 +36,31 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
         if (entity != null) {
             result = dao.buildPersistentObjectInstance();
 
-            result.setIdForDeserializationProcess(entity.getKey().getName());
+            result.setId(entity.getKey().getName());
 
             final Blob binaryData = (Blob) entity.getProperty(DATA_CONTAINER_PROPERTY);
             final ObjectHolder objectHolder = binaryData == null ? null : ObjectHolder.deserialize(binaryData.getBytes(), true);
 
             if (objectHolder != null) {
                 result.getObjectHolder().mergeWith(objectHolder);
+            }
+
+            for (final PropertyMeta propertyMeta : result.getPropertiesMetadata().values()) {
+                if (propertyMeta.isIndexable()) {
+                    final Serializable propertyValue = (Serializable) entity.getProperty(propertyMeta.getName());
+
+                    if (propertyValue != null && propertyValue.getClass().getName().equals(Long.class.getName()) && propertyMeta.getClass().getName().equals(IntegerProperty.class.getName())) {
+                        final Long longValue = (long) propertyValue;
+
+                        if (longValue > Integer.MAX_VALUE || longValue < Integer.MIN_VALUE) {
+                            throw new RuntimeException("Trying to set long value to IntegerProperty. Value was [" + longValue + "], property was [" + propertyMeta.getName() + "]");
+                        }
+
+                        propertyMeta.set(longValue.intValue());
+                    } else {
+                        propertyMeta.set(propertyValue);
+                    }
+                }
             }
         }
         return result;

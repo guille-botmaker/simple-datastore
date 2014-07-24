@@ -14,6 +14,7 @@ public final class RandomUtils {
     private static final Object INIT_LOCK_OBJECT = new Object();
 
     private final SecureRandom random;
+    private Boolean randomBoolean;
 
 
     public static RandomUtils getInstance() {
@@ -102,5 +103,9 @@ public final class RandomUtils {
     public List<?> shuffle(final List<?> choices) {
         Collections.shuffle(choices, random);
         return choices;
+    }
+
+    public boolean getRandomBoolean() {
+        return getIntBetweenInclusive(0, 1) == 0;
     }
 }

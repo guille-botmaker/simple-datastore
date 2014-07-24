@@ -16,7 +16,7 @@ import java.util.GregorianCalendar;
 public abstract class DatastoreEntity extends PersistentObject implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
-    private static final int MAX_GROUPS = 100;
+    public static final int MAX_GROUPS = 100;
 
     public final IntegerProperty GROUP_ID;
     public final LongProperty LAST_MODIFICATION;
@@ -24,8 +24,8 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     protected DatastoreEntity(final CacheStrategy cacheStrategy) {
         super(cacheStrategy);
 
-        GROUP_ID = propInt("gi", 0, false, false, true);
-        LAST_MODIFICATION = propLong("lm", 0l, false, false, true);
+        GROUP_ID = propInt("gi", null, false, false, true);
+        LAST_MODIFICATION = propLong("lm", null, false, false, true);
 
         GROUP_ID.set(getId().hashCode() % MAX_GROUPS);
 
