@@ -2,6 +2,8 @@ package com.zupcat.dao;
 
 import com.zupcat.AbstractTest;
 import com.zupcat.model.ObjectHolder;
+import com.zupcat.model.ObjectVar;
+import com.zupcat.util.RandomUtils;
 
 public class ObjectHolderTests extends AbstractTest {
 
@@ -13,19 +15,43 @@ public class ObjectHolderTests extends AbstractTest {
         trySimpleSerialization(false);
     }
 
-    private byte[] trySimpleSerialization(final boolean compress) {
-        final ObjectHolder source = new ObjectHolder();
-        source.getObjectVar().set("s", "s1");
-        source.getObjectVar().set("b", true);
-        source.getObjectVar().set("i", 100);
-        source.getObjectVar().set("l", 123123123123123l);
+    private void trySimpleSerialization(final boolean compress) {
+        for (int i = 0; i < 10; i++) {
+            final ObjectHolder source = build();
 
-        final ObjectHolder target = ObjectHolder.deserialize(ObjectHolder.deserialize(source.serialize(compress), compress).serialize(compress), compress);
-        assertEquals(source.getObjectVar().getString("s"), target.getObjectVar().getString("s"));
-        assertEquals(source.getObjectVar().getBoolean("b"), target.getObjectVar().getBoolean("b"));
-        assertEquals(source.getObjectVar().getInteger("i"), target.getObjectVar().getInteger("i"));
-        assertEquals(source.getObjectVar().getLong("l"), target.getObjectVar().getLong("l"));
+            final ObjectHolder target = ObjectHolder.deserialize(ObjectHolder.deserialize(source.serialize(compress), compress).serialize(compress), compress);
 
-        return target.serialize(compress);
+            assertTrue(source.isFullyEquals(target));
+            assertTrue(target.isFullyEquals(source));
+            assertTrue(source.isFullyEquals(source));
+            assertTrue(target.isFullyEquals(target));
+            assertEquals(source.toString(), target.toString());
+
+//            final int size = source.serialize(compress).length;
+//            System.err.println("");
+        }
+    }
+
+    private ObjectHolder build() {
+        final ObjectHolder objectHolder = new ObjectHolder();
+
+        fillObjectVar(objectHolder.getObjectVar());
+
+        for (int i = 0; i < 1000; i++) {
+            final ObjectVar item = new ObjectVar();
+            fillObjectVar(item);
+
+            objectHolder.addItem(item);
+        }
+        return objectHolder;
+    }
+
+    private void fillObjectVar(final ObjectVar objectVar) {
+        final RandomUtils randomUtils = RandomUtils.getInstance();
+
+        objectVar.set("string", randomUtils.getRandomSafeAlphaNumberString(20));
+        objectVar.set("long", randomUtils.getRandomLong());
+        objectVar.set("bool", randomUtils.getRandomBoolean());
+        objectVar.set("int", randomUtils.getRandomInt(Integer.MAX_VALUE));
     }
 }

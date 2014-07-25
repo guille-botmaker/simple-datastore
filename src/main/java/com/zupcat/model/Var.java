@@ -7,15 +7,17 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.avro.specific.SpecificRecordBuilderBase;
 
+import java.util.Objects;
+
 @AvroGenerated
 public final class Var extends SpecificRecordBase implements SpecificRecord {
 
     public static final Schema SCHEMA$ = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Var\",\"namespace\":\"com.zupcat.model\",\"fields\":[{\"name\":\"iv\",\"type\":[\"null\",\"int\"],\"default\":null},{\"name\":\"sv\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"bv\",\"type\":[\"null\",\"boolean\"],\"default\":null},{\"name\":\"lv\",\"type\":[\"null\",\"long\"],\"default\":null}]}");
 
-    public Integer iv;
-    public CharSequence sv;
-    public Boolean bv;
-    public Long lv;
+    private Integer iv;
+    private CharSequence sv;
+    private Boolean bv;
+    private Long lv;
 
 
     /**
@@ -75,6 +77,15 @@ public final class Var extends SpecificRecordBase implements SpecificRecord {
         }
     }
 
+    public boolean isFullyEquals(final Var other) {
+        return
+                other != null &&
+                        Objects.equals(this.iv, other.iv) &&
+                        Objects.equals(this.getSv(), other.getSv()) &&
+                        Objects.equals(this.bv, other.bv) &&
+                        Objects.equals(this.lv, other.lv);
+    }
+
     /**
      * Gets the value of the 'iv' field.
      */
@@ -95,7 +106,7 @@ public final class Var extends SpecificRecordBase implements SpecificRecord {
      * Gets the value of the 'sv' field.
      */
     public CharSequence getSv() {
-        return sv;
+        return sv == null ? null : sv.toString();
     }
 
     /**
@@ -167,7 +178,7 @@ public final class Var extends SpecificRecordBase implements SpecificRecord {
             return "Var.Integer[" + iv + "]";
         }
         if (sv != null) {
-            return "Var.String[" + sv + "]";
+            return "Var.String[" + getSv() + "]";
         }
         if (bv != null) {
             return "Var.Boolean[" + bv + "]";

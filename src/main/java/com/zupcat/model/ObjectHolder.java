@@ -53,6 +53,19 @@ public class ObjectHolder extends SpecificRecordBase implements SpecificRecord {
         this.objectVar.mergeWith(objectVar);
     }
 
+    public boolean isFullyEquals(final ObjectHolder other) {
+        if (other == null || !this.objectVar.isFullyEquals(other.objectVar) || this.objectsList.size() != other.objectsList.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < this.objectsList.size(); i++) {
+            if (!this.objectsList.get(i).isFullyEquals(other.objectsList.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public Schema getSchema() {
         return SCHEMA$;
     }

@@ -19,12 +19,26 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord {
 
     public static final Schema SCHEMA$ = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ObjectVar\",\"namespace\":\"com.zupcat.model\",\"fields\":[{\"name\":\"vars\",\"type\":[\"null\",{\"type\":\"map\",\"values\":{\"type\":\"record\",\"name\":\"Var\",\"fields\":[{\"name\":\"iv\",\"type\":[\"null\",\"int\"],\"default\":null},{\"name\":\"sv\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"bv\",\"type\":[\"null\",\"boolean\"],\"default\":null},{\"name\":\"lv\",\"type\":[\"null\",\"long\"],\"default\":null}]}}],\"default\":null}]}");
 
-    public final Map<CharSequence, Var> vars = new HashMap<>();
+    private final Map<CharSequence, Var> vars = new HashMap<>();
 
     /**
      * Default constructor.
      */
     public ObjectVar() {
+    }
+
+
+    public boolean isFullyEquals(final ObjectVar other) {
+        if (other == null || this.vars.size() != other.vars.size()) {
+            return false;
+        }
+
+        for (final Map.Entry<CharSequence, Var> entry : this.vars.entrySet()) {
+            if (!entry.getValue().isFullyEquals(other.vars.get(entry.getKey()))) {
+                return false;
+            }
+        }
+        return true;
     }
 
 
