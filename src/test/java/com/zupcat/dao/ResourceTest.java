@@ -3,7 +3,7 @@ package com.zupcat.dao;
 import com.zupcat.AbstractTest;
 import com.zupcat.model.Resource;
 
-public class ResourceTests extends AbstractTest {
+public class ResourceTest extends AbstractTest {
 
     public void testSavingAndLoadingJavaObject() {
         Resource.buildJavaObject("testid", testClass).save(false);

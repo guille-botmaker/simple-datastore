@@ -4,7 +4,7 @@ import com.zupcat.AbstractTest;
 import com.zupcat.util.IClosure;
 import com.zupcat.util.RetryingExecutor;
 
-public class RetryingExecutorTests extends AbstractTest {
+public class RetryingExecutorTest extends AbstractTest {
 
     public void testFailure() {
         final int[] executions = new int[1];

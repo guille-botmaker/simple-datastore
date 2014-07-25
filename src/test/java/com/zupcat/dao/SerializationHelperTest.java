@@ -4,7 +4,7 @@ import com.zupcat.AbstractTest;
 
 import java.io.File;
 
-public class SerializationHelperTests extends AbstractTest {
+public class SerializationHelperTest extends AbstractTest {
 
 
     public void testSerialization() {

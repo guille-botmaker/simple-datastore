@@ -5,7 +5,7 @@ import com.zupcat.model.ObjectHolder;
 import com.zupcat.model.ObjectVar;
 import com.zupcat.util.RandomUtils;
 
-public class ObjectHolderTests extends AbstractTest {
+public class ObjectHolderTest extends AbstractTest {
 
     public void testSimpleCompressSerialization() {
         trySimpleSerialization(true);

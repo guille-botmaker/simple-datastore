@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class DAOTests extends AbstractTest {
+public class DAOTest extends AbstractTest {
 
     private SampleUserDAO sampleUserDAO;
 
