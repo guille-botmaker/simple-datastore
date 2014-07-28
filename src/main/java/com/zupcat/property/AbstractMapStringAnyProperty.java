@@ -2,23 +2,21 @@ package com.zupcat.property;
 
 import com.zupcat.model.ObjectVar;
 import com.zupcat.model.PersistentObject;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.avro.io.*;
+import org.apache.commons.codec.binary.Base64;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class AbstractMapStringAnyProperty<K, V> extends StringProperty implements Serializable, Map<K, V> {
 
     private static final long serialVersionUID = 6181606486836703354L;
 
-    private static final String ENTRIES_SEPARATOR = "/";
-    private static final String ENTRIES_SEPARATOR_ALT = "[---]";
-
-    private static final String KEY_VALUE_SEPARATOR = "*";
-    private static final String KEY_VALUE_SEPARATOR_ALT = "[+++]";
+    private static final BinaryEncoder reusableBinaryEncoder = EncoderFactory.get().binaryEncoder(new ByteArrayOutputStream(), null);
+    private static final BinaryDecoder reusableBinaryDecoder = DecoderFactory.get().binaryDecoder(new ByteArrayInputStream(new byte[1]), null);
 
     // to avoid some extra parsing to String
     private transient Map<K, V> cache;
@@ -29,27 +27,61 @@ public abstract class AbstractMapStringAnyProperty<K, V> extends StringProperty 
     }
 
     @Override
-    protected void setValueImpl(String value, final ObjectVar objectVar) {
-        if (value != null && value.length() > 0) {
-            value = StringUtils.replace(value, ENTRIES_SEPARATOR, ENTRIES_SEPARATOR_ALT);
-            value = StringUtils.replace(value, KEY_VALUE_SEPARATOR, KEY_VALUE_SEPARATOR_ALT);
-        }
+    protected void setValueImpl(final String value, final ObjectVar objectVar) {
         objectVar.set(name, value);
+    }
+
+
+    @Override
+    public void commit() {
+        super.commit();
+
+        final Map<K, V> map = getMap();
+
+        if (map.isEmpty()) {
+            set(null);
+        } else {
+            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(500);
+            final Encoder encoder = EncoderFactory.get().binaryEncoder(byteArrayOutputStream, reusableBinaryEncoder);
+
+            try {
+                encoder.writeMapStart();
+                encoder.setItemCount(map.size());
+
+                for (final Entry<K, V> entry : map.entrySet()) {
+                    encoder.startItem();
+                    writeKeyValue(encoder, entry);
+                }
+
+                encoder.writeMapEnd();
+
+                encoder.flush();
+                byteArrayOutputStream.close();
+
+                set(Base64.encodeBase64String(byteArrayOutputStream.toByteArray()));
+            } catch (final IOException _ioException) {
+                throw new RuntimeException("Problems serializing MapProperty [" + this + "] on map [" + Arrays.toString(map.entrySet().toArray()) + "]: " + _ioException.getMessage(), _ioException);
+            }
+        }
     }
 
     private Map<K, V> getMap() {
         if (cache == null) {
             cache = new HashMap<>();
-            String data = get();
+            final String data = get();
 
             if (data != null && data.length() > 0) {
-                data = StringUtils.replace(data, ENTRIES_SEPARATOR_ALT, ENTRIES_SEPARATOR);
-                data = StringUtils.replace(data, KEY_VALUE_SEPARATOR_ALT, KEY_VALUE_SEPARATOR);
+                final Decoder decoder = DecoderFactory.get().binaryDecoder(new ByteArrayInputStream(Base64.decodeBase64(data)), reusableBinaryDecoder);
 
-                for (final String entry : StringUtils.split(data, ENTRIES_SEPARATOR)) {
-                    final String[] keyValue = StringUtils.split(entry, KEY_VALUE_SEPARATOR);
-
-                    cache.put(convertKeyFromString(keyValue[0]), convertValueFromString(keyValue[1]));
+                try {
+                    for (long i = decoder.readMapStart(); i != 0; i = decoder.mapNext()) {
+                        for (long j = 0; j < i; j++) {
+                            final Entry<K, V> entry = readKeyValue(decoder);
+                            cache.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                } catch (final IOException _ioException) {
+                    throw new RuntimeException("Problems deserializing MapProperty [" + this + "] with data [" + data + "]: " + _ioException.getMessage(), _ioException);
                 }
             }
         }
@@ -57,9 +89,9 @@ public abstract class AbstractMapStringAnyProperty<K, V> extends StringProperty 
     }
 
 
-    protected abstract K convertKeyFromString(final String s);
+    protected abstract void writeKeyValue(final Encoder encoder, final Entry<K, V> entry) throws IOException;
 
-    protected abstract V convertValueFromString(final String s);
+    protected abstract Map.Entry<K, V> readKeyValue(final Decoder decoder) throws IOException;
 
 
     // Reading operations
@@ -98,46 +130,18 @@ public abstract class AbstractMapStringAnyProperty<K, V> extends StringProperty 
     // Modification Operations
 
     public V put(final K key, final V value) {
-        final V result = getMap().put(key, value);
-
-        upgradeMap();
-
-        return result;
+        return getMap().put(key, value);
     }
 
     public V remove(final Object key) {
-        final V result = getMap().remove(key);
-
-        upgradeMap();
-
-        return result;
+        return getMap().remove(key);
     }
 
     public void putAll(final Map<? extends K, ? extends V> m) {
         getMap().putAll(m);
-
-        upgradeMap();
     }
 
     public void clear() {
         getMap().clear();
-
-        set(null);
-    }
-
-    private void upgradeMap() {
-        final Map<K, V> map = getMap();
-        final StringBuilder builder = new StringBuilder(100);
-
-        for (final Entry<K, V> entry : map.entrySet()) {
-            builder.append(entry.getKey()).append(KEY_VALUE_SEPARATOR).append(entry.getValue()).append(ENTRIES_SEPARATOR);
-        }
-
-        if (builder.length() > 0) {
-            builder.setLength(builder.length() - 1);
-            set(builder.toString());
-        } else {
-            set(null);
-        }
     }
 }

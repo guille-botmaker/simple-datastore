@@ -57,6 +57,13 @@ public abstract class PropertyMeta<E extends Serializable> implements Serializab
         return result == null ? initialValue : result;
     }
 
+    /**
+     * Called when object is about to become a Datastore Entity
+     */
+    public void commit() {
+        // nothing to do
+    }
+
     public void set(final E value) {
         if (auditable) {
             AuditHandlerService.getAuditHandler().logPropertyDataChanged(this, value, owner.getId());

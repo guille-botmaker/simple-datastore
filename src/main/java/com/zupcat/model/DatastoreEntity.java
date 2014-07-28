@@ -194,4 +194,20 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
 
         return p;
     }
+
+    protected MapStringMapStringIntegerProperty propMapStringMapStringInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
+        final MapStringMapStringIntegerProperty p = new MapStringMapStringIntegerProperty(this, name, defaultSentToClient, auditable);
+
+        addPropertyMeta(name, p);
+
+        return p;
+    }
+
+    protected MapStringMapStringStringProperty propMapStringMapStringString(final String name, final boolean defaultSentToClient, final boolean auditable) {
+        final MapStringMapStringStringProperty p = new MapStringMapStringStringProperty(this, name, defaultSentToClient, auditable);
+
+        addPropertyMeta(name, p);
+
+        return p;
+    }
 }

@@ -2,8 +2,12 @@ package com.zupcat.property;
 
 import com.zupcat.model.ObjectVar;
 import com.zupcat.model.PersistentObject;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.avro.io.*;
+import org.apache.commons.codec.binary.Base64;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 
@@ -11,8 +15,8 @@ public abstract class AbstractListAnyProperty<V> extends StringProperty implemen
 
     private static final long serialVersionUID = 6181606486836703354L;
 
-    private static final String ITEMS_SEPARATOR = "/";
-    private static final String ITEMS_SEPARATOR_ALT = "[---]";
+    private static final BinaryEncoder reusableBinaryEncoder = EncoderFactory.get().binaryEncoder(new ByteArrayOutputStream(), null);
+    private static final BinaryDecoder reusableBinaryDecoder = DecoderFactory.get().binaryDecoder(new ByteArrayInputStream(new byte[1]), null);
 
     // to avoid some extra parsing to String
     private transient List<V> cache;
@@ -23,23 +27,59 @@ public abstract class AbstractListAnyProperty<V> extends StringProperty implemen
     }
 
     @Override
-    protected void setValueImpl(String value, final ObjectVar objectVar) {
-        if (value != null && value.length() > 0) {
-            value = StringUtils.replace(value, ITEMS_SEPARATOR, ITEMS_SEPARATOR_ALT);
-        }
+    protected void setValueImpl(final String value, final ObjectVar objectVar) {
         objectVar.set(name, value);
+    }
+
+    @Override
+    public void commit() {
+        super.commit();
+
+        final List<V> list = getList();
+
+        if (list.isEmpty()) {
+            set(null);
+        } else {
+            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(500);
+            final Encoder encoder = EncoderFactory.get().binaryEncoder(byteArrayOutputStream, reusableBinaryEncoder);
+
+            try {
+                encoder.writeArrayStart();
+                encoder.setItemCount(list.size());
+
+                for (final V item : list) {
+                    encoder.startItem();
+                    writeItem(encoder, item);
+                }
+
+                encoder.writeArrayEnd();
+
+                encoder.flush();
+                byteArrayOutputStream.close();
+
+                set(Base64.encodeBase64String(byteArrayOutputStream.toByteArray()));
+            } catch (final IOException _ioException) {
+                throw new RuntimeException("Problems serializing ListProperty [" + this + "] on list [" + Arrays.toString(list.toArray()) + "]: " + _ioException.getMessage(), _ioException);
+            }
+        }
     }
 
     private List<V> getList() {
         if (cache == null) {
             cache = new ArrayList<>();
-            String data = get();
+            final String data = get();
 
             if (data != null && data.length() > 0) {
-                data = StringUtils.replace(data, ITEMS_SEPARATOR_ALT, ITEMS_SEPARATOR);
+                final Decoder decoder = DecoderFactory.get().binaryDecoder(new ByteArrayInputStream(Base64.decodeBase64(data)), reusableBinaryDecoder);
 
-                for (final String entry : StringUtils.split(data, ITEMS_SEPARATOR)) {
-                    cache.add(convertItemFromString(entry));
+                try {
+                    for (long i = decoder.readArrayStart(); i != 0; i = decoder.arrayNext()) {
+                        for (long j = 0; j < i; j++) {
+                            cache.add(readItem(decoder));
+                        }
+                    }
+                } catch (final IOException _ioException) {
+                    throw new RuntimeException("Problems deserializing ListProperty [" + this + "] with data [" + data + "]: " + _ioException.getMessage(), _ioException);
                 }
             }
         }
@@ -47,24 +87,9 @@ public abstract class AbstractListAnyProperty<V> extends StringProperty implemen
     }
 
 
-    protected abstract V convertItemFromString(final String s);
+    protected abstract void writeItem(final Encoder encoder, final V item) throws IOException;
 
-
-    private void upgradeList() {
-        final List<V> list = getList();
-        final StringBuilder builder = new StringBuilder(100);
-
-        for (final V item : list) {
-            builder.append(item).append(ITEMS_SEPARATOR);
-        }
-
-        if (builder.length() > 0) {
-            builder.setLength(builder.length() - 1);
-            set(builder.toString());
-        } else {
-            set(null);
-        }
-    }
+    protected abstract V readItem(final Decoder decoder) throws IOException;
 
 
     // Reading operations
@@ -138,87 +163,51 @@ public abstract class AbstractListAnyProperty<V> extends StringProperty implemen
     // Writing operations
     @Override
     public boolean add(final V v) {
-        final boolean result = getList().add(v);
-
-        upgradeList();
-
-        return result;
+        return getList().add(v);
     }
 
     @Override
     public boolean remove(final Object o) {
-        final boolean result = getList().remove(o);
-
-        upgradeList();
-
-        return result;
+        return getList().remove(o);
     }
 
     @Override
     public boolean addAll(final Collection<? extends V> c) {
-        final boolean result = getList().addAll(c);
-
-        upgradeList();
-
-        return result;
+        return getList().addAll(c);
     }
 
     @Override
     public boolean addAll(final int index, final Collection<? extends V> c) {
-        final boolean result = getList().addAll(index, c);
-
-        upgradeList();
-
-        return result;
+        return getList().addAll(index, c);
     }
 
     @Override
     public boolean removeAll(final Collection<?> c) {
-        final boolean result = getList().removeAll(c);
-
-        upgradeList();
-
-        return result;
+        return getList().removeAll(c);
     }
 
     @Override
     public boolean retainAll(final Collection<?> c) {
-        final boolean result = getList().retainAll(c);
-
-        upgradeList();
-
-        return result;
+        return getList().retainAll(c);
     }
 
     @Override
     public void clear() {
         getList().clear();
-
-        set(null);
     }
 
     @Override
     public V set(final int index, final V element) {
-        final V result = getList().set(index, element);
-
-        upgradeList();
-
-        return result;
+        return getList().set(index, element);
     }
 
     @Override
     public void add(final int index, final V element) {
         getList().add(index, element);
-
-        upgradeList();
     }
 
     @Override
     public V remove(final int index) {
-        final V result = getList().remove(index);
-
-        upgradeList();
-
-        return result;
+        return getList().remove(index);
     }
 }

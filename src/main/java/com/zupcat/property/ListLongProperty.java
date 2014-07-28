@@ -1,10 +1,13 @@
 package com.zupcat.property;
 
 import com.zupcat.model.PersistentObject;
+import org.apache.avro.io.Decoder;
+import org.apache.avro.io.Encoder;
 
+import java.io.IOException;
 import java.io.Serializable;
 
-public class ListLongProperty extends AbstractListAnyProperty<Long> implements Serializable {
+public final class ListLongProperty extends AbstractListAnyProperty<Long> implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
 
@@ -13,7 +16,12 @@ public class ListLongProperty extends AbstractListAnyProperty<Long> implements S
     }
 
     @Override
-    protected Long convertItemFromString(final String s) {
-        return s == null ? null : Long.valueOf(s);
+    protected void writeItem(final Encoder encoder, final Long item) throws IOException {
+        encoder.writeLong(item);
+    }
+
+    @Override
+    protected Long readItem(final Decoder decoder) throws IOException {
+        return decoder.readLong();
     }
 }

@@ -11,7 +11,9 @@ import junit.framework.TestCase;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractTest extends TestCase {
 
@@ -71,6 +73,14 @@ public abstract class AbstractTest extends TestCase {
                 sample.LIST_STRING.add(randomUtils.getRandomSafeString(10));
                 sample.LIST_INT.add(randomUtils.getRandomInt(Integer.MAX_VALUE));
                 sample.LIST_LONG.add(randomUtils.getRandomLong());
+
+                final Map<String, String> innerMap = new HashMap<>();
+                for (int k = 0; k < 20; k++) {
+                    innerMap.put(randomUtils.getRandomSafeAlphaNumberString(10), randomUtils.getRandomSafeString(10));
+                }
+
+                sample.MAP_STRING_MAP_STRING_STRING.put(randomUtils.getRandomSafeAlphaNumberString(10), innerMap);
+                sample.MAP_STRING_MAP_STRING_STRING.put(randomUtils.getRandomSafeAlphaNumberString(10), innerMap);
             }
 
             result.add(sample);

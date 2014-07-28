@@ -4,6 +4,7 @@ import com.zupcat.cache.CacheStrategy;
 import com.zupcat.model.DatastoreEntity;
 import com.zupcat.property.*;
 
+// Map<String, Map<K, V>>
 public class SampleUser extends DatastoreEntity {
 
     public final StringProperty FIRSTNAME;
@@ -19,6 +20,7 @@ public class SampleUser extends DatastoreEntity {
     public final ListStringProperty LIST_STRING;
     public final ListIntegerProperty LIST_INT;
     public final ListLongProperty LIST_LONG;
+    public final MapStringMapStringStringProperty MAP_STRING_MAP_STRING_STRING;
 
 
     public SampleUser() {
@@ -37,5 +39,6 @@ public class SampleUser extends DatastoreEntity {
         LIST_STRING = propListString("ls", false, false);
         LIST_INT = propListInteger("li", false, false);
         LIST_LONG = propListLong("ll", false, false);
+        MAP_STRING_MAP_STRING_STRING = propMapStringMapStringString("msmss", false, false);
     }
 }

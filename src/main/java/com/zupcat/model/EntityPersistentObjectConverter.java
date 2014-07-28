@@ -17,6 +17,11 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
     public Entity buildEntityFromPersistentObject(final P persistentObject, final DAO<P> dao) {
         final Entity anEntity = new Entity(dao.getEntityName(), persistentObject.getId());
 
+        // commiting changes
+        for (final PropertyMeta propertyMeta : persistentObject.getPropertiesMetadata().values()) {
+            propertyMeta.commit();
+        }
+
         final byte[] binaryData = persistentObject.getObjectHolder().serialize(true);
 
         if (binaryData.length > 1000000) {
