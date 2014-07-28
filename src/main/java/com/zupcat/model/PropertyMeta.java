@@ -3,7 +3,11 @@ package com.zupcat.model;
 import com.zupcat.audit.AuditHandlerService;
 
 import java.io.Serializable;
+import java.util.Objects;
 
+/**
+ * Holds metadata of busines objects properties
+ */
 public abstract class PropertyMeta<E extends Serializable> implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
@@ -25,14 +29,18 @@ public abstract class PropertyMeta<E extends Serializable> implements Serializab
         this.indexable = indexable;
     }
 
-    public E get() {
-        final E result = getValueImpl(owner.getObjectHolder().getObjectVar());
-
-        return result == null ? initialValue : result;
-    }
-
     public String getName() {
         return name;
+    }
+
+    public boolean isFullyEquals(final PropertyMeta other) {
+        // skipping owner comparisson. It is not needed and causes stackoverflow
+        return !(other == null ||
+                !Objects.equals(this.name, other.name) ||
+                !Objects.equals(this.initialValue, other.initialValue) ||
+                this.sentToClient != other.sentToClient ||
+                this.auditable != other.auditable ||
+                this.indexable != other.indexable);
     }
 
     public boolean isIndexable() {
@@ -41,6 +49,12 @@ public abstract class PropertyMeta<E extends Serializable> implements Serializab
 
     public E getInitialValue() {
         return initialValue;
+    }
+
+    public E get() {
+        final E result = getValueImpl(owner.getObjectHolder().getObjectVar());
+
+        return result == null ? initialValue : result;
     }
 
     public void set(final E value) {

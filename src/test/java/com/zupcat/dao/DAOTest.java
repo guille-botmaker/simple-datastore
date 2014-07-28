@@ -8,9 +8,7 @@ import com.zupcat.sample.SampleUser;
 import com.zupcat.sample.SampleUserDAO;
 import com.zupcat.util.RandomUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class DAOTest extends AbstractTest {
 
@@ -63,6 +61,42 @@ public class DAOTest extends AbstractTest {
         final int allSize = sampleUserDAO.getAll().size();
         assertTrue(specificFound);
         assertTrue(totalEntities >= 100 && totalEntities == allSize);
+    }
+
+    public void testPersistenceFullyEquals() {
+        //cleaning db
+        final List<String> ids = new ArrayList<>(100);
+        for (final SampleUser sampleUser : sampleUserDAO.getAll()) {
+            ids.add(sampleUser.getId());
+        }
+
+        sampleUserDAO.remove(ids);
+
+        RetryingHandler.sleep(2000);
+
+        assertTrue(sampleUserDAO.getAll().isEmpty());
+
+        final List<SampleUser> source = buildUsers();
+
+        sampleUserDAO.massiveUpload(source);
+
+        RetryingHandler.sleep(2000);
+
+        final List<SampleUser> target = sampleUserDAO.getAll();
+
+        // checking both are completely equals
+        assertEquals(target.size(), source.size());
+
+        final Map<String, SampleUser> targetMap = new HashMap<>();
+        for (final SampleUser sampleUser : target) {
+            targetMap.put(sampleUser.getId(), sampleUser);
+        }
+
+        for (final SampleUser sourceUser : source) {
+            final SampleUser targetUser = targetMap.get(sourceUser.getId());
+
+            assertTrue(sourceUser.isFullyEquals(targetUser));
+        }
     }
 
     public void testUpdateOrPersistAndQueries() {

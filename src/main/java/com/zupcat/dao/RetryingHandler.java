@@ -15,6 +15,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Proxy for all Datastore ops. It retries the call if it has problems
+ *
  * @see http://code.google.com/appengine/articles/handling_datastore_errors.html
  * @see http://code.google.com/appengine/docs/java/datastore/transactions.html
  */

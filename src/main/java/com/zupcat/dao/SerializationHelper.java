@@ -7,6 +7,9 @@ import java.util.logging.Logger;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
+/**
+ * Helper class for java objects to byte[] and byte[] to java objects convertions
+ */
 public final class SerializationHelper {
 
     private static final Logger log = Logger.getLogger(SerializationHelper.class.getName());

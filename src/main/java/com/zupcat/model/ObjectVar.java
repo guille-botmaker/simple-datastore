@@ -14,6 +14,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * Represents an object
+ */
 @AvroGenerated
 public class ObjectVar extends SpecificRecordBase implements SpecificRecord {
 

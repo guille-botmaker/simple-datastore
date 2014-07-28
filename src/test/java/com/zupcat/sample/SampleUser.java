@@ -2,10 +2,7 @@ package com.zupcat.sample;
 
 import com.zupcat.cache.CacheStrategy;
 import com.zupcat.model.DatastoreEntity;
-import com.zupcat.property.BooleanProperty;
-import com.zupcat.property.IntegerProperty;
-import com.zupcat.property.LongProperty;
-import com.zupcat.property.StringProperty;
+import com.zupcat.property.*;
 
 public class SampleUser extends DatastoreEntity {
 
@@ -14,6 +11,7 @@ public class SampleUser extends DatastoreEntity {
     public final IntegerProperty AGE;
     public final LongProperty LONG_VALUE;
     public final BooleanProperty IS_FAKE;
+    public final MapStringStringProperty MESSAGES_MAP;
 
 
     public SampleUser() {
@@ -24,5 +22,6 @@ public class SampleUser extends DatastoreEntity {
         AGE = propInt("ag", null);
         LONG_VALUE = propLong("lv", 0l);
         IS_FAKE = propBool("f", false);
+        MESSAGES_MAP = new MapStringStringProperty(this, "mm", false, false);
     }
 }

@@ -11,6 +11,17 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Logger;
 
+/**
+ * This class is a wrapper for Datastore operations. Supports most of the DatastoreService and DatastoreAsyncService operations adding features such as:
+ * <p/>
+ * - Entity to "DatastoreEntity" convertions
+ * - caching usage
+ * - retrying algorithms
+ * - performance logging
+ * - remote client massive and parallel data access
+ * <p/>
+ * Every X_DataStoreEntity should have its X_DAO implementation. See tests for examples
+ */
 public abstract class DAO<P extends DatastoreEntity> implements Serializable {
 
     private static final long serialVersionUID = 471847964351314234L;

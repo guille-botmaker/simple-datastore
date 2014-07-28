@@ -9,6 +9,9 @@ import org.apache.avro.specific.SpecificRecordBuilderBase;
 
 import java.util.Objects;
 
+/**
+ * Avro Object that supports having a types variable.
+ */
 @AvroGenerated
 public final class Var extends SpecificRecordBase implements SpecificRecord {
 

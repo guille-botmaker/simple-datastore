@@ -6,7 +6,11 @@ import com.zupcat.util.RandomUtils;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
+/**
+ * Base class for all persistent entities. Handles data and metadata of business objects
+ */
 public abstract class PersistentObject implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
@@ -40,6 +44,26 @@ public abstract class PersistentObject implements Serializable {
 
     public String getEntityName() {
         return entityName;
+    }
+
+    public boolean isFullyEquals(final PersistentObject other) {
+        if (
+                other == null ||
+                        !Objects.equals(this.id, other.id) ||
+                        !Objects.equals(this.cacheStrategy, other.cacheStrategy) ||
+                        !Objects.equals(this.entityName, other.entityName) ||
+                        this.propertiesMetadata.size() != other.propertiesMetadata.size() ||
+                        !this.objectHolder.isFullyEquals(other.objectHolder)
+                ) {
+            return false;
+        }
+
+        for (final Map.Entry<String, PropertyMeta> entry : this.propertiesMetadata.entrySet()) {
+            if (!entry.getValue().isFullyEquals(other.propertiesMetadata.get(entry.getKey()))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public Map<String, PropertyMeta> getPropertiesMetadata() {

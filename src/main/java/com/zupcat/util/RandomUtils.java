@@ -3,6 +3,9 @@ package com.zupcat.util;
 import java.security.SecureRandom;
 import java.util.*;
 
+/**
+ * Pack of random generators
+ */
 public final class RandomUtils {
 
     private static RandomUtils instance;

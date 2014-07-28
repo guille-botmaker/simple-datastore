@@ -15,6 +15,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Usefull class for downloading massive amount of data in parallel
+ */
 public final class MassiveDownload implements Serializable {
 
     private static final long serialVersionUID = 4221412643513234232L;

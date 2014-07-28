@@ -6,6 +6,9 @@ import com.zupcat.exception.NoMoreRetriesException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Helper class that encapsulates a retrying algorithm. Usefull for AppEngine API calls
+ */
 public final class RetryingExecutor {
 
     private static final Logger log = Logger.getLogger(RetryingExecutor.class.getName());

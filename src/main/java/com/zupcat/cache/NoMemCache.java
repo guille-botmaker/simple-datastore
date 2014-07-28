@@ -1,5 +1,8 @@
 package com.zupcat.cache;
 
+/**
+ * This implementation avoids MemCache usage
+ */
 public final class NoMemCache extends MemCache {
 
     protected NoMemCache() {

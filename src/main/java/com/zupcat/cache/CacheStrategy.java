@@ -2,6 +2,9 @@ package com.zupcat.cache;
 
 import java.io.Serializable;
 
+/**
+ * Cache strategies for hide expiration strategies
+ */
 public enum CacheStrategy implements Serializable {
 
     NO_CACHE(new NoMemCache()), // NullObject pattern

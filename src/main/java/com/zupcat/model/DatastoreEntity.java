@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Objects;
 
 public abstract class DatastoreEntity extends PersistentObject implements Serializable {
 
@@ -40,6 +41,11 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     public int getDaysSinceLastModification() {
         return getMinutesSinceLastModification() / (60 * 24);
     }
+
+    public boolean isFullyEquals(final DatastoreEntity other) {
+        return super.isFullyEquals(other) && !(other == null || !Objects.equals(this.GROUP_ID.get(), other.GROUP_ID.get()) || !Objects.equals(this.LAST_MODIFICATION.get(), other.LAST_MODIFICATION.get()));
+    }
+
 
     public int getMinutesSinceLastModification() {
         final long lm = LAST_MODIFICATION.get();

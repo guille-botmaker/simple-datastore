@@ -7,6 +7,9 @@ import com.zupcat.property.IntegerProperty;
 
 import java.io.Serializable;
 
+/**
+ * Helper that converts Datastore Entities to Java Objects
+ */
 public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
 
     public static final String DATA_CONTAINER_PROPERTY = "bdata";

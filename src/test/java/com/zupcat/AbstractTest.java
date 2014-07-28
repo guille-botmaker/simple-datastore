@@ -62,6 +62,10 @@ public abstract class AbstractTest extends TestCase {
             sample.LONG_VALUE.set(randomUtils.getRandomLong());
             sample.IS_FAKE.set(randomUtils.getRandomBoolean());
 
+            for (int j = 0; j < 10; j++) {
+                sample.MESSAGES_MAP.put("" + j, randomUtils.getRandomSafeString(10));
+            }
+
             result.add(sample);
         }
 

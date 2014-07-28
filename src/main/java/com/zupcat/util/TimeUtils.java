@@ -8,6 +8,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+/**
+ * Pack of common date operations
+ */
 public final class TimeUtils {
 
     //    public static long getNormalizedCurrentTimeMillisForBeginingOfDay() {

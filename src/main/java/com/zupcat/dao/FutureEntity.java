@@ -10,6 +10,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Wrapper for async Datastore ops
+ */
 public final class FutureEntity<T extends PersistentObject> {
 
     private final Future<Entity> futureEntity;

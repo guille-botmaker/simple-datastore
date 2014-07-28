@@ -10,6 +10,9 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * This class acts as a MemCache proxy. Adds retrying functionality
+ */
 public final class MemcacheManager implements Serializable {
 
     private static final long serialVersionUID = 9497964351314234L;

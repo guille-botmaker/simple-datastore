@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
+/**
+ * Avro class for holding complex graphs of objects and serializing it with low footprint
+ */
 @AvroGenerated
 public class ObjectHolder extends SpecificRecordBase implements SpecificRecord {
 

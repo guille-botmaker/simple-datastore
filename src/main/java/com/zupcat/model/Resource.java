@@ -9,6 +9,9 @@ import com.zupcat.dao.SerializationHelper;
 
 import java.io.Serializable;
 
+/**
+ * Usefull class for app parameters persistence.
+ */
 public final class Resource implements Serializable {
 
     private static final long serialVersionUID = -2259862423311176614L;
