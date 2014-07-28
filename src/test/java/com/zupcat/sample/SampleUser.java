@@ -12,6 +12,13 @@ public class SampleUser extends DatastoreEntity {
     public final LongProperty LONG_VALUE;
     public final BooleanProperty IS_FAKE;
     public final MapStringStringProperty MESSAGES_MAP;
+    public final MapStringLongProperty MESSAGES_BIG_COUNTER;
+    public final MapStringIntegerProperty MESSAGES_COUNTER;
+    public final MapIntegerIntegerProperty QTY_PER_QTY;
+    public final MapIntegerStringProperty INT_PER_STRING;
+    public final ListStringProperty LIST_STRING;
+    public final ListIntegerProperty LIST_INT;
+    public final ListLongProperty LIST_LONG;
 
 
     public SampleUser() {
@@ -22,6 +29,13 @@ public class SampleUser extends DatastoreEntity {
         AGE = propInt("ag", null);
         LONG_VALUE = propLong("lv", 0l);
         IS_FAKE = propBool("f", false);
-        MESSAGES_MAP = new MapStringStringProperty(this, "mm", false, false);
+        MESSAGES_MAP = propMapStringString("mm", false, false);
+        MESSAGES_BIG_COUNTER = propMapStringLong("mmbc", false, false);
+        MESSAGES_COUNTER = propMapStringInteger("mmc", false, false);
+        QTY_PER_QTY = propMapIntegerInteger("qpq", false, false);
+        INT_PER_STRING = propMapIntegerString("ips", false, false);
+        LIST_STRING = propListString("ls", false, false);
+        LIST_INT = propListInteger("li", false, false);
+        LIST_LONG = propListLong("ll", false, false);
     }
 }

@@ -64,6 +64,13 @@ public abstract class AbstractTest extends TestCase {
 
             for (int j = 0; j < 10; j++) {
                 sample.MESSAGES_MAP.put("" + j, randomUtils.getRandomSafeString(10));
+                sample.MESSAGES_BIG_COUNTER.put("" + j, randomUtils.getRandomLong());
+                sample.MESSAGES_COUNTER.put("" + j, randomUtils.getRandomInt(Integer.MAX_VALUE));
+                sample.QTY_PER_QTY.put(j, randomUtils.getRandomInt(Integer.MAX_VALUE));
+                sample.INT_PER_STRING.put(j, randomUtils.getRandomSafeString(10));
+                sample.LIST_STRING.add(randomUtils.getRandomSafeString(10));
+                sample.LIST_INT.add(randomUtils.getRandomInt(Integer.MAX_VALUE));
+                sample.LIST_LONG.add(randomUtils.getRandomLong());
             }
 
             result.add(sample);

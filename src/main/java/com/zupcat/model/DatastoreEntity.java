@@ -1,10 +1,7 @@
 package com.zupcat.model;
 
 import com.zupcat.cache.CacheStrategy;
-import com.zupcat.property.BooleanProperty;
-import com.zupcat.property.IntegerProperty;
-import com.zupcat.property.LongProperty;
-import com.zupcat.property.StringProperty;
+import com.zupcat.property.*;
 import com.zupcat.util.TimeUtils;
 
 import java.io.Serializable;
@@ -128,6 +125,70 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
 
     protected LongProperty propLong(final String name, final Long initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
         final LongProperty p = new LongProperty(this, name, initialValue, defaultSentToClient, auditable, isIndexable);
+
+        addPropertyMeta(name, p);
+
+        return p;
+    }
+
+    protected MapStringStringProperty propMapStringString(final String name, final boolean defaultSentToClient, final boolean auditable) {
+        final MapStringStringProperty p = new MapStringStringProperty(this, name, defaultSentToClient, auditable);
+
+        addPropertyMeta(name, p);
+
+        return p;
+    }
+
+    protected MapStringIntegerProperty propMapStringInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
+        final MapStringIntegerProperty p = new MapStringIntegerProperty(this, name, defaultSentToClient, auditable);
+
+        addPropertyMeta(name, p);
+
+        return p;
+    }
+
+    protected MapIntegerIntegerProperty propMapIntegerInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
+        final MapIntegerIntegerProperty p = new MapIntegerIntegerProperty(this, name, defaultSentToClient, auditable);
+
+        addPropertyMeta(name, p);
+
+        return p;
+    }
+
+    protected MapIntegerStringProperty propMapIntegerString(final String name, final boolean defaultSentToClient, final boolean auditable) {
+        final MapIntegerStringProperty p = new MapIntegerStringProperty(this, name, defaultSentToClient, auditable);
+
+        addPropertyMeta(name, p);
+
+        return p;
+    }
+
+    protected MapStringLongProperty propMapStringLong(final String name, final boolean defaultSentToClient, final boolean auditable) {
+        final MapStringLongProperty p = new MapStringLongProperty(this, name, defaultSentToClient, auditable);
+
+        addPropertyMeta(name, p);
+
+        return p;
+    }
+
+    protected ListIntegerProperty propListInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
+        final ListIntegerProperty p = new ListIntegerProperty(this, name, defaultSentToClient, auditable);
+
+        addPropertyMeta(name, p);
+
+        return p;
+    }
+
+    protected ListLongProperty propListLong(final String name, final boolean defaultSentToClient, final boolean auditable) {
+        final ListLongProperty p = new ListLongProperty(this, name, defaultSentToClient, auditable);
+
+        addPropertyMeta(name, p);
+
+        return p;
+    }
+
+    protected ListStringProperty propListString(final String name, final boolean defaultSentToClient, final boolean auditable) {
+        final ListStringProperty p = new ListStringProperty(this, name, defaultSentToClient, auditable);
 
         addPropertyMeta(name, p);
 
