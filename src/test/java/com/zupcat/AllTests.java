@@ -10,6 +10,7 @@ import org.junit.runners.Suite;
         SerializationHelperTest.class,
         ResourceTest.class,
         RetryingExecutorTest.class,
+        DAONoConcurrencyTest.class,
         ObjectHolderTest.class
 })
 public class AllTests {

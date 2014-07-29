@@ -3,8 +3,18 @@ package com.zupcat.dao;
 import com.zupcat.AbstractTest;
 import com.zupcat.util.IClosure;
 import com.zupcat.util.RetryingExecutor;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.util.Arrays;
+
+@RunWith(Parameterized.class)
 public class RetryingExecutorTest extends AbstractTest {
+
+    @Parameterized.Parameters
+    public static java.util.List<Object[]> data() {
+        return Arrays.asList(new Object[500][0]);
+    }
 
     public void testFailure() {
         final int[] executions = new int[1];

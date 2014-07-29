@@ -7,12 +7,23 @@ import com.zupcat.model.PersistentObject;
 import com.zupcat.sample.SampleUser;
 import com.zupcat.sample.SampleUserDAO;
 import com.zupcat.util.RandomUtils;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
+@RunWith(Parameterized.class)
 public class DAOTest extends AbstractTest {
 
     private SampleUserDAO sampleUserDAO;
+
+    @Parameterized.Parameters
+    public static java.util.List<Object[]> data() {
+        return Arrays.asList(new Object[500][0]);
+    }
 
 
     @Override
@@ -61,42 +72,6 @@ public class DAOTest extends AbstractTest {
         final int allSize = sampleUserDAO.getAll().size();
         assertTrue(specificFound);
         assertTrue(totalEntities >= 100 && totalEntities == allSize);
-    }
-
-    public void testPersistenceFullyEquals() {
-        //cleaning db
-        final List<String> ids = new ArrayList<>(100);
-        for (final SampleUser sampleUser : sampleUserDAO.getAll()) {
-            ids.add(sampleUser.getId());
-        }
-
-        sampleUserDAO.remove(ids);
-
-        RetryingHandler.sleep(2000);
-
-        assertTrue(sampleUserDAO.getAll().isEmpty());
-
-        final List<SampleUser> source = buildUsers();
-
-        sampleUserDAO.massiveUpload(source);
-
-        RetryingHandler.sleep(2000);
-
-        final List<SampleUser> target = sampleUserDAO.getAll();
-
-        // checking both are completely equals
-        assertEquals(target.size(), source.size());
-
-        final Map<String, SampleUser> targetMap = new HashMap<>();
-        for (final SampleUser sampleUser : target) {
-            targetMap.put(sampleUser.getId(), sampleUser);
-        }
-
-        for (final SampleUser sourceUser : source) {
-            final SampleUser targetUser = targetMap.get(sourceUser.getId());
-
-            assertTrue(sourceUser.isFullyEquals(targetUser));
-        }
     }
 
     public void testUpdateOrPersistAndQueries() {
