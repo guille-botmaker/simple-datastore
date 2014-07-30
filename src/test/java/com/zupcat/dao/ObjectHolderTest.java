@@ -4,13 +4,29 @@ import com.zupcat.AbstractTest;
 import com.zupcat.model.ObjectHolder;
 import com.zupcat.model.ObjectVar;
 import com.zupcat.util.RandomUtils;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.util.Arrays;
+
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
+
+@RunWith(Parameterized.class)
 public class ObjectHolderTest extends AbstractTest {
 
+    @Parameterized.Parameters
+    public static java.util.List<Object[]> data() {
+        return Arrays.asList(new Object[5][0]);
+    }
+
+    @Test
     public void testSimpleCompressSerialization() {
         trySimpleSerialization(true);
     }
 
+    @Test
     public void testSimpleSerialization() {
         trySimpleSerialization(false);
     }

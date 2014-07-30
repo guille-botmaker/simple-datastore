@@ -3,9 +3,24 @@ package com.zupcat.dao;
 import com.zupcat.AbstractTest;
 import com.zupcat.util.IClosure;
 import com.zupcat.util.RetryingExecutor;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.util.Arrays;
+
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
+
+@RunWith(Parameterized.class)
 public class RetryingExecutorTest extends AbstractTest {
 
+    @Parameterized.Parameters
+    public static java.util.List<Object[]> data() {
+        return Arrays.asList(new Object[5][0]);
+    }
+
+    @Test
     public void testFailure() {
         final int[] executions = new int[1];
         executions[0] = 0;
@@ -35,6 +50,7 @@ public class RetryingExecutorTest extends AbstractTest {
         }
     }
 
+    @Test
     public void testOk() throws Exception {
         final RetryingExecutor retryingExecutor = new RetryingExecutor(10, 200, new IClosure() {
             @Override

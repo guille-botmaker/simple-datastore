@@ -7,7 +7,8 @@ import com.zupcat.sample.SampleUserDAO;
 import com.zupcat.service.SimpleDatastoreService;
 import com.zupcat.service.SimpleDatastoreServiceFactory;
 import com.zupcat.util.RandomUtils;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,41 +16,48 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractTest extends TestCase {
+public abstract class AbstractTest {
+
+    private static final Object LOCK_OBJECT = new Object();
 
     protected SimpleDatastoreService service;
-    protected final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+    private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     protected TestClass testClass;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
+        synchronized (LOCK_OBJECT) {
+            helper.setUp();
 
-        service = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
-        service.registerDAO(new SampleUserDAO());
+            service = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
+            service.registerDAO(new SampleUserDAO());
 
-        helper.setUp();
+            testClass = new TestClass();
+            testClass.other = new TestClass();
 
-        testClass = new TestClass();
-        testClass.other = new TestClass();
+            final RandomUtils randomUtils = RandomUtils.getInstance();
 
-        final RandomUtils randomUtils = RandomUtils.getInstance();
+            testClass.s = randomUtils.getRandomSafeAlphaNumberString(5);
+            testClass.i = randomUtils.getRandomInt(1000000);
+            testClass.l = randomUtils.getRandomLong();
 
-        testClass.s = randomUtils.getRandomSafeAlphaNumberString(5);
-        testClass.i = randomUtils.getRandomInt(1000000);
-        testClass.l = randomUtils.getRandomLong();
-
-        testClass.other.s = randomUtils.getRandomSafeAlphaNumberString(5);
-        testClass.other.i = randomUtils.getRandomInt(1000000);
-        testClass.other.l = randomUtils.getRandomLong();
+            testClass.other.s = randomUtils.getRandomSafeAlphaNumberString(5);
+            testClass.other.i = randomUtils.getRandomInt(1000000);
+            testClass.other.l = randomUtils.getRandomLong();
+        }
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-
-        helper.tearDown();
+    @After
+    public void tearDown() throws Exception {
     }
+
+//    @BeforeClass
+//    public static void oneTimeSetUp() {
+//    }
+
+//    @AfterClass
+//    public static void oneTimeTearDown() {
+//    }
 
     protected static List<SampleUser> buildUsers() {
         final int samples = 100;
