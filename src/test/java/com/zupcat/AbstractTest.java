@@ -7,9 +7,8 @@ import com.zupcat.sample.SampleUserDAO;
 import com.zupcat.service.SimpleDatastoreService;
 import com.zupcat.service.SimpleDatastoreServiceFactory;
 import com.zupcat.util.RandomUtils;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -22,12 +21,14 @@ public abstract class AbstractTest {
     private static final Object LOCK_OBJECT = new Object();
 
     protected SimpleDatastoreService service;
-    private static final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+    private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     protected TestClass testClass;
 
     @Before
     public void setUp() throws Exception {
         synchronized (LOCK_OBJECT) {
+            helper.setUp();
+
             service = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
             service.registerDAO(new SampleUserDAO());
 
@@ -46,21 +47,17 @@ public abstract class AbstractTest {
         }
     }
 
-//    @After
-//    public void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
+    }
+
+//    @BeforeClass
+//    public static void oneTimeSetUp() {
 //    }
 
-    @BeforeClass
-    public static void oneTimeSetUp() {
-        helper.setUp();
-    }
-
-    @AfterClass
-    public static void oneTimeTearDown() {
-        synchronized (LOCK_OBJECT) {
-            helper.tearDown();
-        }
-    }
+//    @AfterClass
+//    public static void oneTimeTearDown() {
+//    }
 
     protected static List<SampleUser> buildUsers() {
         final int samples = 100;

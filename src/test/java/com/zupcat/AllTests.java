@@ -6,12 +6,11 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-//        DAOTest.class,
+        DAOTest.class,
         SerializationHelperTest.class,
         ResourceTest.class,
-//        RetryingExecutorTest.class,
-//        DAONoConcurrencyTest.class,
-//        ObjectHolderTest.class
+        RetryingExecutorTest.class,
+        ObjectHolderTest.class
 })
 public class AllTests {
 
