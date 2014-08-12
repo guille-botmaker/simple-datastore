@@ -60,7 +60,7 @@ public abstract class AbstractTest {
 //    }
 
     protected static List<SampleUser> buildUsers() {
-        final int samples = 100;
+        final int samples = 10;
         final List<SampleUser> result = new ArrayList<>(samples);
         final RandomUtils randomUtils = RandomUtils.getInstance();
 
@@ -83,7 +83,7 @@ public abstract class AbstractTest {
                 sample.LIST_LONG.add(randomUtils.getRandomLong());
 
                 final Map<String, String> innerMap = new HashMap<>();
-                for (int k = 0; k < 20; k++) {
+                for (int k = 0; k < 5; k++) {
                     innerMap.put(randomUtils.getRandomSafeAlphaNumberString(10), randomUtils.getRandomSafeString(10));
                 }
 

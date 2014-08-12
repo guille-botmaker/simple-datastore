@@ -12,6 +12,11 @@
     <description>simple-datastore simplifies complex business data models to be stored on Google Datastore</description>
     <url>http://maven.apache.org</url>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <appengine.target.version>1.9.8</appengine.target.version>
+    </properties>
+
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -24,10 +29,13 @@
         <url>http://svn.apache.org/viewcvs.cgi/maven</url>
     </scm>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <appengine.target.version>1.9.8</appengine.target.version>
-    </properties>
+    <developers>
+        <developer>
+            <id>hernan</id>
+            <name>Hernan Liendo</name>
+            <email>hernan@zupcat.com</email>
+        </developer>
+    </developers>
 
     <dependencies>
         <!-- =============== App Engine Dependencies START =============== -->
