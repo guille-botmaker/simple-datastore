@@ -23,7 +23,7 @@ public class DAOTest extends AbstractTest {
 
     @Parameterized.Parameters
     public static java.util.List<Object[]> data() {
-        return Arrays.asList(new Object[5][0]);
+        return Arrays.asList(new Object[2][0]);
     }
 
     @Before
