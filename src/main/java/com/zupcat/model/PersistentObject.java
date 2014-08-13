@@ -29,7 +29,7 @@ public abstract class PersistentObject implements Serializable {
 
         this.cacheStrategy = cacheStrategy;
         entityName = className.substring(className.lastIndexOf(".") + 1);
-        id = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
+        id = RandomUtils.getInstance().getRandomSafeAlphaNumberString(20);
     }
 
     public abstract void setModified();

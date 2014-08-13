@@ -93,7 +93,7 @@ public final class TimeUtils {
 //        final DateTime todayDateTime = new DateTime(today);
 //        final int days = Days.daysBetween(dateFromDateTime, todayDateTime).getDays();
 //
-//        Logger.getLogger(TimeUtils.class.getName()).log(Level.SEVERE, "getDaysPassedSinceInitialStandardModificationTime. l [" + l + "], dateFrom [" + dateFrom + "], today [" + today + "], dateFromDateTime [" + dateFromDateTime + "], todayDateTime [" + todayDateTime + "], days [" + days + "]", new Exception());
+//        Logger.getLogger(TimeUtils.class.getPropertyName()).log(Level.SEVERE, "getDaysPassedSinceInitialStandardModificationTime. l [" + l + "], dateFrom [" + dateFrom + "], today [" + today + "], dateFromDateTime [" + dateFromDateTime + "], todayDateTime [" + todayDateTime + "], days [" + days + "]", new Exception());
 //
 //        return days;
 //    }

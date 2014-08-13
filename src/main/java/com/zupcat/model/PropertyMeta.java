@@ -29,7 +29,7 @@ public abstract class PropertyMeta<E extends Serializable> implements Serializab
         this.indexable = indexable;
     }
 
-    public String getName() {
+    public String getPropertyName() {
         return name;
     }
 

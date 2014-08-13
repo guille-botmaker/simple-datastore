@@ -200,7 +200,7 @@ public abstract class DAO<P extends DatastoreEntity> implements Serializable {
 
 //    public Iterator<C> getByGroupId(final int groupId, final BuildQuery _buildQuery) {
 //        final QueryData queryData = new QueryData(getEntityDescriptor().getKind(), null, 150);
-//        queryData.addOp(EntityDescriptor.GROUP_ID.getName(), Query.FilterOperator.EQUAL, groupId);
+//        queryData.addOp(EntityDescriptor.GROUP_ID.getPropertyName(), Query.FilterOperator.EQUAL, groupId);
 //
 //        _buildQuery.buildQuery(queryData);
 //
@@ -235,10 +235,10 @@ public abstract class DAO<P extends DatastoreEntity> implements Serializable {
         if (!prepareQueryOverride(query, massiveDownload)) {
             final List<Query.Filter> filterList = new ArrayList<>(2);
 
-            filterList.add(new Query.FilterPredicate(sample.GROUP_ID.getName(), Query.FilterOperator.EQUAL, massiveDownload.getGroupId()));
+            filterList.add(new Query.FilterPredicate(sample.GROUP_ID.getPropertyName(), Query.FilterOperator.EQUAL, massiveDownload.getGroupId()));
 
             if (!massiveDownload.getOnlyUseGroupId()) {
-                filterList.add(new Query.FilterPredicate(sample.LAST_MODIFICATION.getName(), Query.FilterOperator.GREATER_THAN_OR_EQUAL, massiveDownload.getFromFormattedTime() * 10000000));
+                filterList.add(new Query.FilterPredicate(sample.LAST_MODIFICATION.getPropertyName(), Query.FilterOperator.GREATER_THAN_OR_EQUAL, massiveDownload.getFromFormattedTime() * 10000000));
             }
 
             query.setFilter(new Query.CompositeFilter(Query.CompositeFilterOperator.AND, filterList));

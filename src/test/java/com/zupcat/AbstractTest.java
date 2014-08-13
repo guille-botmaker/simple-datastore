@@ -60,7 +60,7 @@ public abstract class AbstractTest {
 //    }
 
     protected static List<SampleUser> buildUsers() {
-        final int samples = 10;
+        final int samples = 100;
         final List<SampleUser> result = new ArrayList<>(samples);
         final RandomUtils randomUtils = RandomUtils.getInstance();
 
