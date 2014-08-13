@@ -12,12 +12,12 @@ public final class SampleUserDAO extends DAO<SampleUser> {
     }
 
     public List<SampleUser> getAll() {
-        return findByQuery(new Query());
+        return findByQuery(new Query(getEntityName()));
     }
 
     public List<SampleUser> getByLastName(final String lastName) {
         final Query query = new Query(getEntityName());
-        query.setFilter(new Query.FilterPredicate(sample.LASTNAME.getName(), Query.FilterOperator.EQUAL, lastName));
+        query.setFilter(new Query.FilterPredicate(sample.LASTNAME.getPropertyName(), Query.FilterOperator.EQUAL, lastName));
 
         return findByQuery(query);
     }

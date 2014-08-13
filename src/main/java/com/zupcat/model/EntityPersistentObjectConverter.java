@@ -32,7 +32,7 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
 
         for (final PropertyMeta propertyMeta : persistentObject.getPropertiesMetadata().values()) {
             if (propertyMeta.isIndexable()) {
-                anEntity.setProperty(propertyMeta.getName(), propertyMeta.get());
+                anEntity.setProperty(propertyMeta.getPropertyName(), propertyMeta.get());
             }
         }
         return anEntity;
@@ -55,13 +55,13 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
 
             for (final PropertyMeta propertyMeta : result.getPropertiesMetadata().values()) {
                 if (propertyMeta.isIndexable()) {
-                    final Serializable propertyValue = (Serializable) entity.getProperty(propertyMeta.getName());
+                    final Serializable propertyValue = (Serializable) entity.getProperty(propertyMeta.getPropertyName());
 
                     if (propertyValue != null && propertyValue.getClass().getName().equals(Long.class.getName()) && propertyMeta.getClass().getName().equals(IntegerProperty.class.getName())) {
                         final Long longValue = (long) propertyValue;
 
                         if (longValue > Integer.MAX_VALUE || longValue < Integer.MIN_VALUE) {
-                            throw new RuntimeException("Trying to set long value to IntegerProperty. Value was [" + longValue + "], property was [" + propertyMeta.getName() + "]");
+                            throw new RuntimeException("Trying to set long value to IntegerProperty. Value was [" + longValue + "], property was [" + propertyMeta.getPropertyName() + "]");
                         }
 
                         propertyMeta.set(longValue.intValue());

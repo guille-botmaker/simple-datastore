@@ -23,7 +23,7 @@ public class DAOTest extends AbstractTest {
 
     @Parameterized.Parameters
     public static java.util.List<Object[]> data() {
-        return Arrays.asList(new Object[5][0]);
+        return Arrays.asList(new Object[2][0]);
     }
 
     @Before
@@ -186,7 +186,7 @@ public class DAOTest extends AbstractTest {
     public void testFindUnique() {
         final Query query = new Query(sampleUserDAO.getEntityName());
         final SampleUser sample = new SampleUser();
-        query.setFilter(new Query.FilterPredicate(sample.LASTNAME.getName(), Query.FilterOperator.EQUAL, "liendo"));
+        query.setFilter(new Query.FilterPredicate(sample.LASTNAME.getPropertyName(), Query.FilterOperator.EQUAL, "liendo"));
 
         final SampleUser result = sampleUserDAO.findUnique(query);
         assertEquals(result.LASTNAME.get(), "liendo");

@@ -1,6 +1,6 @@
 package com.zupcat.model;
 
-import com.zupcat.audit.AuditHandlerService;
+import com.zupcat.audit.AuditHandlerServiceFactory;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -29,7 +29,7 @@ public abstract class PropertyMeta<E extends Serializable> implements Serializab
         this.indexable = indexable;
     }
 
-    public String getName() {
+    public String getPropertyName() {
         return name;
     }
 
@@ -66,7 +66,7 @@ public abstract class PropertyMeta<E extends Serializable> implements Serializab
 
     public void set(final E value) {
         if (auditable) {
-            AuditHandlerService.getAuditHandler().logPropertyDataChanged(this, value, owner.getId());
+            AuditHandlerServiceFactory.getAuditHandler().logPropertyDataChanged(this, value, owner.getId());
         }
 
         final ObjectVar objectVar = owner.getObjectHolder().getObjectVar();
