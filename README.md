@@ -1,6 +1,7 @@
 simple-datastore
 ================
 
+<img src="https://raw.githubusercontent.com/ZupCat/simple-datastore/master/doc/zupcat.png" alt="ZupCat Logo" title="ZupCat" align="left" />
 **simple-datastore** simplifies complex business data models to be stored on [Google Datastore]
 
 
@@ -10,6 +11,7 @@ We develop and operate an important quantity of massive games, having +16M users
 Every game has a complex and always-changing data model, such as any complex application has.
 
 Major problems that **simple-datastore** addresses are:
+
 
 
 | **Challenge**                                 | **How**                                       |
@@ -25,8 +27,7 @@ Major problems that **simple-datastore** addresses are:
 The following simplified class diagram shows a little part of our always changing game model for **one game**:
 
 
-<img src="https://raw.githubusercontent.com/ZupCat/simple-datastore/master/doc/model.png"
- alt="Class diagram" title="Class diagram" align="center" />
+<img src="https://raw.githubusercontent.com/ZupCat/simple-datastore/master/doc/model.png" alt="Class diagram" title="Class diagram" align="center" />
 
 
 The idea behind **simple-datastore** is to persist those object instances in just **one Datastore Entity** but allowing the program to deal with the same class diagram shown above.
