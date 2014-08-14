@@ -4,7 +4,7 @@ simple-datastore
 **simple-datastore** simplifies complex business data models to be stored on [Google Datastore]
 
 
-h1. Why **simple-datastore**
+## Why **simple-datastore**
 
 We develop and operate an important quantity of massive games, having +16M users. 
 Every game has a complex and always-changing data model, such as any complex application has.
@@ -20,7 +20,7 @@ Major problems that **simple-datastore** addresses are:
 | Achieve very **high performance** | XX |
 
 
-h1. How
+ ##How
 
 The following simplified class diagram shows a little part of our always changing game model for **one game**:
 
@@ -32,7 +32,7 @@ The following simplified class diagram shows a little part of our always changin
 The idea behind **simple-datastore** is to persist those object instances in just **one Datastore Entity** but allowing the program to deal with the same class diagram shown above.
 
 
-h1. Main Features
+ ##Main Features
 
 * Complex business object data model conversion to single [Google Datastore Entity]
 * Automatic migration of models versions 
@@ -54,7 +54,7 @@ h1. Main Features
 * It works! **simple-datastore** concepts are a part of our architecture core for running games with tons of users 
 
 
-h2. Getting started
+ ##Getting started
 * download x maven
 * guia para empezar modelando segun los ejemplos de tests
 
