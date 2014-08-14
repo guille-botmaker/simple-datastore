@@ -20,7 +20,7 @@ Major problems that **simple-datastore** addresses are:
 | Achieve very **high performance** | XX |
 
 
- ##How
+## How
 
 The following simplified class diagram shows a little part of our always changing game model for **one game**:
 
@@ -32,7 +32,7 @@ The following simplified class diagram shows a little part of our always changin
 The idea behind **simple-datastore** is to persist those object instances in just **one Datastore Entity** but allowing the program to deal with the same class diagram shown above.
 
 
- ##Main Features
+## Main Features
 
 * Complex business object data model conversion to single [Google Datastore Entity]
 * Automatic migration of models versions 
@@ -54,7 +54,7 @@ The idea behind **simple-datastore** is to persist those object instances in jus
 * It works! **simple-datastore** concepts are a part of our architecture core for running games with tons of users 
 
 
- ##Getting started
+## Getting started
 * download x maven
 * guia para empezar modelando segun los ejemplos de tests
 
