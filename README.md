@@ -6,6 +6,8 @@ simple-datastore
 **simple-datastore** simplifies complex business data models to be stored on [Google Datastore]
 
 
+
+
 ## Why **simple-datastore**
 
 We develop and operate an important quantity of massive games, having +16M users. 
