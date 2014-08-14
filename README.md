@@ -1,7 +1,8 @@
 simple-datastore
 ================
 
-<img src="https://raw.githubusercontent.com/ZupCat/simple-datastore/master/doc/zupcat.png" alt="ZupCat Logo" title="ZupCat" align="left" />
+<img style="max-width:12%;" src="https://raw.githubusercontent.com/ZupCat/simple-datastore/master/doc/zupcat.png" alt="ZupCat Logo" title="ZupCat" align="left" />
+
 **simple-datastore** simplifies complex business data models to be stored on [Google Datastore]
 
 
