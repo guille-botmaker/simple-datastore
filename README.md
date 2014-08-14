@@ -12,8 +12,8 @@ Every game has a complex and always-changing data model, such as any complex app
 Major problems that **simple-datastore** addresses are:
 
 
-| **Challenge** | **How** |
-|---------------|---------|
+| **Challenge**                                 | **How**                                       |
+|-----------------------------------------------|-----------------------------------------------|
 | **Feature changing is usual**. They impact in the data model and they have to be deployed very quickly | Adding a new attribute requires adding it to a Java object: no mapping is required, no "ALTER TABLE" scripts, no migration of old rows |
 | **Downtime should be avoided** as much as possible | XX |
 | * Reducing Google Datastore paradigm **learning curve** | XX |
