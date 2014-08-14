@@ -57,15 +57,29 @@ The idea behind **simple-datastore** is to persist those object instances in jus
 
 
 ## Getting started
-* Include maven dependency (work in process) or add [Distribution Directory] to the project classpath
-* Check [modeling samples]
+1. Include maven dependency (work in process) or add lastest version of the [Distribution Directory] to the project classpath
+2. Check [modeling samples]
+
+
+## Contributing
+
+We would love to get your contributions! If you spot a bug, then please [raise an issue] in our main GitHub project; likewise if you have developed a cool new feature or improvement in your simple-datastore fork, then send us a pull request!
+
+## Copyright and license
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
 
 
 [Google Datastore]:https://developers.google.com/appengine/docs/java/datastore/
 [Google Datastore Entity]:https://developers.google.com/appengine/docs/java/datastore/entities
 [DatastoreService]:https://developers.google.com/appengine/docs/java/javadoc/com/google/appengine/api/datastore/DatastoreService
 [MemCache]:https://developers.google.com/appengine/docs/java/memcache/
-[Distribution Directory]"https://github.com/ZupCat/simple-datastore/tree/master/dist
+[Distribution Directory]:https://github.com/ZupCat/simple-datastore/tree/master/dist
+[raise an issue]:https://github.com/ZupCat/simple-datastore/issues
 [modeling samples]:sss
 [Apache Avro]:http://avro.apache.org/
 
