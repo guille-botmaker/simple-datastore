@@ -3,6 +3,8 @@ simple-datastore
 
 **simple-datastore** simplifies complex business data models to be stored on [Google Datastore]
 
+***
+
 <img width="15%" src="https://raw.githubusercontent.com/ZupCat/simple-datastore/master/doc/zupcat.png" alt="ZupCat Logo" title="ZupCat" align="center" />
 
 
@@ -80,6 +82,6 @@ We would love to get your contributions! If you spot a bug, then please [raise a
 [MemCache]:https://developers.google.com/appengine/docs/java/memcache/
 [Distribution Directory]:https://github.com/ZupCat/simple-datastore/tree/master/dist
 [raise an issue]:https://github.com/ZupCat/simple-datastore/issues
-[modeling samples]:sss
+[modeling samples]:https://github.com/ZupCat/simple-datastore/wiki/simple-datastore-Samples
 [Apache Avro]:http://avro.apache.org/
 
