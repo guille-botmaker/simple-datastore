@@ -48,11 +48,7 @@ The idea behind **simple-datastore** is to persist those object instances in jus
 * Useful **[MemCache] strategies** on data access
 * **Retrying algorithms** for all Google App Engine calls
 * Data access logging for **performance tuning**
-* **Common business object behaviour**:
-1. equals/hashcode
-2. lastUpdateTimestamp
-3. several helper for getting information about update events on the Entity
-4. toString showing entity data
+* **Common business object behaviour**: equals/hashcode, lastUpdateTimestamp, several helper for getting information about update events on the Entity and toString showing entity data
 * **Audit hooks** for data change
 * **Easy and transparent** way to store and retrieve complex app parameters
 * It works! **simple-datastore** concepts are a part of our architecture core for running games with tons of users 
