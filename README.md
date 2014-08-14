@@ -1,9 +1,9 @@
 simple-datastore
 ================
 
-<img width="15%" src="https://raw.githubusercontent.com/ZupCat/simple-datastore/master/doc/zupcat.png" alt="ZupCat Logo" title="ZupCat" align="center" />
-
 **simple-datastore** simplifies complex business data models to be stored on [Google Datastore]
+
+<img width="15%" src="https://raw.githubusercontent.com/ZupCat/simple-datastore/master/doc/zupcat.png" alt="ZupCat Logo" title="ZupCat" align="center" />
 
 
 ## Why **simple-datastore**
@@ -18,9 +18,9 @@ Major problems that **simple-datastore** addresses are:
 | **Challenge**                                 | **How**                                       |
 |-----------------------------------------------|-----------------------------------------------|
 | **Feature changing is usual**. They impact in the data model and they have to be deployed very quickly | Adding a new attribute requires adding it to a Java object: no mapping is required, no "ALTER TABLE" scripts, no migration of old rows |
-| **Downtime should be avoided** as much as possible | XX |
-| * Reducing Google Datastore paradigm **learning curve** | XX |
-| Achieve very **high performance** | XX |
+| **Downtime should be avoided** as much as possible | No need to stop a running app. Deploying a new version automatically deploys a new model. The migration occurs when the entity is loader, with no overhead |
+| Reducing Google Datastore paradigm **learning curve** | Because of even higher abstraction level when modeling |
+| Achieving very **high performance** | No reflection usage, very little extra steps on entity convertion to model |
 
 
 ## How
@@ -57,13 +57,15 @@ The idea behind **simple-datastore** is to persist those object instances in jus
 
 
 ## Getting started
-* download x maven
-* guia para empezar modelando segun los ejemplos de tests
+* Include maven dependency (work in process) or add [Distribution Directory] to the project classpath
+* Check [modeling samples]
 
 
 [Google Datastore]:https://developers.google.com/appengine/docs/java/datastore/
 [Google Datastore Entity]:https://developers.google.com/appengine/docs/java/datastore/entities
 [DatastoreService]:https://developers.google.com/appengine/docs/java/javadoc/com/google/appengine/api/datastore/DatastoreService
 [MemCache]:https://developers.google.com/appengine/docs/java/memcache/
+[Distribution Directory]"https://github.com/ZupCat/simple-datastore/tree/master/dist
+[modeling samples]:sss
 [Apache Avro]:http://avro.apache.org/
 
