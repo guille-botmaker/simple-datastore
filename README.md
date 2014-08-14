@@ -38,23 +38,23 @@ The idea behind **simple-datastore** is to persist those object instances in jus
 
 ## Main Features
 
-* Complex business object data model conversion to single [Google Datastore Entity]
-* Automatic migration of models versions 
-* Handy data access methods for common [DatastoreService] features (Queries, CRUD on both synchronous and asynchronous model)
+* **Complex business object data model conversion** to single [Google Datastore Entity]
+* **Automatic migration** of models versions 
+* Handy **data access methods** for common [DatastoreService] features (Queries, CRUD on both synchronous and asynchronous model)
 * [Apache Avro] based fast Java objects serialization without Java Reflection usage
-* Easy, declarative way to model
-* Very low overhead, extreme reduction of queries when materializing a persisted model 
-* Support for massive, parallel data access outside of Google App Engine
-* Useful [MemCache] strategies on data access
-* Retrying algorithms for all Google App Engine calls
-* Data access logging for performance tuning
-* Common business object behaviour:
-** equals/hashcode
-** lastUpdateTimestamp
-** several helper for getting information about update events on the Entity
-** toString showing entity data
-* Audit hooks for data change
-* Easy and transparent way to store and retrieve complex app parameters
+* **Easy, declarative** way to model
+* Very **low overhead**, extreme reduction of queries when materializing a persisted model 
+* Support for **massive, parallel data access outside of Google App Engine**
+* Useful **[MemCache] strategies** on data access
+* **Retrying algorithms** for all Google App Engine calls
+* Data access logging for **performance tuning**
+* **Common business object behaviour**:
+1. equals/hashcode
+2. lastUpdateTimestamp
+3. several helper for getting information about update events on the Entity
+4. toString showing entity data
+* **Audit hooks** for data change
+* **Easy and transparent** way to store and retrieve complex app parameters
 * It works! **simple-datastore** concepts are a part of our architecture core for running games with tons of users 
 
 
