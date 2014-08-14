@@ -60,7 +60,7 @@ The idea behind **simple-datastore** is to persist those object instances in jus
 
 ## Getting started
 1. Include maven dependency (work in process) or add lastest version of the [Distribution Directory] to the project classpath
-2. Check [modeling samples]
+2. **Check [modeling samples]**
 
 
 ## Contributing
