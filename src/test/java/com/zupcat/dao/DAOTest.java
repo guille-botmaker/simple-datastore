@@ -75,14 +75,20 @@ public class DAOTest extends AbstractTest {
 
     @Test
     public void testGetForMassiveUpdate() {
-        final int prevSize = userDAO.getAll().size();
-        userDAO.massiveUpload(buildUsers());
+        final List<User> prev = buildUsers();
+
+        final int prevSize = prev.size();
+        userDAO.massiveUpload(prev);
 
         RetryingHandler.sleep(5000);
 
-        final int postSize = userDAO.getAll().size();
+        final List<User> all = userDAO.getAll();
+
+        final int postSize = all.size();
 
         assertTrue(postSize >= prevSize + 100);
+
+        assertTrue(all.iterator().next().ADDRESS.get().getStreet().startsWith("Sesamo"));
     }
 
     @Test
@@ -133,8 +139,6 @@ public class DAOTest extends AbstractTest {
 
         final User next = userDAO.findUniqueIdMultiple(ids).values().iterator().next();
         assertEquals(user, next);
-
-        assertTrue(next.ADDRESS.get().getStreet().startsWith("Sesamo"));
     }
 
     @Test
