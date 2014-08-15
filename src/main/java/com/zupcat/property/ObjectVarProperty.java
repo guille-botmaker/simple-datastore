@@ -1,5 +1,6 @@
 package com.zupcat.property;
 
+import com.zupcat.model.ObjectHolder;
 import com.zupcat.model.ObjectVar;
 import com.zupcat.model.PersistentObject;
 import com.zupcat.model.PropertyMeta;
@@ -14,8 +15,8 @@ public final class ObjectVarProperty<OV extends ObjectVar> extends PropertyMeta<
     private final Class<OV> objectClass;
 
 
-    public ObjectVarProperty(final PersistentObject owner, final String name, final Class<OV> objectClass) {
-        this(owner, name, objectClass, false, false);
+    public ObjectVarProperty(final PersistentObject owner, final String name, final Class<OV> _objectClass) {
+        this(owner, name, _objectClass, false, false);
     }
 
     public ObjectVarProperty(final PersistentObject owner, final String name, final Class<OV> _objectClass, final boolean sentToClient, final boolean auditable) {
@@ -30,21 +31,27 @@ public final class ObjectVarProperty<OV extends ObjectVar> extends PropertyMeta<
     public OV get() {
         if (cache == null) {
             final ObjectVar container = owner.getObjectHolder().getObjectVar();
-            final ObjectVar theObjectVar = container.getObjectVar(name);
+            final ObjectHolder objectHolder = container.getObjectHolder(name);
 
-            if (theObjectVar != null) {
-                buildNewInstance();
+            if (objectHolder != null) {
+                final ObjectVar theObjectVar = objectHolder.getObjectVar();
 
-                cache.mergeWith(theObjectVar);
+                if (theObjectVar != null) {
+                    buildNewInstance();
+
+                    cache.mergeWith(theObjectVar);
+                }
             }
         }
         return cache;
     }
 
+
     public void set(final OV value) {
         if (value == null) {
             final ObjectVar container = owner.getObjectHolder().getObjectVar();
-            container.set(name, ((ObjectVar) null));
+
+            container.set(name, ((ObjectHolder) null));
             cache = null;
         } else {
             get();
@@ -67,7 +74,10 @@ public final class ObjectVarProperty<OV extends ObjectVar> extends PropertyMeta<
             set(null);
         } else {
             final ObjectVar container = owner.getObjectHolder().getObjectVar();
-            container.set(name, cache);
+
+            final ObjectHolder objectHolder = new ObjectHolder();
+            objectHolder.getObjectVar().mergeWith(container);
+            container.set(name, objectHolder);
         }
     }
 

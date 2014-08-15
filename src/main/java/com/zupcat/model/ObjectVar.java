@@ -24,7 +24,7 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
 
     private static final long serialVersionUID = 471847964351314234L;
 
-    private static final AvroSerializer<ObjectVar> objectVarSerializer = new AvroSerializer<>();
+    private static final AvroSerializer<ObjectHolder> serializer = new AvroSerializer<>();
 
     public static final Schema SCHEMA$ = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ObjectVar\",\"namespace\":\"com.zupcat.model\",\"fields\":[{\"name\":\"vars\",\"type\":[\"null\",{\"type\":\"map\",\"values\":{\"type\":\"record\",\"name\":\"Var\",\"fields\":[{\"name\":\"iv\",\"type\":[\"null\",\"int\"],\"default\":null},{\"name\":\"sv\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"bv\",\"type\":[\"null\",\"boolean\"],\"default\":null},{\"name\":\"lv\",\"type\":[\"null\",\"long\"],\"default\":null}]}}],\"default\":null}]}");
 
@@ -152,12 +152,12 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
         }
     }
 
-    public void set(final String varName, final ObjectVar objectVarValue) {
+    public void set(final String varName, final ObjectHolder objectHolderValue) {
         final Var var = new Var();
 
-        if (objectVarValue != null) {
-            final String serializedObjectVarValue = Base64.encodeBase64String(objectVarSerializer.serialize(objectVarValue, ObjectVar.class, false));
-            var.setSv(serializedObjectVarValue);
+        if (objectHolderValue != null) {
+            final String serialized = Base64.encodeBase64String(serializer.serialize(objectHolderValue, ObjectHolder.class, false));
+            var.setSv(serialized);
         }
         set(varName, var);
     }
@@ -199,16 +199,16 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
         return var == null || var.getSv() == null ? null : var.getSv().toString();
     }
 
-    public ObjectVar getObjectVar(final String varName) {
+    public ObjectHolder getObjectHolder(final String varName) {
         final Var var = getVar(varName);
 
         if (var == null || var.getSv() == null) {
             return null;
         }
 
-        return objectVarSerializer.deserialize(
+        return serializer.deserialize(
                 Base64.decodeBase64(var.getSv().toString()),
-                ObjectVar.class,
+                ObjectHolder.class,
                 false
         );
     }

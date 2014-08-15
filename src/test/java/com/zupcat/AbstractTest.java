@@ -79,6 +79,8 @@ public abstract class AbstractTest {
             address.setOrder(randomUtils.getRandomInt(Integer.MAX_VALUE));
             sample.ADDRESS.set(address);
 
+            sample.ADDRESSES.get().add(address);
+
             for (int j = 0; j < 10; j++) {
                 sample.MESSAGES_MAP.put("" + j, randomUtils.getRandomSafeString(10));
                 sample.MESSAGES_BIG_COUNTER.put("" + j, randomUtils.getRandomLong());

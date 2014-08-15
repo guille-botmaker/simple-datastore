@@ -29,10 +29,13 @@ public class ObjectHolderTest extends AbstractTest {
         sourceInnerObjectVar.set("str", "an inner str");
         sourceInnerObjectVar.set("int", "an inner int");
 
+        final ObjectHolder innerObjectHolder = new ObjectHolder();
+        innerObjectHolder.setObjectVar(sourceInnerObjectVar);
+
         final ObjectHolder sourceObjectHolder = new ObjectHolder();
         sourceObjectHolder.getObjectVar().set("str", "a string");
         sourceObjectHolder.getObjectVar().set("int", "an int");
-        sourceObjectHolder.getObjectVar().set("aov", sourceInnerObjectVar);
+        sourceObjectHolder.getObjectVar().set("aov", innerObjectHolder);
 
         final AvroSerializer<ObjectHolder> objectHolderAvroSerializer = new AvroSerializer<>();
 
@@ -50,7 +53,7 @@ public class ObjectHolderTest extends AbstractTest {
 
         Assert.assertTrue(sourceObjectHolder.isFullyEquals(targetObjectHolder));
 
-        Assert.assertEquals(targetObjectHolder.getObjectVar().getObjectVar("aov").getString("str"), "an inner str");
+        Assert.assertEquals(targetObjectHolder.getObjectVar().getObjectHolder("aov").getObjectVar().getString("str"), "an inner str");
     }
 
 

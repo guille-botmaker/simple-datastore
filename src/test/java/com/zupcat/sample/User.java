@@ -21,6 +21,7 @@ public class User extends DatastoreEntity {
     public final ListLongProperty LIST_LONG;
     public final MapStringMapStringStringProperty MAP_STRING_MAP_STRING_STRING;
     public final ObjectVarProperty<Address> ADDRESS;
+    public final ListObjectVarProperty<Address> ADDRESSES;
 
 
     public User() {
@@ -41,5 +42,6 @@ public class User extends DatastoreEntity {
         LIST_LONG = propListLong("ll", false, false);
         MAP_STRING_MAP_STRING_STRING = propMapStringMapStringString("msmss", false, false);
         ADDRESS = new ObjectVarProperty<>(this, "ad", Address.class);
+        ADDRESSES = new ListObjectVarProperty<>(this, "ads");
     }
 }

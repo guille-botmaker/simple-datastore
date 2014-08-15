@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * Holds metadata of busines objects properties
  */
-public abstract class PropertyMeta<E extends Serializable> implements Serializable {
+public abstract class PropertyMeta<E> implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
 
