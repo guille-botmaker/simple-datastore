@@ -76,7 +76,7 @@ public final class ObjectVarProperty<OV extends ObjectVar> extends PropertyMeta<
             final ObjectVar container = owner.getObjectHolder().getObjectVar();
 
             final ObjectHolder objectHolder = new ObjectHolder();
-            objectHolder.getObjectVar().mergeWith(container);
+            objectHolder.getObjectVar().mergeWith(cache);
             container.set(name, objectHolder);
         }
     }

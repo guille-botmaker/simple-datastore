@@ -14,14 +14,17 @@ public final class ListObjectVarProperty<OV extends ObjectVar> extends PropertyM
     private static final long serialVersionUID = 6181606486836703354L;
 
     private transient List<OV> cache;
+    private final Class<OV> objectClass;
 
 
-    public ListObjectVarProperty(final PersistentObject owner, final String name) {
-        this(owner, name, false, false);
+    public ListObjectVarProperty(final PersistentObject owner, final String name, final Class<OV> _objectClass) {
+        this(owner, name, _objectClass, false, false);
     }
 
-    public ListObjectVarProperty(final PersistentObject owner, final String name, final boolean sentToClient, final boolean auditable) {
+    public ListObjectVarProperty(final PersistentObject owner, final String name, final Class<OV> _objectClass, final boolean sentToClient, final boolean auditable) {
         super(owner, name, null, sentToClient, auditable, false);
+
+        objectClass = _objectClass;
 
         owner.addPropertyMeta(name, this);
     }
@@ -38,7 +41,12 @@ public final class ListObjectVarProperty<OV extends ObjectVar> extends PropertyM
                 final List<OV> items = (List<OV>) objectHolder.getItems();
 
                 if (items != null && !items.isEmpty()) {
-                    cache.addAll(items);
+                    for (final OV item : items) {
+                        final OV specificItem = buildNewInstance();
+                        specificItem.mergeWith(item);
+
+                        cache.add(specificItem);
+                    }
                 }
             }
         }
@@ -79,6 +87,14 @@ public final class ListObjectVarProperty<OV extends ObjectVar> extends PropertyM
                 objectHolder.addItem(ov);
             }
             container.set(name, objectHolder);
+        }
+    }
+
+    private OV buildNewInstance() {
+        try {
+            return objectClass.newInstance();
+        } catch (final Exception _exception) {
+            throw new RuntimeException("Problems instantiating class [" + objectClass.getName() + "] (maybe a missing default empty constructor?): " + _exception.getMessage(), _exception);
         }
     }
 
