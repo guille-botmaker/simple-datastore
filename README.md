@@ -1,12 +1,11 @@
+<img width="15%" src="https://raw.githubusercontent.com/ZupCat/simple-datastore/master/doc/zupcat.png" alt="ZupCat Logo" title="ZupCat" align="center" />
+
 simple-datastore
 ================
 
 **simple-datastore** simplifies complex business data models to be stored on [Google Datastore]
 
 ***
-
-<img width="15%" src="https://raw.githubusercontent.com/ZupCat/simple-datastore/master/doc/zupcat.png" alt="ZupCat Logo" title="ZupCat" align="center" />
-
 
 ## Why **simple-datastore**
 
@@ -23,17 +22,6 @@ Major problems that **simple-datastore** addresses are:
 | **Downtime should be avoided** as much as possible | No need to stop a running app. Deploying a new version automatically deploys a new model. The migration occurs when the entity is loader, with no overhead |
 | Reducing Google Datastore paradigm **learning curve** | Because of even higher abstraction level when modeling |
 | Achieving very **high performance** | No reflection usage, very little extra steps on entity convertion to model |
-
-
-## How
-
-The following simplified class diagram shows a little part of our always changing game model for **one game**:
-
-
-<img src="https://raw.githubusercontent.com/ZupCat/simple-datastore/master/doc/model.png" alt="Class diagram" title="Class diagram" align="center" />
-
-
-The idea behind **simple-datastore** is to persist those object instances in just **one Datastore Entity** but allowing the program to deal with the same class diagram shown above.
 
 
 ## Main Features
@@ -53,11 +41,31 @@ The idea behind **simple-datastore** is to persist those object instances in jus
 * **Easy and transparent** way to store and retrieve complex app parameters
 * It works! **simple-datastore** concepts are a part of our architecture core for running games with tons of users 
 
+***
 
 ## Getting started
-1. Include maven dependency (work in process) or add lastest version of the [Distribution Directory] to the project classpath
-2. **Check [modeling samples]**
+1. Check **[some examples](https://github.com/ZupCat/simple-datastore/wiki/simple-datastore-Common-Uses-and-Features)**
+2. Follow the **[Starting Guide](https://github.com/ZupCat/simple-datastore/wiki/Starting-Guide)** to include simple-datastore in your project
 
+***
+
+## How
+
+The following simplified class diagram shows a little part of our always changing game model for **one game**:
+
+
+<img src="https://raw.githubusercontent.com/ZupCat/simple-datastore/master/doc/model.png" alt="Class diagram" title="Class diagram" align="center" />
+
+
+The idea behind **simple-datastore** is to persist those object instances in just **one Datastore Entity** but allowing the program to deal with the same class diagram shown above.
+
+
+## Why simple-datastore is different to [objectify-appengine](https://code.google.com/p/objectify-appengine/)
+Objectify is a very nice and mature project. I believe simple-datastore is different because of **simplicity**:
+* The main idea behind simple-datastore is to keep most of the model in just one Entity
+* simple-datastore doesn't have entities relations and doesn't expose Key and other JPA/JDO features
+* You could say simple-datastore is less powerful but simpler.
+* Even though the simplicity, this is still being the core of our complex model for massive games
 
 ## Contributing
 
