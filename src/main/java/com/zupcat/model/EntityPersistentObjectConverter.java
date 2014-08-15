@@ -12,6 +12,9 @@ import java.io.Serializable;
  */
 public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
 
+    private static final AvroSerializer<ObjectHolder> objectHolderSerializer = new AvroSerializer<>();
+
+
     public static final String DATA_CONTAINER_PROPERTY = "bdata";
 
     public Entity buildEntityFromPersistentObject(final P persistentObject, final DAO<P> dao) {
@@ -22,7 +25,7 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
             propertyMeta.commit();
         }
 
-        final byte[] binaryData = persistentObject.getObjectHolder().serialize(true);
+        final byte[] binaryData = objectHolderSerializer.serialize(persistentObject.getObjectHolder(), ObjectHolder.class, true);
 
         if (binaryData.length > 1000000) {
             throw new RuntimeException("BinaryData length for object [" + persistentObject + "] is bigger than permitted: " + binaryData.length);
@@ -47,7 +50,7 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
             result.setId(entity.getKey().getName());
 
             final Blob binaryData = (Blob) entity.getProperty(DATA_CONTAINER_PROPERTY);
-            final ObjectHolder objectHolder = binaryData == null ? null : ObjectHolder.deserialize(binaryData.getBytes(), true);
+            final ObjectHolder objectHolder = binaryData == null ? null : objectHolderSerializer.deserialize(binaryData.getBytes(), ObjectHolder.class, true);
 
             if (objectHolder != null) {
                 result.getObjectHolder().mergeWith(objectHolder);

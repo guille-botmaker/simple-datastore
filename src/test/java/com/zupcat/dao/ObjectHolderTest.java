@@ -1,9 +1,11 @@
 package com.zupcat.dao;
 
 import com.zupcat.AbstractTest;
+import com.zupcat.model.AvroSerializer;
 import com.zupcat.model.ObjectHolder;
 import com.zupcat.model.ObjectVar;
 import com.zupcat.util.RandomUtils;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -22,6 +24,37 @@ public class ObjectHolderTest extends AbstractTest {
     }
 
     @Test
+    public void testObjectVarWithObjectVars() {
+        final ObjectVar sourceInnerObjectVar = new ObjectVar();
+        sourceInnerObjectVar.set("str", "an inner str");
+        sourceInnerObjectVar.set("int", "an inner int");
+
+        final ObjectHolder sourceObjectHolder = new ObjectHolder();
+        sourceObjectHolder.getObjectVar().set("str", "a string");
+        sourceObjectHolder.getObjectVar().set("int", "an int");
+        sourceObjectHolder.getObjectVar().set("aov", sourceInnerObjectVar);
+
+        final AvroSerializer<ObjectHolder> objectHolderAvroSerializer = new AvroSerializer<>();
+
+        final ObjectHolder targetObjectHolder =
+                objectHolderAvroSerializer.deserialize(
+                        objectHolderAvroSerializer.serialize(
+                                objectHolderAvroSerializer.deserialize(
+                                        objectHolderAvroSerializer.serialize(sourceObjectHolder, ObjectHolder.class, true),
+                                        ObjectHolder.class,
+                                        true
+                                )
+                                , ObjectHolder.class, true)
+
+                        , ObjectHolder.class, true);
+
+        Assert.assertTrue(sourceObjectHolder.isFullyEquals(targetObjectHolder));
+
+        Assert.assertEquals(targetObjectHolder.getObjectVar().getObjectVar("aov").getString("str"), "an inner str");
+    }
+
+
+    @Test
     public void testSimpleCompressSerialization() {
         trySimpleSerialization(true);
     }
@@ -35,7 +68,20 @@ public class ObjectHolderTest extends AbstractTest {
         for (int i = 0; i < 10; i++) {
             final ObjectHolder source = build();
 
-            final ObjectHolder target = ObjectHolder.deserialize(ObjectHolder.deserialize(source.serialize(compress), compress).serialize(compress), compress);
+            final AvroSerializer<ObjectHolder> objectHolderAvroSerializer = new AvroSerializer<>();
+
+            final ObjectHolder target =
+                    objectHolderAvroSerializer.deserialize(
+                            objectHolderAvroSerializer.serialize(
+                                    objectHolderAvroSerializer.deserialize(
+                                            objectHolderAvroSerializer.serialize(source, ObjectHolder.class, compress),
+                                            ObjectHolder.class,
+                                            compress
+                                    )
+                                    , ObjectHolder.class, compress)
+
+                            , ObjectHolder.class, compress);
+
 
             assertTrue(source.isFullyEquals(target));
             assertTrue(target.isFullyEquals(source));

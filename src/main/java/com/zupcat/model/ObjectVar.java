@@ -8,6 +8,7 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.avro.specific.SpecificRecordBuilderBase;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.codec.binary.Base64;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,6 +20,8 @@ import java.util.Map;
  */
 @AvroGenerated
 public class ObjectVar extends SpecificRecordBase implements SpecificRecord {
+
+    private static final AvroSerializer<ObjectVar> objectVarSerializer = new AvroSerializer<>();
 
     public static final Schema SCHEMA$ = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ObjectVar\",\"namespace\":\"com.zupcat.model\",\"fields\":[{\"name\":\"vars\",\"type\":[\"null\",{\"type\":\"map\",\"values\":{\"type\":\"record\",\"name\":\"Var\",\"fields\":[{\"name\":\"iv\",\"type\":[\"null\",\"int\"],\"default\":null},{\"name\":\"sv\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"bv\",\"type\":[\"null\",\"boolean\"],\"default\":null},{\"name\":\"lv\",\"type\":[\"null\",\"long\"],\"default\":null}]}}],\"default\":null}]}");
 
@@ -142,6 +145,16 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord {
         }
     }
 
+    public void set(final String varName, final ObjectVar objectVarValue) {
+        final Var var = new Var();
+
+        if (objectVarValue != null) {
+            final String serializedObjectVarValue = Base64.encodeBase64String(objectVarSerializer.serialize(objectVarValue, ObjectVar.class, false));
+            var.setSv(serializedObjectVarValue);
+        }
+        set(varName, var);
+    }
+
     public void set(final String varName, final String stringValue) {
         final Var var = new Var();
         var.setSv(stringValue);
@@ -177,6 +190,20 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord {
     public String getString(final String varName) {
         final Var var = getVar(varName);
         return var == null || var.getSv() == null ? null : var.getSv().toString();
+    }
+
+    public ObjectVar getObjectVar(final String varName) {
+        final Var var = getVar(varName);
+
+        if (var == null || var.getSv() == null) {
+            return null;
+        }
+
+        return objectVarSerializer.deserialize(
+                Base64.decodeBase64(var.getSv().toString()),
+                ObjectVar.class,
+                false
+        );
     }
 
     public Integer getInteger(final String varName) {
