@@ -46,6 +46,7 @@ Major problems that **simple-datastore** addresses are:
 ## Getting started
 1. Check **[some examples](https://github.com/ZupCat/simple-datastore/wiki/simple-datastore-Common-Uses-and-Features)**
 2. Follow the **[Starting Guide](https://github.com/ZupCat/simple-datastore/wiki/Starting-Guide)** to include simple-datastore in your project
+3. Check other **[advanced examples](https://github.com/ZupCat/simple-datastore/wiki/Other-more-complex-examples)**
 
 ***
 
