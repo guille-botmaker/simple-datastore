@@ -7,13 +7,16 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.avro.specific.SpecificRecordBuilderBase;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Avro Object that supports having a types variable.
  */
 @AvroGenerated
-public final class Var extends SpecificRecordBase implements SpecificRecord {
+public final class Var extends SpecificRecordBase implements SpecificRecord, Serializable {
+
+    private static final long serialVersionUID = 471847964351314234L;
 
     public static final Schema SCHEMA$ = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Var\",\"namespace\":\"com.zupcat.model\",\"fields\":[{\"name\":\"iv\",\"type\":[\"null\",\"int\"],\"default\":null},{\"name\":\"sv\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"bv\",\"type\":[\"null\",\"boolean\"],\"default\":null},{\"name\":\"lv\",\"type\":[\"null\",\"long\"],\"default\":null}]}");
 
@@ -196,7 +199,9 @@ public final class Var extends SpecificRecordBase implements SpecificRecord {
     /**
      * RecordBuilder for Var instances.
      */
-    public static final class Builder extends SpecificRecordBuilderBase<Var> implements RecordBuilder<Var> {
+    public static final class Builder extends SpecificRecordBuilderBase<Var> implements RecordBuilder<Var>, Serializable {
+
+        private static final long serialVersionUID = 471847964351314234L;
 
         private Integer integerVar;
         private CharSequence stringVar;

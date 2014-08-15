@@ -70,7 +70,7 @@ public abstract class PersistentObject implements Serializable {
         return propertiesMetadata;
     }
 
-    protected void addPropertyMeta(final String name, final PropertyMeta propertyMeta) {
+    public void addPropertyMeta(final String name, final PropertyMeta propertyMeta) {
 //        if (propertyMeta.isIndexable() && propertyMeta.getInitialValue() == null) {
 //            throw new RuntimeException("Property [" + name + "] of Entity [" + entityName + "] is indexable and has null default value. This is not allowed. Please change then initialValue to be not null");
 //        }

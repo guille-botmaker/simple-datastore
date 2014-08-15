@@ -4,8 +4,8 @@ import com.google.appengine.api.datastore.Query;
 import com.zupcat.AbstractTest;
 import com.zupcat.model.DatastoreEntity;
 import com.zupcat.model.PersistentObject;
-import com.zupcat.sample.SampleUser;
-import com.zupcat.sample.SampleUserDAO;
+import com.zupcat.sample.User;
+import com.zupcat.sample.UserDAO;
 import com.zupcat.util.RandomUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class DAOTest extends AbstractTest {
 
-    private SampleUserDAO sampleUserDAO;
+    private UserDAO userDAO;
 
     @Parameterized.Parameters
     public static java.util.List<Object[]> data() {
@@ -29,10 +29,10 @@ public class DAOTest extends AbstractTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        sampleUserDAO = service.getDAO(SampleUserDAO.class);
+        userDAO = service.getDAO(UserDAO.class);
 
-        for (final SampleUser sampleUser : buildUsers()) {
-            sampleUserDAO.updateOrPersist(sampleUser);
+        for (final User user : buildUsers()) {
+            userDAO.updateOrPersist(user);
         }
     }
 
@@ -40,34 +40,34 @@ public class DAOTest extends AbstractTest {
     public void testPersistenceFullyEquals() {
         //cleaning db
         final List<String> ids = new ArrayList<>(100);
-        for (final SampleUser sampleUser : sampleUserDAO.getAll()) {
-            ids.add(sampleUser.getId());
+        for (final User user : userDAO.getAll()) {
+            ids.add(user.getId());
         }
 
-        sampleUserDAO.remove(ids);
+        userDAO.remove(ids);
 
         RetryingHandler.sleep(2000);
 
-        assertTrue(sampleUserDAO.getAll().isEmpty());
+        assertTrue(userDAO.getAll().isEmpty());
 
-        final List<SampleUser> source = buildUsers();
+        final List<User> source = buildUsers();
 
-        sampleUserDAO.massiveUpload(source);
+        userDAO.massiveUpload(source);
 
         RetryingHandler.sleep(2000);
 
-        final List<SampleUser> target = sampleUserDAO.getAll();
+        final List<User> target = userDAO.getAll();
 
         // checking both are completely equals
         assertEquals(target.size(), source.size());
 
-        final Map<String, SampleUser> targetMap = new HashMap<>();
-        for (final SampleUser sampleUser : target) {
-            targetMap.put(sampleUser.getId(), sampleUser);
+        final Map<String, User> targetMap = new HashMap<>();
+        for (final User user : target) {
+            targetMap.put(user.getId(), user);
         }
 
-        for (final SampleUser sourceUser : source) {
-            final SampleUser targetUser = targetMap.get(sourceUser.getId());
+        for (final User sourceUser : source) {
+            final User targetUser = targetMap.get(sourceUser.getId());
 
             assertTrue(sourceUser.isFullyEquals(targetUser));
         }
@@ -75,12 +75,12 @@ public class DAOTest extends AbstractTest {
 
     @Test
     public void testGetForMassiveUpdate() {
-        final int prevSize = sampleUserDAO.getAll().size();
-        sampleUserDAO.massiveUpload(buildUsers());
+        final int prevSize = userDAO.getAll().size();
+        userDAO.massiveUpload(buildUsers());
 
         RetryingHandler.sleep(5000);
 
-        final int postSize = sampleUserDAO.getAll().size();
+        final int postSize = userDAO.getAll().size();
 
         assertTrue(postSize >= prevSize + 100);
     }
@@ -93,22 +93,22 @@ public class DAOTest extends AbstractTest {
         for (int i = 0; i < DatastoreEntity.MAX_GROUPS; i++) {
             final MassiveDownload massiveDownload = new MassiveDownload();
             massiveDownload.setGroupId(i);
-            massiveDownload.setKind(sampleUserDAO.getEntityName());
+            massiveDownload.setKind(userDAO.getEntityName());
 
-            sampleUserDAO.getForMassiveDownload(massiveDownload);
+            userDAO.getForMassiveDownload(massiveDownload);
 
             final Collection<PersistentObject> results = massiveDownload.getResults();
 
             totalEntities += results.size();
 
             for (final PersistentObject user : results) {
-                if (((SampleUser) user).LASTNAME.get().equals("liendo")) {
+                if (((User) user).LASTNAME.get().equals("liendo")) {
                     specificFound = true;
                 }
             }
         }
 
-        final int allSize = sampleUserDAO.getAll().size();
+        final int allSize = userDAO.getAll().size();
         assertTrue(specificFound);
         assertTrue(totalEntities >= 100 && totalEntities == allSize);
     }
@@ -117,102 +117,105 @@ public class DAOTest extends AbstractTest {
     public void testUpdateOrPersistAndQueries() {
         final String id = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
 
-        assertNull(sampleUserDAO.findById(id));
+        assertNull(userDAO.findById(id));
 
-        final SampleUser sampleUser = new SampleUser();
-        sampleUser.setId(id);
-        sampleUser.LASTNAME.set("Test123");
+        final User user = new User();
+        user.setId(id);
+        user.LASTNAME.set("Test123");
 
-        sampleUserDAO.updateOrPersist(sampleUser);
+        userDAO.updateOrPersist(user);
 
-        assertEquals(sampleUser, sampleUserDAO.findById(id));
-        assertEquals(sampleUser, sampleUserDAO.findByIdAsync(id).get());
+        assertEquals(user, userDAO.findById(id));
+        assertEquals(user, userDAO.findByIdAsync(id).get());
 
         final List<String> ids = new ArrayList<>();
         ids.add(id);
 
-        assertEquals(sampleUser, sampleUserDAO.findUniqueIdMultiple(ids).values().iterator().next());
+        final User next = userDAO.findUniqueIdMultiple(ids).values().iterator().next();
+        assertEquals(user, next);
+
+        assertTrue(next.ADDRESS.get().getStreet().startsWith("Sesamo"));
     }
 
     @Test
     public void testUpdateOrPersistAsync() {
-        assertTrue(sampleUserDAO.getByLastName("NewLastName").size() == 0);
+        assertTrue(userDAO.getByLastName("NewLastName").size() == 0);
 
-        final SampleUser sampleUser = new SampleUser();
-        sampleUser.LASTNAME.set("NewLastName");
-        sampleUserDAO.updateOrPersistAsync(sampleUser);
+        final User user = new User();
+        user.LASTNAME.set("NewLastName");
+        userDAO.updateOrPersistAsync(user);
 
         RetryingHandler.sleep(5000);
 
-        assertTrue(sampleUserDAO.getByLastName("NewLastName").size() == 1);
+        assertTrue(userDAO.getByLastName("NewLastName").size() == 1);
     }
 
     @Test
     public void testRemove() {
-        final List<SampleUser> allUsers = sampleUserDAO.getByLastName("liendo");
+        final List<User> allUsers = userDAO.getByLastName("liendo");
         assertTrue(allUsers.size() == 1);
 
-        sampleUserDAO.remove(allUsers.iterator().next().getId());
+        userDAO.remove(allUsers.iterator().next().getId());
 
-        assertTrue(sampleUserDAO.getByLastName("liendo").size() == 0);
+        assertTrue(userDAO.getByLastName("liendo").size() == 0);
     }
 
     @Test
     public void testRemoveMultiple() {
-        final List<SampleUser> allUsers = sampleUserDAO.getByLastName("liendo");
+        final List<User> allUsers = userDAO.getByLastName("liendo");
         assertTrue(allUsers.size() == 1);
 
         final List<String> ids = new ArrayList<>();
         ids.add(allUsers.iterator().next().getId());
 
-        sampleUserDAO.remove(ids);
+        userDAO.remove(ids);
 
-        assertTrue(sampleUserDAO.getByLastName("liendo").size() == 0);
+        assertTrue(userDAO.getByLastName("liendo").size() == 0);
     }
 
     @Test
     public void testRemoveAsync() {
-        final List<SampleUser> allUsers = sampleUserDAO.getByLastName("liendo");
+        final List<User> allUsers = userDAO.getByLastName("liendo");
         assertTrue(allUsers.size() == 1);
 
-        sampleUserDAO.removeAsync(allUsers.iterator().next().getId());
+        userDAO.removeAsync(allUsers.iterator().next().getId());
 
         RetryingHandler.sleep(5000);
 
-        assertTrue(sampleUserDAO.getByLastName("liendo").size() == 0);
+        assertTrue(userDAO.getByLastName("liendo").size() == 0);
     }
 
     @Test
     public void testFindUnique() {
-        final Query query = new Query(sampleUserDAO.getEntityName());
-        final SampleUser sample = new SampleUser();
+        final Query query = new Query(userDAO.getEntityName());
+        final User sample = new User();
         query.setFilter(new Query.FilterPredicate(sample.LASTNAME.getPropertyName(), Query.FilterOperator.EQUAL, "liendo"));
 
-        final SampleUser result = sampleUserDAO.findUnique(query);
+        final User result = userDAO.findUnique(query);
         assertEquals(result.LASTNAME.get(), "liendo");
     }
 
     @Test
     public void testQueryAllObjects() {
-        final List<SampleUser> allUsers = sampleUserDAO.getAll();
+        final List<User> allUsers = userDAO.getAll();
 
         assertFalse(allUsers.isEmpty());
     }
 
     @Test
     public void testQuerySpecific() {
-        final List<SampleUser> allUsers = sampleUserDAO.getByLastName("liendo");
+        final List<User> allUsers = userDAO.getByLastName("liendo");
 
         assertTrue(allUsers.size() == 1);
         checkSpecificUser(allUsers.get(0));
 
-        checkSpecificUser(sampleUserDAO.findById(allUsers.get(0).getId()));
+        checkSpecificUser(userDAO.findById(allUsers.get(0).getId()));
     }
 
-    private void checkSpecificUser(final SampleUser sampleUser) {
-        assertEquals(sampleUser.FIRSTNAME.get(), "hernan");
-        assertEquals(sampleUser.LASTNAME.get(), "liendo");
-        assertEquals(sampleUser.AGE.get(), Integer.valueOf(18));
-        assertEquals(sampleUser.IS_FAKE.get(), Boolean.FALSE);
+    private void checkSpecificUser(final User user) {
+        assertEquals(user.FIRSTNAME.get(), "hernan");
+        assertEquals(user.LASTNAME.get(), "liendo");
+        assertEquals(user.AGE.get(), Integer.valueOf(18));
+        assertEquals(user.IS_FAKE.get(), Boolean.FALSE);
     }
 }

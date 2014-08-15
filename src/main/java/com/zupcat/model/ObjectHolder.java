@@ -8,6 +8,7 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.avro.specific.SpecificRecordBuilderBase;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +16,9 @@ import java.util.List;
  * Avro class for holding complex graphs of objects and serializing it with low footprint
  */
 @AvroGenerated
-public class ObjectHolder extends SpecificRecordBase implements SpecificRecord {
+public class ObjectHolder extends SpecificRecordBase implements SpecificRecord, Serializable {
+
+    private static final long serialVersionUID = 471847964351314234L;
 
     public static final Schema SCHEMA$ = new Schema.Parser().parse("{\"type\": \"record\", \"name\": \"ObjectHolder\", \"namespace\": \"com.zupcat.model\", \"fields\": [ { \"name\": \"objectsList\", \"type\": [\"null\", { \"type\": \"array\", \"items\": { \"type\": \"record\", \"name\": \"ObjectVar\", \"fields\": [ { \"name\": \"vars\", \"type\": [ \"null\", { \"type\": \"map\", \"values\": { \"type\": \"record\", \"name\": \"Var\", \"fields\": [ { \"name\": \"iv\", \"type\": [ \"null\", \"int\" ], \"default\": null }, { \"name\": \"sv\", \"type\": [ \"null\", \"string\" ], \"default\": null }, { \"name\": \"bv\", \"type\": [ \"null\", \"boolean\" ], \"default\": null }, { \"name\": \"lv\", \"type\": [ \"null\", \"long\" ], \"default\": null } ] } } ], \"default\": null } ] }, \"java-class\": \"java.util.List\" }], \"default\": null }, { \"name\": \"objectVar\", \"type\": [\"null\", \"ObjectVar\"], \"default\": null } ] }");
 
@@ -208,7 +211,9 @@ public class ObjectHolder extends SpecificRecordBase implements SpecificRecord {
     /**
      * RecordBuilder for ObjectHolder instances.
      */
-    public static final class Builder extends SpecificRecordBuilderBase<ObjectHolder> implements RecordBuilder<ObjectHolder> {
+    public static final class Builder extends SpecificRecordBuilderBase<ObjectHolder> implements RecordBuilder<ObjectHolder>, Serializable {
+
+        private static final long serialVersionUID = 471847964351314234L;
 
         private List<ObjectVar> objectsList;
         private ObjectVar objectVar;

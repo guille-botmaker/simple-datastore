@@ -10,6 +10,7 @@ import org.apache.avro.specific.SpecificRecordBuilderBase;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.codec.binary.Base64;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,7 +20,9 @@ import java.util.Map;
  * Represents an object
  */
 @AvroGenerated
-public class ObjectVar extends SpecificRecordBase implements SpecificRecord {
+public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Serializable {
+
+    private static final long serialVersionUID = 471847964351314234L;
 
     private static final AvroSerializer<ObjectVar> objectVarSerializer = new AvroSerializer<>();
 
@@ -31,6 +34,10 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord {
      * Default constructor.
      */
     public ObjectVar() {
+    }
+
+    public ObjectVar(final ObjectVar anotherObjectVar) {
+        this.mergeWith(anotherObjectVar);
     }
 
 
@@ -252,7 +259,9 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord {
     }
 
 
-    public static final class Builder extends SpecificRecordBuilderBase<ObjectVar> implements RecordBuilder<ObjectVar> {
+    public static final class Builder extends SpecificRecordBuilderBase<ObjectVar> implements RecordBuilder<ObjectVar>, Serializable {
+
+        private static final long serialVersionUID = 471847964351314234L;
 
         private Map<java.lang.CharSequence, Var> varsMap;
 

@@ -2,8 +2,9 @@ package com.zupcat;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.zupcat.sample.SampleUser;
-import com.zupcat.sample.SampleUserDAO;
+import com.zupcat.sample.Address;
+import com.zupcat.sample.User;
+import com.zupcat.sample.UserDAO;
 import com.zupcat.service.SimpleDatastoreService;
 import com.zupcat.service.SimpleDatastoreServiceFactory;
 import com.zupcat.util.RandomUtils;
@@ -30,7 +31,7 @@ public abstract class AbstractTest {
             helper.setUp();
 
             service = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
-            service.registerDAO(new SampleUserDAO());
+            service.registerDAO(new UserDAO());
 
             testClass = new TestClass();
             testClass.other = new TestClass();
@@ -59,18 +60,24 @@ public abstract class AbstractTest {
 //    public static void oneTimeTearDown() {
 //    }
 
-    protected static List<SampleUser> buildUsers() {
+    protected static List<User> buildUsers() {
         final int samples = 100;
-        final List<SampleUser> result = new ArrayList<>(samples);
+        final List<User> result = new ArrayList<>(samples);
         final RandomUtils randomUtils = RandomUtils.getInstance();
 
         for (int i = 0; i < samples; i++) {
-            final SampleUser sample = new SampleUser();
+            final User sample = new User();
             sample.FIRSTNAME.set("First Name " + randomUtils.getRandomSafeString(10));
             sample.LASTNAME.set("LAST Name " + randomUtils.getRandomSafeString(10));
             sample.AGE.set(randomUtils.getIntBetweenInclusive(1, 100));
             sample.LONG_VALUE.set(randomUtils.getRandomLong());
             sample.IS_FAKE.set(randomUtils.getRandomBoolean());
+
+            final Address address = new Address();
+            address.setStreet("Sesamo Street " + randomUtils.getRandomSafeString(10));
+            address.setNumber("1st " + randomUtils.getRandomSafeString(10));
+            address.setOrder(randomUtils.getRandomInt(Integer.MAX_VALUE));
+            sample.ADDRESS.set(address);
 
             for (int j = 0; j < 10; j++) {
                 sample.MESSAGES_MAP.put("" + j, randomUtils.getRandomSafeString(10));
@@ -94,7 +101,7 @@ public abstract class AbstractTest {
             result.add(sample);
         }
 
-        final SampleUser sample = new SampleUser();
+        final User sample = new User();
         sample.FIRSTNAME.set("hernan");
         sample.LASTNAME.set("liendo");
         sample.AGE.set(18);

@@ -5,13 +5,13 @@ import com.zupcat.dao.DAO;
 
 import java.util.List;
 
-public final class SampleUserDAO extends DAO<SampleUser> {
+public final class UserDAO extends DAO<User> {
 
-    public SampleUserDAO() {
-        super(new SampleUser());
+    public UserDAO() {
+        super(new User());
     }
 
-    public List<SampleUser> getByLastName(final String lastName) {
+    public List<User> getByLastName(final String lastName) {
         final Query query = new Query(getEntityName());
         query.setFilter(new Query.FilterPredicate(sample.LASTNAME.getPropertyName(), Query.FilterOperator.EQUAL, lastName));
 
