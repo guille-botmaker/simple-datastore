@@ -11,10 +11,6 @@ public final class SampleUserDAO extends DAO<SampleUser> {
         super(new SampleUser());
     }
 
-    public List<SampleUser> getAll() {
-        return findByQuery(new Query(getEntityName()));
-    }
-
     public List<SampleUser> getByLastName(final String lastName) {
         final Query query = new Query(getEntityName());
         query.setFilter(new Query.FilterPredicate(sample.LASTNAME.getPropertyName(), Query.FilterOperator.EQUAL, lastName));

@@ -114,6 +114,11 @@ public abstract class DAO<P extends DatastoreEntity> implements Serializable, ID
         };
     }
 
+    public List<P> getAll() {
+        return findByQuery(new Query(getEntityName()));
+    }
+
+
     public P findById(final String id) {
         final String entityName = sample.getEntityName();
         final String cacheKey = entityName + id;

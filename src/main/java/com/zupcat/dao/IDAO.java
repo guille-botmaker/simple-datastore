@@ -4,6 +4,7 @@ import com.zupcat.model.DatastoreEntity;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,6 +27,7 @@ public interface IDAO<P extends DatastoreEntity> extends Serializable {
 
     Map<String, P> findUniqueIdMultiple(final Collection<String> ids);
 
+    List<P> getAll();
 
     // Updating methods =====
     void updateOrPersist(final P persistentObject);
