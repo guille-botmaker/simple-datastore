@@ -22,8 +22,8 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     protected DatastoreEntity(final CacheStrategy cacheStrategy) {
         super(cacheStrategy);
 
-        GROUP_ID = propInt("gi", null, false, false, true);
-        LAST_MODIFICATION = propLong("lm", null, false, false, true);
+        GROUP_ID = integer("gi", null, false, false, true);
+        LAST_MODIFICATION = longInt("lm", null, false, false, true);
 
         GROUP_ID.set(Math.abs(getId().hashCode() % MAX_GROUPS));
 
@@ -83,11 +83,11 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     }
     // === Properties factories helpers ==========================================================================================================
 
-    protected StringProperty propString(final String name, final String initialValue) {
-        return propString(name, initialValue, false, false, false);
+    protected StringProperty string(final String name, final String initialValue) {
+        return string(name, initialValue, false, false, false);
     }
 
-    protected StringProperty propString(final String name, final String initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
+    protected StringProperty string(final String name, final String initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
         final StringProperty p = new StringProperty(this, name, initialValue, defaultSentToClient, auditable, isIndexable);
 
         addPropertyMeta(name, p);
@@ -95,11 +95,11 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return p;
     }
 
-    protected IntegerProperty propInt(final String name, final Integer initialValue) {
-        return propInt(name, initialValue, false, false, false);
+    protected IntegerProperty integer(final String name, final Integer initialValue) {
+        return integer(name, initialValue, false, false, false);
     }
 
-    protected IntegerProperty propInt(final String name, final Integer initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
+    protected IntegerProperty integer(final String name, final Integer initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
         final IntegerProperty p = new IntegerProperty(this, name, initialValue, defaultSentToClient, auditable, isIndexable);
 
         addPropertyMeta(name, p);
@@ -107,11 +107,11 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return p;
     }
 
-    protected BooleanProperty propBool(final String name, final Boolean initialValue) {
-        return propBool(name, initialValue, false, false, false);
+    protected BooleanProperty bool(final String name, final Boolean initialValue) {
+        return bool(name, initialValue, false, false, false);
     }
 
-    protected BooleanProperty propBool(final String name, final Boolean initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
+    protected BooleanProperty bool(final String name, final Boolean initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
         final BooleanProperty p = new BooleanProperty(this, name, initialValue, defaultSentToClient, auditable, isIndexable);
 
         addPropertyMeta(name, p);
@@ -119,11 +119,11 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return p;
     }
 
-    protected LongProperty propLong(final String name, final Long initialValue) {
-        return propLong(name, initialValue, false, false, false);
+    protected LongProperty longInt(final String name, final Long initialValue) {
+        return longInt(name, initialValue, false, false, false);
     }
 
-    protected LongProperty propLong(final String name, final Long initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
+    protected LongProperty longInt(final String name, final Long initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
         final LongProperty p = new LongProperty(this, name, initialValue, defaultSentToClient, auditable, isIndexable);
 
         addPropertyMeta(name, p);
@@ -131,47 +131,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return p;
     }
 
-    protected MapStringStringProperty propMapStringString(final String name, final boolean defaultSentToClient, final boolean auditable) {
-        final MapStringStringProperty p = new MapStringStringProperty(this, name, defaultSentToClient, auditable);
-
-        addPropertyMeta(name, p);
-
-        return p;
-    }
-
-    protected MapStringIntegerProperty propMapStringInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
-        final MapStringIntegerProperty p = new MapStringIntegerProperty(this, name, defaultSentToClient, auditable);
-
-        addPropertyMeta(name, p);
-
-        return p;
-    }
-
-    protected MapIntegerIntegerProperty propMapIntegerInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
-        final MapIntegerIntegerProperty p = new MapIntegerIntegerProperty(this, name, defaultSentToClient, auditable);
-
-        addPropertyMeta(name, p);
-
-        return p;
-    }
-
-    protected MapIntegerStringProperty propMapIntegerString(final String name, final boolean defaultSentToClient, final boolean auditable) {
-        final MapIntegerStringProperty p = new MapIntegerStringProperty(this, name, defaultSentToClient, auditable);
-
-        addPropertyMeta(name, p);
-
-        return p;
-    }
-
-    protected MapStringLongProperty propMapStringLong(final String name, final boolean defaultSentToClient, final boolean auditable) {
-        final MapStringLongProperty p = new MapStringLongProperty(this, name, defaultSentToClient, auditable);
-
-        addPropertyMeta(name, p);
-
-        return p;
-    }
-
-    protected ListIntegerProperty propListInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
+    protected ListIntegerProperty listInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
         final ListIntegerProperty p = new ListIntegerProperty(this, name, defaultSentToClient, auditable);
 
         addPropertyMeta(name, p);
@@ -179,7 +139,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return p;
     }
 
-    protected ListLongProperty propListLong(final String name, final boolean defaultSentToClient, final boolean auditable) {
+    protected ListLongProperty listLong(final String name, final boolean defaultSentToClient, final boolean auditable) {
         final ListLongProperty p = new ListLongProperty(this, name, defaultSentToClient, auditable);
 
         addPropertyMeta(name, p);
@@ -187,7 +147,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return p;
     }
 
-    protected ListStringProperty propListString(final String name, final boolean defaultSentToClient, final boolean auditable) {
+    protected ListStringProperty listString(final String name, final boolean defaultSentToClient, final boolean auditable) {
         final ListStringProperty p = new ListStringProperty(this, name, defaultSentToClient, auditable);
 
         addPropertyMeta(name, p);
@@ -195,7 +155,48 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return p;
     }
 
-    protected MapStringMapStringIntegerProperty propMapStringMapStringInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
+    protected MapStringStringProperty mapStringString(final String name, final boolean defaultSentToClient, final boolean auditable) {
+        final MapStringStringProperty p = new MapStringStringProperty(this, name, defaultSentToClient, auditable);
+
+        addPropertyMeta(name, p);
+
+        return p;
+    }
+
+    protected MapStringIntegerProperty mapStringInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
+        final MapStringIntegerProperty p = new MapStringIntegerProperty(this, name, defaultSentToClient, auditable);
+
+        addPropertyMeta(name, p);
+
+        return p;
+    }
+
+    protected MapIntegerIntegerProperty mapIntegerInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
+        final MapIntegerIntegerProperty p = new MapIntegerIntegerProperty(this, name, defaultSentToClient, auditable);
+
+        addPropertyMeta(name, p);
+
+        return p;
+    }
+
+    protected MapIntegerStringProperty mapIntegerString(final String name, final boolean defaultSentToClient, final boolean auditable) {
+        final MapIntegerStringProperty p = new MapIntegerStringProperty(this, name, defaultSentToClient, auditable);
+
+        addPropertyMeta(name, p);
+
+        return p;
+    }
+
+    protected MapStringLongProperty mapStringLong(final String name, final boolean defaultSentToClient, final boolean auditable) {
+        final MapStringLongProperty p = new MapStringLongProperty(this, name, defaultSentToClient, auditable);
+
+        addPropertyMeta(name, p);
+
+        return p;
+    }
+
+
+    protected MapStringMapStringIntegerProperty mapStringMapStringInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
         final MapStringMapStringIntegerProperty p = new MapStringMapStringIntegerProperty(this, name, defaultSentToClient, auditable);
 
         addPropertyMeta(name, p);
@@ -203,7 +204,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return p;
     }
 
-    protected MapStringMapStringStringProperty propMapStringMapStringString(final String name, final boolean defaultSentToClient, final boolean auditable) {
+    protected MapStringMapStringStringProperty mapStringMapStringString(final String name, final boolean defaultSentToClient, final boolean auditable) {
         final MapStringMapStringStringProperty p = new MapStringMapStringStringProperty(this, name, defaultSentToClient, auditable);
 
         addPropertyMeta(name, p);

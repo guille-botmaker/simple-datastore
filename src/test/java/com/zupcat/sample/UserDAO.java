@@ -8,13 +8,10 @@ import java.util.List;
 public final class UserDAO extends DAO<User> {
 
     public UserDAO() {
-        super(new User());
+        super(User.class);
     }
 
     public List<User> getByLastName(final String lastName) {
-        final Query query = new Query(getEntityName());
-        query.setFilter(new Query.FilterPredicate(sample.LASTNAME.getPropertyName(), Query.FilterOperator.EQUAL, lastName));
-
-        return findByQuery(query);
+        return findByQuery(new Query.FilterPredicate(sample.LASTNAME.getPropertyName(), Query.FilterOperator.EQUAL, lastName));
     }
 }

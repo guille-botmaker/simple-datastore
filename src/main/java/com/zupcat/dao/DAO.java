@@ -32,8 +32,13 @@ public abstract class DAO<P extends DatastoreEntity> implements Serializable, ID
     private final EntityPersistentObjectConverter<P> entityPersistentObjectConverter;
 
 
-    protected DAO(final P _sample) {
-        sample = _sample;
+    protected DAO(final Class<P> _beanClass) {
+        try {
+            sample = _beanClass.newInstance();
+        } catch (final Exception _exception) {
+            throw new RuntimeException("Problems instantiating class [" + _beanClass.getName() + "] (maybe a missing default empty constructor?): " + _exception.getMessage(), _exception);
+        }
+
         entityPersistentObjectConverter = new EntityPersistentObjectConverter<>();
     }
 
@@ -64,8 +69,10 @@ public abstract class DAO<P extends DatastoreEntity> implements Serializable, ID
         return entity;
     }
 
+    protected List<P> findByQuery(final Query.Filter filter) {
+        final Query query = new Query(getEntityName());
+        query.setFilter(filter);
 
-    protected List<P> findByQuery(final Query query) {
         final List<P> list = new ArrayList<>();
         final Iterator<P> iterator = findByQueryIterable(query);
 
@@ -115,7 +122,7 @@ public abstract class DAO<P extends DatastoreEntity> implements Serializable, ID
     }
 
     public List<P> getAll() {
-        return findByQuery(new Query(getEntityName()));
+        return findByQuery(null);
     }
 
 
