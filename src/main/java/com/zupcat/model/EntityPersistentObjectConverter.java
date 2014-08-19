@@ -12,10 +12,28 @@ import java.io.Serializable;
  */
 public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
 
-    private static final AvroSerializer<ObjectHolder> objectHolderSerializer = new AvroSerializer<>();
-
+    private static final Object LOCK_OBJECT = new Object();
+    private static EntityPersistentObjectConverter _instance;
 
     public static final String DATA_CONTAINER_PROPERTY = "bdata";
+
+    private final AvroSerializer<ObjectHolder> objectHolderSerializer;
+
+
+    private EntityPersistentObjectConverter() {
+        objectHolderSerializer = new AvroSerializer<>();
+    }
+
+    public static EntityPersistentObjectConverter instance() {
+        if (_instance == null) {
+            synchronized (LOCK_OBJECT) {
+                if (_instance == null) {
+                    _instance = new EntityPersistentObjectConverter();
+                }
+            }
+        }
+        return _instance;
+    }
 
     public Entity buildEntityFromPersistentObject(final P persistentObject, final DAO<P> dao) {
         final Entity anEntity = new Entity(dao.getEntityName(), persistentObject.getId());

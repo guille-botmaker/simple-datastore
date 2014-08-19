@@ -1,7 +1,7 @@
 package com.zupcat.property;
 
+import com.zupcat.model.DatastoreEntity;
 import com.zupcat.model.ObjectVar;
-import com.zupcat.model.PersistentObject;
 import org.apache.avro.io.*;
 import org.apache.commons.codec.binary.Base64;
 
@@ -22,8 +22,8 @@ public abstract class AbstractMapStringAnyProperty<K, V> extends StringProperty 
     private transient Map<K, V> cache;
 
 
-    public AbstractMapStringAnyProperty(final PersistentObject owner, final String name, final boolean sentToClient, final boolean auditable) {
-        super(owner, name, null, sentToClient, auditable, false);
+    public AbstractMapStringAnyProperty(final DatastoreEntity owner, final boolean sentToClient, final boolean auditable) {
+        super(owner, null, sentToClient, auditable, false);
     }
 
     @Override

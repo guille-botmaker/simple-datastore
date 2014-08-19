@@ -1,8 +1,8 @@
 package com.zupcat.property;
 
+import com.zupcat.model.DatastoreEntity;
 import com.zupcat.model.ObjectHolder;
 import com.zupcat.model.ObjectVar;
-import com.zupcat.model.PersistentObject;
 import com.zupcat.model.PropertyMeta;
 
 import java.io.Serializable;
@@ -17,12 +17,12 @@ public final class ListObjectVarProperty<OV extends ObjectVar> extends PropertyM
     private final Class<OV> objectClass;
 
 
-    public ListObjectVarProperty(final PersistentObject owner, final String name, final Class<OV> _objectClass) {
-        this(owner, name, _objectClass, false, false);
+    public ListObjectVarProperty(final DatastoreEntity owner, final Class<OV> _objectClass) {
+        this(owner, _objectClass, false, false);
     }
 
-    public ListObjectVarProperty(final PersistentObject owner, final String name, final Class<OV> _objectClass, final boolean sentToClient, final boolean auditable) {
-        super(owner, name, null, sentToClient, auditable, false);
+    public ListObjectVarProperty(final DatastoreEntity owner, final Class<OV> _objectClass, final boolean sentToClient, final boolean auditable) {
+        super(owner, null, sentToClient, auditable, false);
 
         objectClass = _objectClass;
 

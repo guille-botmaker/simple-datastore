@@ -5,28 +5,56 @@ import com.zupcat.property.*;
 import com.zupcat.util.TimeUtils;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Objects;
+import java.util.*;
 
 public abstract class DatastoreEntity extends PersistentObject implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
     public static final int MAX_GROUPS = 100;
 
-    public final IntegerProperty GROUP_ID;
-    public final LongProperty LAST_MODIFICATION;
+    // persistent state
+    private final ObjectHolder objectHolder = new ObjectHolder();
+
+    private final String entityName;
+    private final CacheStrategy cacheStrategy;
+    private final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();
+
+    // entity usefull properties
+    public IntegerProperty GROUP_ID;
+    public LongProperty LAST_MODIFICATION;
+
 
     protected DatastoreEntity(final CacheStrategy cacheStrategy) {
-        super(cacheStrategy);
+        GROUP_ID = integer(null, false, false, true);
+        LAST_MODIFICATION = longInt(null, false, false, true);
 
-        GROUP_ID = integer("gi", null, false, false, true);
-        LAST_MODIFICATION = longInt("lm", null, false, false, true);
+        this.cacheStrategy = cacheStrategy;
 
+        final Class<? extends DatastoreEntity> clazz = this.getClass();
+        final String className = clazz.getName();
+        entityName = className.substring(className.lastIndexOf(".") + 1);
+
+        config();
+
+        for (final Field field : clazz.getFields()) {
+            if (PropertyMeta.class.isAssignableFrom(field.getType())) {
+                final String propertyName = field.getName();
+
+                try {
+                    final PropertyMeta propertyMeta = (PropertyMeta) field.get(this);
+
+                    propertyMeta.setPropertyName(propertyName);
+                    addPropertyMeta(propertyName, propertyMeta);
+
+                } catch (final IllegalAccessException _illegalAccessException) {
+                    throw new RuntimeException("Problems getting value for field [" + propertyName + "], of class [" + clazz + "]. Possible private variable?: " + _illegalAccessException.getMessage(), _illegalAccessException);
+                }
+            }
+        }
         GROUP_ID.set(Math.abs(getId().hashCode() % MAX_GROUPS));
-
         setModified();
     }
 
@@ -35,14 +63,77 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         LAST_MODIFICATION.set(TimeUtils.buildStandardModificationTime());
     }
 
-    public int getDaysSinceLastModification() {
-        return getMinutesSinceLastModification() / (60 * 24);
+    public String getEntityName() {
+        return entityName;
     }
 
     public boolean isFullyEquals(final DatastoreEntity other) {
-        return super.isFullyEquals(other) && !(other == null || !Objects.equals(this.GROUP_ID.get(), other.GROUP_ID.get()) || !Objects.equals(this.LAST_MODIFICATION.get(), other.LAST_MODIFICATION.get()));
+        if (
+                other == null ||
+                        !Objects.equals(this.getId(), other.getId()) ||
+                        !Objects.equals(this.cacheStrategy, other.cacheStrategy) ||
+                        !Objects.equals(this.entityName, other.entityName) ||
+                        !Objects.equals(this.GROUP_ID.get(), other.GROUP_ID.get()) ||
+                        !Objects.equals(this.LAST_MODIFICATION.get(), other.LAST_MODIFICATION.get()) ||
+                        this.propertiesMetadata.size() != other.propertiesMetadata.size() ||
+                        !this.objectHolder.isFullyEquals(other.objectHolder)
+                ) {
+            return false;
+        }
+
+        for (final Map.Entry<String, PropertyMeta> entry : this.propertiesMetadata.entrySet()) {
+            if (!entry.getValue().isFullyEquals(other.propertiesMetadata.get(entry.getKey()))) {
+                return false;
+            }
+        }
+        return true;
     }
 
+    public Map<String, PropertyMeta> getPropertiesMetadata() {
+        return propertiesMetadata;
+    }
+
+    public void addPropertyMeta(final String name, final PropertyMeta propertyMeta) {
+//        if (propertyMeta.isIndexable() && propertyMeta.getInitialValue() == null) {
+//            throw new RuntimeException("Property [" + name + "] of Entity [" + entityName + "] is indexable and has null default value. This is not allowed. Please change then initialValue to be not null");
+//        }
+        propertiesMetadata.put(name, propertyMeta);
+    }
+
+    /**
+     * For framework internal calls. Do not use this method directly
+     */
+    public ObjectHolder getObjectHolder() {
+        return objectHolder;
+    }
+
+    public CacheStrategy getCacheStrategy() {
+        return cacheStrategy;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(500);
+
+        builder
+                .append("[")
+                .append(entityName)
+                .append("|")
+                .append(getId())
+                .append("|")
+                .append(objectHolder.toString(builder));
+
+        builder.append("]");
+
+        return builder.toString();
+    }
+
+    protected abstract void config();
+
+
+    public int getDaysSinceLastModification() {
+        return getMinutesSinceLastModification() / (60 * 24);
+    }
 
     public int getMinutesSinceLastModification() {
         final long lm = LAST_MODIFICATION.get();
@@ -83,132 +174,116 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     }
     // === Properties factories helpers ==========================================================================================================
 
-    protected StringProperty string(final String name, final String initialValue) {
-        return string(name, initialValue, false, false, false);
+    protected StringProperty string() {
+        return string(null, false, false, false);
     }
 
-    protected StringProperty string(final String name, final String initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
-        final StringProperty p = new StringProperty(this, name, initialValue, defaultSentToClient, auditable, isIndexable);
-
-        addPropertyMeta(name, p);
-
-        return p;
+    protected StringProperty string(final String initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
+        return new StringProperty(this, initialValue, defaultSentToClient, auditable, isIndexable);
     }
 
-    protected IntegerProperty integer(final String name, final Integer initialValue) {
-        return integer(name, initialValue, false, false, false);
+    protected IntegerProperty integer() {
+        return integer(0, false, false, false);
     }
 
-    protected IntegerProperty integer(final String name, final Integer initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
-        final IntegerProperty p = new IntegerProperty(this, name, initialValue, defaultSentToClient, auditable, isIndexable);
-
-        addPropertyMeta(name, p);
-
-        return p;
+    protected IntegerProperty integer(final Integer initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
+        return new IntegerProperty(this, initialValue, defaultSentToClient, auditable, isIndexable);
     }
 
-    protected BooleanProperty bool(final String name, final Boolean initialValue) {
-        return bool(name, initialValue, false, false, false);
+    protected BooleanProperty bool() {
+        return bool(false, false, false, false);
     }
 
-    protected BooleanProperty bool(final String name, final Boolean initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
-        final BooleanProperty p = new BooleanProperty(this, name, initialValue, defaultSentToClient, auditable, isIndexable);
-
-        addPropertyMeta(name, p);
-
-        return p;
+    protected BooleanProperty bool(final Boolean initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
+        return new BooleanProperty(this, initialValue, defaultSentToClient, auditable, isIndexable);
     }
 
-    protected LongProperty longInt(final String name, final Long initialValue) {
-        return longInt(name, initialValue, false, false, false);
+    protected LongProperty longInt() {
+        return longInt(0l, false, false, false);
     }
 
-    protected LongProperty longInt(final String name, final Long initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
-        final LongProperty p = new LongProperty(this, name, initialValue, defaultSentToClient, auditable, isIndexable);
-
-        addPropertyMeta(name, p);
-
-        return p;
+    protected LongProperty longInt(final Long initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
+        return new LongProperty(this, initialValue, defaultSentToClient, auditable, isIndexable);
     }
 
-    protected ListIntegerProperty listInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
-        final ListIntegerProperty p = new ListIntegerProperty(this, name, defaultSentToClient, auditable);
-
-        addPropertyMeta(name, p);
-
-        return p;
+    protected ListIntegerProperty listInteger() {
+        return listInteger(false, false);
     }
 
-    protected ListLongProperty listLong(final String name, final boolean defaultSentToClient, final boolean auditable) {
-        final ListLongProperty p = new ListLongProperty(this, name, defaultSentToClient, auditable);
-
-        addPropertyMeta(name, p);
-
-        return p;
+    protected ListIntegerProperty listInteger(final boolean defaultSentToClient, final boolean auditable) {
+        return new ListIntegerProperty(this, defaultSentToClient, auditable);
     }
 
-    protected ListStringProperty listString(final String name, final boolean defaultSentToClient, final boolean auditable) {
-        final ListStringProperty p = new ListStringProperty(this, name, defaultSentToClient, auditable);
-
-        addPropertyMeta(name, p);
-
-        return p;
+    protected ListLongProperty listLong() {
+        return listLong(false, false);
     }
 
-    protected MapStringStringProperty mapStringString(final String name, final boolean defaultSentToClient, final boolean auditable) {
-        final MapStringStringProperty p = new MapStringStringProperty(this, name, defaultSentToClient, auditable);
-
-        addPropertyMeta(name, p);
-
-        return p;
+    protected ListLongProperty listLong(final boolean defaultSentToClient, final boolean auditable) {
+        return new ListLongProperty(this, defaultSentToClient, auditable);
     }
 
-    protected MapStringIntegerProperty mapStringInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
-        final MapStringIntegerProperty p = new MapStringIntegerProperty(this, name, defaultSentToClient, auditable);
-
-        addPropertyMeta(name, p);
-
-        return p;
+    protected ListStringProperty listString() {
+        return listString(false, false);
     }
 
-    protected MapIntegerIntegerProperty mapIntegerInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
-        final MapIntegerIntegerProperty p = new MapIntegerIntegerProperty(this, name, defaultSentToClient, auditable);
-
-        addPropertyMeta(name, p);
-
-        return p;
+    protected ListStringProperty listString(final boolean defaultSentToClient, final boolean auditable) {
+        return new ListStringProperty(this, defaultSentToClient, auditable);
     }
 
-    protected MapIntegerStringProperty mapIntegerString(final String name, final boolean defaultSentToClient, final boolean auditable) {
-        final MapIntegerStringProperty p = new MapIntegerStringProperty(this, name, defaultSentToClient, auditable);
-
-        addPropertyMeta(name, p);
-
-        return p;
+    protected MapStringStringProperty mapStringString() {
+        return mapStringString(false, false);
     }
 
-    protected MapStringLongProperty mapStringLong(final String name, final boolean defaultSentToClient, final boolean auditable) {
-        final MapStringLongProperty p = new MapStringLongProperty(this, name, defaultSentToClient, auditable);
+    protected MapStringStringProperty mapStringString(final boolean defaultSentToClient, final boolean auditable) {
+        return new MapStringStringProperty(this, defaultSentToClient, auditable);
+    }
 
-        addPropertyMeta(name, p);
+    protected MapStringIntegerProperty mapStringInteger() {
+        return mapStringInteger(false, false);
+    }
 
-        return p;
+    protected MapStringIntegerProperty mapStringInteger(final boolean defaultSentToClient, final boolean auditable) {
+        return new MapStringIntegerProperty(this, defaultSentToClient, auditable);
+    }
+
+    protected MapIntegerIntegerProperty mapIntegerInteger() {
+        return mapIntegerInteger(false, false);
+    }
+
+    protected MapIntegerIntegerProperty mapIntegerInteger(final boolean defaultSentToClient, final boolean auditable) {
+        return new MapIntegerIntegerProperty(this, defaultSentToClient, auditable);
+    }
+
+    protected MapIntegerStringProperty mapIntegerString() {
+        return mapIntegerString(false, false);
+    }
+
+    protected MapIntegerStringProperty mapIntegerString(final boolean defaultSentToClient, final boolean auditable) {
+        return new MapIntegerStringProperty(this, defaultSentToClient, auditable);
+    }
+
+    protected MapStringLongProperty mapStringLong() {
+        return mapStringLong(false, false);
+    }
+
+    protected MapStringLongProperty mapStringLong(final boolean defaultSentToClient, final boolean auditable) {
+        return new MapStringLongProperty(this, defaultSentToClient, auditable);
     }
 
 
-    protected MapStringMapStringIntegerProperty mapStringMapStringInteger(final String name, final boolean defaultSentToClient, final boolean auditable) {
-        final MapStringMapStringIntegerProperty p = new MapStringMapStringIntegerProperty(this, name, defaultSentToClient, auditable);
-
-        addPropertyMeta(name, p);
-
-        return p;
+    protected MapStringMapStringIntegerProperty mapStringMapStringInteger() {
+        return mapStringMapStringInteger(false, false);
     }
 
-    protected MapStringMapStringStringProperty mapStringMapStringString(final String name, final boolean defaultSentToClient, final boolean auditable) {
-        final MapStringMapStringStringProperty p = new MapStringMapStringStringProperty(this, name, defaultSentToClient, auditable);
+    protected MapStringMapStringIntegerProperty mapStringMapStringInteger(final boolean defaultSentToClient, final boolean auditable) {
+        return new MapStringMapStringIntegerProperty(this, defaultSentToClient, auditable);
+    }
 
-        addPropertyMeta(name, p);
+    protected MapStringMapStringStringProperty mapStringMapStringString() {
+        return mapStringMapStringString(false, false);
+    }
 
-        return p;
+    protected MapStringMapStringStringProperty mapStringMapStringString(final boolean defaultSentToClient, final boolean auditable) {
+        return new MapStringMapStringStringProperty(this, defaultSentToClient, auditable);
     }
 }

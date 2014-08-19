@@ -12,16 +12,15 @@ public abstract class PropertyMeta<E> implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
 
-    protected final String name;
-    protected final PersistentObject owner;
+    protected String name;
+    protected final DatastoreEntity owner;
     private final E initialValue;
     private final boolean sentToClient;
     private final boolean auditable;
     private final boolean indexable;
 
 
-    protected PropertyMeta(final PersistentObject owner, final String name, final E initialValue, final boolean sentToClient, final boolean auditable, final boolean indexable) {
-        this.name = name;
+    protected PropertyMeta(final DatastoreEntity owner, final E initialValue, final boolean sentToClient, final boolean auditable, final boolean indexable) {
         this.owner = owner;
         this.initialValue = initialValue;
         this.sentToClient = sentToClient;
@@ -31,6 +30,10 @@ public abstract class PropertyMeta<E> implements Serializable {
 
     public String getPropertyName() {
         return name;
+    }
+
+    public void setPropertyName(final String propertyName) {
+        this.name = propertyName;
     }
 
     public boolean isFullyEquals(final PropertyMeta other) {

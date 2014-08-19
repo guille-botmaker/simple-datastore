@@ -1,6 +1,6 @@
 package com.zupcat.property;
 
-import com.zupcat.model.PersistentObject;
+import com.zupcat.model.DatastoreEntity;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.Encoder;
 
@@ -14,8 +14,8 @@ public final class MapStringMapStringIntegerProperty extends AbstractMapStringAn
 
     private static final long serialVersionUID = 6181606486836703354L;
 
-    public MapStringMapStringIntegerProperty(final PersistentObject owner, final String name, final boolean sentToClient, final boolean auditable) {
-        super(owner, name, sentToClient, auditable);
+    public MapStringMapStringIntegerProperty(final DatastoreEntity owner, final boolean sentToClient, final boolean auditable) {
+        super(owner, sentToClient, auditable);
     }
 
     @Override

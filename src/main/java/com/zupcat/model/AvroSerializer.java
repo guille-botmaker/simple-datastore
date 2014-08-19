@@ -13,6 +13,7 @@ import java.util.zip.InflaterInputStream;
 public final class AvroSerializer<T extends SpecificRecordBase> implements Serializable {
 
     private static final long serialVersionUID = 471847964351314234L;
+    private static final Object LOCK_OBJECT = new Object();
 
     private static final byte[] EB = {
             0x22 - 0x17,
@@ -65,12 +66,14 @@ public final class AvroSerializer<T extends SpecificRecordBase> implements Seria
             byteOutputStream = new ByteArrayOutputStream(1024);
             final OutputStream outputStream = compressing ? new DeflaterOutputStream(byteOutputStream) : byteOutputStream;
 
-            final Encoder encoder = EncoderFactory.get().binaryEncoder(outputStream, getReusableBinaryEncoder());
-            final SpecificDatumWriter<T> writer = new SpecificDatumWriter<>(recordClass);
+            synchronized (LOCK_OBJECT) {
+                final Encoder encoder = EncoderFactory.get().binaryEncoder(outputStream, getReusableBinaryEncoder());
+                final SpecificDatumWriter<T> writer = new SpecificDatumWriter<>(recordClass);
 
-            writer.write(record, encoder);
-            encoder.flush();
-            outputStream.close();
+                writer.write(record, encoder);
+                encoder.flush();
+                outputStream.close();
+            }
 
             byte[] result = byteOutputStream.toByteArray();
             byteOutputStream.close();
@@ -104,9 +107,11 @@ public final class AvroSerializer<T extends SpecificRecordBase> implements Seria
             enc(bytes);
 
             final SpecificDatumReader<T> reader = new SpecificDatumReader<>(recordClass);
-            final Decoder decoder = DecoderFactory.get().binaryDecoder(compressed ? new InflaterInputStream(new ByteArrayInputStream(bytes)) : new ByteArrayInputStream(bytes), getReusableBinaryDecoder());
+            synchronized (LOCK_OBJECT) {
+                final Decoder decoder = DecoderFactory.get().binaryDecoder(compressed ? new InflaterInputStream(new ByteArrayInputStream(bytes)) : new ByteArrayInputStream(bytes), getReusableBinaryDecoder());
 
-            return reader.read(null, decoder);
+                return reader.read(null, decoder);
+            }
 
         } catch (final IOException _ioException) {
             throw new RuntimeException("Problems when deserializing record [" + recordClass.getName() + "]: " + _ioException.getMessage(), _ioException);

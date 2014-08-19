@@ -1,6 +1,6 @@
 package com.zupcat.property;
 
-import com.zupcat.model.PersistentObject;
+import com.zupcat.model.DatastoreEntity;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.Encoder;
 
@@ -11,8 +11,8 @@ public final class ListLongProperty extends AbstractListAnyProperty<Long> implem
 
     private static final long serialVersionUID = 6181606486836703354L;
 
-    public ListLongProperty(final PersistentObject owner, final String name, final boolean sentToClient, final boolean auditable) {
-        super(owner, name, sentToClient, auditable);
+    public ListLongProperty(final DatastoreEntity owner, final boolean sentToClient, final boolean auditable) {
+        super(owner, sentToClient, auditable);
     }
 
     @Override

@@ -39,7 +39,7 @@ public abstract class DAO<P extends DatastoreEntity> implements Serializable, ID
             throw new RuntimeException("Problems instantiating class [" + _beanClass.getName() + "] (maybe a missing default empty constructor?): " + _exception.getMessage(), _exception);
         }
 
-        entityPersistentObjectConverter = new EntityPersistentObjectConverter<>();
+        entityPersistentObjectConverter = EntityPersistentObjectConverter.instance();
     }
 
 

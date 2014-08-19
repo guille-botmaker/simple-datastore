@@ -17,7 +17,7 @@ public final class Resource implements Serializable {
     private static final long serialVersionUID = -2259862423311176614L;
     private static final String ENTITY_NAME = "Resource";
 
-    public static final int MAX_BLOB_SIZE = 1100 * 1024; //(1100k);
+    public static final int MAX_BLOB_SIZE = 1150 * 1024; //(1150k);
 
     private String id;
     private String type;
@@ -64,7 +64,7 @@ public final class Resource implements Serializable {
 
     public void validateSize() {
         if (this.rawValue != null && this.rawValue.length > MAX_BLOB_SIZE) {
-            throw new RuntimeException("Resource with key [" + id + "] is bigger than permitted: " + this.rawValue.length);
+            throw new RuntimeException("Resource with key [" + id + "] is bigger than permitted(" + MAX_BLOB_SIZE + "): " + this.rawValue.length);
         }
     }
 
@@ -134,8 +134,8 @@ public final class Resource implements Serializable {
     @Override
     public String toString() {
         return "Resource{" +
-                "type='" + type + '\'' +
-                ", id='" + id + '\'' +
+                "id='" + id + '\'' +
+                ", type='" + type + '\'' +
                 '}';
     }
 }

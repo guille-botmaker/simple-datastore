@@ -6,28 +6,51 @@ import com.zupcat.property.*;
 
 public class User extends DatastoreEntity {
 
-    public final StringProperty FIRSTNAME = string("fn", null);
-    public final StringProperty LASTNAME = string("ln", null, false, false, true);
-    public final IntegerProperty AGE = integer("ag", null);
-    public final LongProperty LONG_VALUE = longInt("lv", 0l);
-    public final BooleanProperty IS_FAKE = bool("f", false);
+    public StringProperty FIRSTNAME;
+    public StringProperty LASTNAME;
+    public IntegerProperty AGE;
+    public LongProperty LONG_VALUE;
+    public BooleanProperty IS_FAKE;
 
-    public final ListStringProperty LIST_STRING = listString("ls", false, false);
-    public final ListIntegerProperty LIST_INT = listInteger("li", false, false);
-    public final ListLongProperty LIST_LONG = listLong("ll", false, false);
+    public ListStringProperty LIST_STRING;
+    public ListIntegerProperty LIST_INT;
+    public ListLongProperty LIST_LONG;
 
-    public final MapStringStringProperty MESSAGES_MAP = mapStringString("mm", false, false);
-    public final MapStringLongProperty MESSAGES_BIG_COUNTER = mapStringLong("mmbc", false, false);
-    public final MapStringIntegerProperty MESSAGES_COUNTER = mapStringInteger("mmc", false, false);
-    public final MapIntegerIntegerProperty QTY_PER_QTY = mapIntegerInteger("qpq", false, false);
-    public final MapIntegerStringProperty INT_PER_STRING = mapIntegerString("ips", false, false);
-    public final MapStringMapStringStringProperty MAP_STRING_MAP_STRING_STRING = mapStringMapStringString("msmss", false, false);
+    public MapStringStringProperty MESSAGES_MAP;
+    public MapStringLongProperty MESSAGES_BIG_COUNTER;
+    public MapStringIntegerProperty MESSAGES_COUNTER;
+    public MapIntegerIntegerProperty QTY_PER_QTY;
+    public MapIntegerStringProperty INT_PER_STRING;
+    public MapStringMapStringStringProperty MAP_STRING_MAP_STRING_STRING;
 
-    public final ObjectVarProperty<Address> ADDRESS = new ObjectVarProperty<>(this, "ad", Address.class);
-    public final ListObjectVarProperty<Address> ADDRESSES = new ListObjectVarProperty<>(this, "ads", Address.class);
+    public ObjectVarProperty<Address> ADDRESS;
+    public ListObjectVarProperty<Address> ADDRESSES;
 
 
     public User() {
         super(CacheStrategy.SESSION_CACHE);
+    }
+
+    @Override
+    protected void config() {
+        FIRSTNAME = string();
+        LASTNAME = string(null, false, false, true);
+        AGE = integer();
+        LONG_VALUE = longInt();
+        IS_FAKE = bool();
+
+        LIST_STRING = listString();
+        LIST_INT = listInteger();
+        LIST_LONG = listLong();
+
+        MESSAGES_MAP = mapStringString();
+        MESSAGES_BIG_COUNTER = mapStringLong();
+        MESSAGES_COUNTER = mapStringInteger();
+        QTY_PER_QTY = mapIntegerInteger();
+        INT_PER_STRING = mapIntegerString();
+        MAP_STRING_MAP_STRING_STRING = mapStringMapStringString();
+
+        ADDRESS = new ObjectVarProperty<>(this, Address.class);
+        ADDRESSES = new ListObjectVarProperty<>(this, Address.class);
     }
 }

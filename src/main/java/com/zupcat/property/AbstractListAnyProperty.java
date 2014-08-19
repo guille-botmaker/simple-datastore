@@ -1,7 +1,7 @@
 package com.zupcat.property;
 
+import com.zupcat.model.DatastoreEntity;
 import com.zupcat.model.ObjectVar;
-import com.zupcat.model.PersistentObject;
 import org.apache.avro.io.*;
 import org.apache.commons.codec.binary.Base64;
 
@@ -22,8 +22,8 @@ public abstract class AbstractListAnyProperty<V> extends StringProperty implemen
     private transient List<V> cache;
 
 
-    public AbstractListAnyProperty(final PersistentObject owner, final String name, final boolean sentToClient, final boolean auditable) {
-        super(owner, name, null, sentToClient, auditable, false);
+    public AbstractListAnyProperty(final DatastoreEntity owner, final boolean sentToClient, final boolean auditable) {
+        super(owner, null, sentToClient, auditable, false);
     }
 
     @Override
