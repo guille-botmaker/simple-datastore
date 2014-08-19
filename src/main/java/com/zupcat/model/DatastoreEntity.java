@@ -286,4 +286,20 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     protected MapStringMapStringStringProperty mapStringMapStringString(final boolean defaultSentToClient, final boolean auditable) {
         return new MapStringMapStringStringProperty(this, defaultSentToClient, auditable);
     }
+
+    protected ObjectVarProperty objectVarProperty(final Class clazz) {
+        return objectVarProperty(clazz, false, false);
+    }
+
+    protected ObjectVarProperty objectVarProperty(final Class clazz, final boolean defaultSentToClient, final boolean auditable) {
+        return new ObjectVarProperty(this, clazz);
+    }
+
+    protected ListObjectVarProperty listObjectVarProperty(final Class clazz) {
+        return listObjectVarProperty(clazz, false, false);
+    }
+
+    protected ListObjectVarProperty listObjectVarProperty(final Class clazz, final boolean defaultSentToClient, final boolean auditable) {
+        return new ListObjectVarProperty(this, clazz);
+    }
 }

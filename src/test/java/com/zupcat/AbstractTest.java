@@ -88,10 +88,10 @@ public abstract class AbstractTest {
             sample.ADDRESSES.get().add(address2);
 
             for (int j = 0; j < 10; j++) {
-                sample.MESSAGES_MAP.put("" + j, randomUtils.getRandomSafeString(10));
-                sample.MESSAGES_BIG_COUNTER.put("" + j, randomUtils.getRandomLong());
-                sample.MESSAGES_COUNTER.put("" + j, randomUtils.getRandomInt(Integer.MAX_VALUE));
-                sample.QTY_PER_QTY.put(j, randomUtils.getRandomInt(Integer.MAX_VALUE));
+                sample.MAP_STRING_STRING.put("" + j, randomUtils.getRandomSafeString(10));
+                sample.MAP_STRING_LONG.put("" + j, randomUtils.getRandomLong());
+                sample.MAP_STRING_INTEGER.put("" + j, randomUtils.getRandomInt(Integer.MAX_VALUE));
+                sample.MAP_INTEGER_INTEGER.put(j, randomUtils.getRandomInt(Integer.MAX_VALUE));
                 sample.INT_PER_STRING.put(j, randomUtils.getRandomSafeString(10));
                 sample.LIST_STRING.add(randomUtils.getRandomSafeString(10));
                 sample.LIST_INT.add(randomUtils.getRandomInt(Integer.MAX_VALUE));
