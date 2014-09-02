@@ -2,6 +2,7 @@ package com.zupcat.util;
 
 import com.zupcat.model.PersistentObject;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -74,83 +75,69 @@ public final class TimeUtils {
 //        }
 //        return lastWeek;
 //    }
-//
-//    public static int getDaysSinceStandardModificationTime(final long l) {
-//        return getMinutesSinceStandardModificationTime(l) / (60 * 24);
-//    }
-//
-//    /**
-//     * Returns the days passed since the date from parameter 'l', but set to 00:00:00.000 Hs.
-//     */
-//    public static int getDaysPassedSinceInitialStandardModificationTime(final long l) {
-//        final Date dateFrom = getInitialDateFromStandardModificationTime(l);
-//        final Date today = getInitialDateFromStandardModificationTime(buildStandardModificationTime());
-//
-//        final DateTime dateFromDateTime = new DateTime(dateFrom);
-//        final DateTime todayDateTime = new DateTime(today);
-//        final int days = Days.daysBetween(dateFromDateTime, todayDateTime).getDays();
-//
-//        Logger.getLogger(TimeUtils.class.getPropertyName()).log(Level.SEVERE, "getDaysPassedSinceInitialStandardModificationTime. l [" + l + "], dateFrom [" + dateFrom + "], today [" + today + "], dateFromDateTime [" + dateFromDateTime + "], todayDateTime [" + todayDateTime + "], days [" + days + "]", new Exception());
-//
-//        return days;
-//    }
-//
-//    /**
-//     * Returns the date from parameter 'l', but set to 00:00:00.000 Hs.
-//     */
-//    public static Date getInitialDateFromStandardModificationTime(final long l) {
-//        final Calendar calendar = getCalendar();
-//        calendar.setTime(getDateFromStandardModificationTime(l));
-//        calendar.set(Calendar.HOUR_OF_DAY, 0);
-//        calendar.set(Calendar.MINUTE, 0);
-//        calendar.set(Calendar.SECOND, 0);
-//        calendar.set(Calendar.MILLISECOND, 0);
-//        return calendar.getTime();
-//    }
-//
-//    public static int getMinutesSinceStandardModificationTime(final long l) {
-//
-//        if (l == 0l)
-//            return 0;
-//
-//        final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-//
-//        final GregorianCalendar now = new GregorianCalendar();
-//        final GregorianCalendar modified = new GregorianCalendar();
-//
-//        try {
-//            now.setTime(dateFormat.parse("" + TimeUtils.buildStandardModificationTime(new Date())));
-//            modified.setTime(dateFormat.parse("" + l));
-//
-//        } catch (final ParseException e) {
-//            throw new GAEException(ErrorType.PROGRAMMING, e);
-//        }
-//
-//        return ((int) ((now.getTime().getTime() - modified.getTime().getTime()) / 60000));
-//    }
-//
-//    public static Date getDateFromStandardModificationTime(final long l) {
-//        try {
-//            final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(PersistenceObject.DATE_FORMAT);
-//            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-//
-//            return simpleDateFormat.parse(Long.toString(l));
-//        } catch (final ParseException _parseException) {
-//            throw new GAEException(ErrorType.PROGRAMMING, _parseException, "Problems parsing long to date [" + l
-//                    + "]: " + _parseException.getMessage());
-//        }
-//    }
-//
-//    /**
-//     * @return YYYYMMDD
-//     */
-//    public static int buildStandardToday() {
-//        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
-//        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-//
-//        return Integer.parseInt(simpleDateFormat.format(new Date()));
-//    }
-//
+
+    public static int getDaysSinceStandardModificationTime(final long l) {
+        return getMinutesSinceStandardModificationTime(l) / (60 * 24);
+    }
+
+    /**
+     * Returns the date from parameter 'l', but set to 00:00:00.000 Hs.
+     */
+    public static Date getInitialDateFromStandardModificationTime(final long l) {
+        final Calendar calendar = getCalendar();
+        calendar.setTime(getDateFromStandardModificationTime(l));
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
+
+    public static int getMinutesSinceStandardModificationTime(final long l) {
+        if (l == 0l) {
+            return 0;
+        }
+
+        final SimpleDateFormat dateFormat = new SimpleDateFormat(PersistentObject.DATE_FORMAT);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        final GregorianCalendar now = new GregorianCalendar();
+        final GregorianCalendar modified = new GregorianCalendar();
+
+        try {
+            now.setTime(dateFormat.parse("" + TimeUtils.buildStandardModificationTime()));
+            modified.setTime(dateFormat.parse("" + l));
+
+        } catch (final ParseException e) {
+            throw new RuntimeException("Problems parsing date from [" + l + "]: " + e.getMessage(), e);
+        }
+
+        return ((int) (Math.abs(now.getTime().getTime() - modified.getTime().getTime()) / 60000));
+    }
+
+    public static Date getDateFromStandardModificationTime(final long l) {
+        try {
+            final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(PersistentObject.DATE_FORMAT);
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+            return simpleDateFormat.parse(Long.toString(l));
+
+        } catch (final ParseException _parseException) {
+            throw new RuntimeException("Problems parsing date from [" + l + "]: " + _parseException.getMessage(), _parseException);
+        }
+    }
+
+
+    /**
+     * @return YYYYMMDD
+     */
+    public static int buildStandardToday() {
+        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        return Integer.parseInt(simpleDateFormat.format(getCalendar().getTime()));
+    }
+
     public static long buildStandardModificationTime() {
         return buildStandardModificationTime(getCalendar().getTime());
     }
