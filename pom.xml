@@ -13,7 +13,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <appengine.target.version>1.9.8</appengine.target.version>
+        <appengine.target.version>1.9.10</appengine.target.version>
     </properties>
 
     <licenses>
@@ -221,4 +221,9 @@
         </plugins>
 
     </build>
+
+
+    -- build root pom
+
+
 </project>
