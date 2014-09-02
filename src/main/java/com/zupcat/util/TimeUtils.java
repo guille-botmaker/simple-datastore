@@ -3,46 +3,43 @@ package com.zupcat.util;
 import com.zupcat.model.PersistentObject;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * Pack of common date operations
  */
 public final class TimeUtils {
 
-    //    public static long getNormalizedCurrentTimeMillisForBeginingOfDay() {
-//        final GregorianCalendar calendar = new GregorianCalendar();
-//        calendar.setTime(getCalendar().getTime());
-//
-//        calendar.set(Calendar.HOUR_OF_DAY, 0);
-//        calendar.set(Calendar.MINUTE, 0);
-//        calendar.set(Calendar.SECOND, 0);
-//        calendar.set(Calendar.MILLISECOND, 0);
-//
-//        return calendar.getTimeInMillis();
-//    }
-//
-//    public static long getNormalizedCurrentTimeMillisForEndingOfDay() {
-//        final GregorianCalendar calendar = new GregorianCalendar();
-//        calendar.setTime(getCalendar().getTime());
-//
-//        calendar.set(Calendar.HOUR_OF_DAY, 23);
-//        calendar.set(Calendar.MINUTE, 59);
-//        calendar.set(Calendar.SECOND, 59);
-//        calendar.set(Calendar.MILLISECOND, 999);
-//
-//        return calendar.getTimeInMillis();
-//    }
-//
-//    public static long getNormalizedCurrentTimeMillis() {
-//        return getCalendar().getTimeInMillis();
-//    }
+    public static long getNormalizedCurrentTimeMillisForBeginingOfDay() {
+        final GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTime(getCalendar().getTime());
+
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        return calendar.getTimeInMillis();
+    }
+
+
+    public static long getNormalizedCurrentTimeMillisForEndingOfDay() {
+        final GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTime(getCalendar().getTime());
+
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+
+        return calendar.getTimeInMillis();
+    }
+
+    public static long getNormalizedCurrentTimeMillis() {
+        return getCalendar().getTimeInMillis();
+    }
 
     public static Calendar getCalendar() {
-        // Locale: US - First day of week: SUNDAY
         return Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.US);
     }
 
