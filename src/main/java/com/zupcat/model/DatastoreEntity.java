@@ -23,11 +23,13 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     private final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();
 
     // entity usefull properties
+    public StringProperty ID;
     public IntegerProperty GROUP_ID;
     public LongProperty LAST_MODIFICATION;
 
 
     protected DatastoreEntity(final CacheStrategy cacheStrategy) {
+        ID = string(null, true, false, false);
         GROUP_ID = integer(null, false, false, true);
         LAST_MODIFICATION = longInt(null, false, false, true);
 
@@ -56,6 +58,16 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         }
         GROUP_ID.set(Math.abs(getId().hashCode() % MAX_GROUPS));
         setModified();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(final String id) {
+        this.id = id;
+        ID.set(id);
     }
 
     @Override
