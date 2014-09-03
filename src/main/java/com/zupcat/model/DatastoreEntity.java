@@ -206,6 +206,14 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return new StringProperty(this, initialValue, sentToClient, auditable, isIndexable);
     }
 
+    protected ByteArrayProperty byteArray() {
+        return byteArray(null, false, false, false);
+    }
+
+    protected ByteArrayProperty byteArray(final byte[] initialValue, final boolean sentToClient, final boolean auditable, final boolean isIndexable) {
+        return new ByteArrayProperty(this, initialValue, sentToClient, auditable, isIndexable);
+    }
+
     protected IntegerProperty integer() {
         return integer(0, false, false, false);
     }
