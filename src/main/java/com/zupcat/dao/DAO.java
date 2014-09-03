@@ -219,6 +219,13 @@ public abstract class DAO<P extends DatastoreEntity> implements Serializable, ID
 //        return this.findByQueryLazy(queryData);
 //    }
 
+    protected P findUnique(final Query.Filter filter) {
+        final Query query = new Query(getEntityName());
+        query.setFilter(filter);
+
+        return findUnique(query);
+    }
+
     protected P findUnique(final Query query) {
         final Entity entity = getRetryingHandler().tryExecuteQueryWithSingleResult(query);
 
