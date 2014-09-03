@@ -103,7 +103,15 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     /**
      * For framework internal calls. Do not use this method directly
      */
+    public ObjectHolder getInternalObjectHolder() {
+        return objectHolder;
+    }
+
     public ObjectHolder getObjectHolder() {
+        // commiting changes
+        for (final PropertyMeta propertyMeta : getPropertiesMetadata().values()) {
+            propertyMeta.commit();
+        }
         return objectHolder;
     }
 

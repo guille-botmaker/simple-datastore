@@ -30,7 +30,7 @@ public final class ObjectVarProperty<OV extends ObjectVar> extends PropertyMeta<
     @Override
     public OV get() {
         if (cache == null) {
-            final ObjectVar container = owner.getObjectHolder().getObjectVar();
+            final ObjectVar container = owner.getInternalObjectHolder().getObjectVar();
             final ObjectHolder objectHolder = container.getObjectHolder(name);
 
             if (objectHolder != null) {
@@ -49,7 +49,7 @@ public final class ObjectVarProperty<OV extends ObjectVar> extends PropertyMeta<
 
     public void set(final OV value) {
         if (value == null) {
-            final ObjectVar container = owner.getObjectHolder().getObjectVar();
+            final ObjectVar container = owner.getInternalObjectHolder().getObjectVar();
 
             container.set(name, ((ObjectHolder) null));
             cache = null;
@@ -73,7 +73,7 @@ public final class ObjectVarProperty<OV extends ObjectVar> extends PropertyMeta<
         if (toPersistObjectVar == null) {
             set(null);
         } else {
-            final ObjectVar container = owner.getObjectHolder().getObjectVar();
+            final ObjectVar container = owner.getInternalObjectHolder().getObjectVar();
 
             final ObjectHolder objectHolder = new ObjectHolder();
             objectHolder.getObjectVar().mergeWith(cache);

@@ -55,7 +55,7 @@ public abstract class PropertyMeta<E> implements Serializable {
     }
 
     public E get() {
-        final E result = getValueImpl(owner.getObjectHolder().getObjectVar());
+        final E result = getValueImpl(owner.getInternalObjectHolder().getObjectVar());
 
         return result == null ? initialValue : result;
     }
@@ -72,7 +72,7 @@ public abstract class PropertyMeta<E> implements Serializable {
             AuditHandlerServiceFactory.getAuditHandler().logPropertyDataChanged(this, value, owner.getId());
         }
 
-        final ObjectVar objectVar = owner.getObjectHolder().getObjectVar();
+        final ObjectVar objectVar = owner.getInternalObjectHolder().getObjectVar();
 
         if (value == null || value.equals(initialValue)) {
             objectVar.removeVar(name);

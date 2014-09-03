@@ -34,7 +34,7 @@ public final class ListObjectVarProperty<OV extends ObjectVar> extends PropertyM
         if (cache == null) {
             cache = new ArrayList<>();
 
-            final ObjectVar container = owner.getObjectHolder().getObjectVar();
+            final ObjectVar container = owner.getInternalObjectHolder().getObjectVar();
             final ObjectHolder objectHolder = container.getObjectHolder(name);
 
             if (objectHolder != null) {
@@ -55,7 +55,7 @@ public final class ListObjectVarProperty<OV extends ObjectVar> extends PropertyM
 
     public void set(final List<OV> value) {
         if (value == null || value.isEmpty()) {
-            final ObjectVar container = owner.getObjectHolder().getObjectVar();
+            final ObjectVar container = owner.getInternalObjectHolder().getObjectVar();
             container.set(name, ((ObjectHolder) null));
 
             if (cache != null) {
@@ -79,7 +79,7 @@ public final class ListObjectVarProperty<OV extends ObjectVar> extends PropertyM
         if (list == null || list.isEmpty()) {
             set(null);
         } else {
-            final ObjectVar container = owner.getObjectHolder().getObjectVar();
+            final ObjectVar container = owner.getInternalObjectHolder().getObjectVar();
 
             final ObjectHolder objectHolder = new ObjectHolder();
 

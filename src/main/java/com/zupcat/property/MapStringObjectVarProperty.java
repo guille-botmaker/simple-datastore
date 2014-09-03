@@ -32,7 +32,7 @@ public final class MapStringObjectVarProperty<OV extends WithIdObjectVar> extend
         if (cache == null) {
             cache = new HashMap<>();
 
-            final ObjectVar container = owner.getObjectHolder().getObjectVar();
+            final ObjectVar container = owner.getInternalObjectHolder().getObjectVar();
             final ObjectHolder objectHolder = container.getObjectHolder(name);
 
             if (objectHolder != null) {
@@ -53,7 +53,7 @@ public final class MapStringObjectVarProperty<OV extends WithIdObjectVar> extend
 
     public void set(final Map<String, OV> value) {
         if (value == null || value.isEmpty()) {
-            final ObjectVar container = owner.getObjectHolder().getObjectVar();
+            final ObjectVar container = owner.getInternalObjectHolder().getObjectVar();
             container.set(name, ((ObjectHolder) null));
 
             if (cache != null) {
@@ -77,7 +77,7 @@ public final class MapStringObjectVarProperty<OV extends WithIdObjectVar> extend
         if (map == null || map.isEmpty()) {
             set(null);
         } else {
-            final ObjectVar container = owner.getObjectHolder().getObjectVar();
+            final ObjectVar container = owner.getInternalObjectHolder().getObjectVar();
 
             final ObjectHolder objectHolder = new ObjectHolder();
 
