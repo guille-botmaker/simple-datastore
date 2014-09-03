@@ -23,7 +23,7 @@ public abstract class AbstractMapStringAnyProperty<K, V> extends StringProperty 
 
 
     public AbstractMapStringAnyProperty(final DatastoreEntity owner, final boolean sentToClient, final boolean auditable) {
-        super(owner, null, sentToClient, auditable, false);
+        super(owner, null, sentToClient, auditable, false, false);
     }
 
     @Override

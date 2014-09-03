@@ -23,7 +23,7 @@ public abstract class AbstractListAnyProperty<V> extends StringProperty implemen
 
 
     public AbstractListAnyProperty(final DatastoreEntity owner, final boolean sentToClient, final boolean auditable) {
-        super(owner, null, sentToClient, auditable, false);
+        super(owner, null, sentToClient, auditable, false, false);
     }
 
     @Override
