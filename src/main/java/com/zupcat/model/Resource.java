@@ -104,7 +104,7 @@ public final class Resource implements Serializable {
         return resource;
     }
 
-    public static Resource buildJavaObject(final String id, final Serializable javaObject) {
+    public static Resource buildJavaObject(final String id, final Object javaObject) {
         final Resource resource = new Resource();
 
         resource.id = id;
