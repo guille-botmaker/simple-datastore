@@ -3,6 +3,7 @@ package com.zupcat.model;
 import com.zupcat.util.RandomUtils;
 
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 /**
  * Base class for all persistent entities. Handles data and metadata of business objects
@@ -10,6 +11,7 @@ import java.io.Serializable;
 public abstract class PersistentObject implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
+    protected static final Logger LOGGER = Logger.getLogger(PersistentObject.class.getName());
 
     public static final String DATE_FORMAT = "yyMMddHHmmssSSS";
 
