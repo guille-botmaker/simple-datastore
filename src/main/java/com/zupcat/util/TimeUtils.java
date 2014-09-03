@@ -93,6 +93,10 @@ public final class TimeUtils {
         return calendar.getTime();
     }
 
+    public static long getMillisFromStandardModificationTime(final long smTime) {
+        return getDateFromStandardModificationTime(smTime).getTime();
+    }
+
     public static int getMinutesSinceStandardModificationTime(final long l) {
         if (l == 0l) {
             return 0;
