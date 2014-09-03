@@ -166,6 +166,10 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return ((int) (Math.abs((now.getTime().getTime() - modified.getTime().getTime())) / 60000));
     }
 
+    protected void setObjectVarType(final String type) {
+        getInternalObjectHolder().getObjectVar().set("_t", type);
+    }
+
     public Date getLastModificationAsDate() {
         try {
             return new SimpleDateFormat(DATE_FORMAT).parse(Long.toString(LAST_MODIFICATION.get()));
