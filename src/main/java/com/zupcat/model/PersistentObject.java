@@ -15,15 +15,20 @@ public abstract class PersistentObject implements Serializable {
 
     public static final String DATE_FORMAT = "yyMMddHHmmssSSS";
 
-    protected String id;
+    private String id;
 
 
     protected PersistentObject() {
         setId(RandomUtils.getInstance().getRandomSafeAlphaNumberString(20));
     }
 
+    public String getId() {
+        return id;
+    }
 
-    public abstract void setId(final String id);
+    public void setId(final String id) {
+        this.id = id;
+    }
 
     public abstract void setModified();
 
