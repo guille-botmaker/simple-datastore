@@ -22,4 +22,25 @@ public class LongProperty extends PropertyMeta<Long> implements Serializable {
     protected void setValueImpl(final Long value, final ObjectVar objectVar) {
         objectVar.set(name, value);
     }
+
+    public void add(final long value) {
+        final Long current = get();
+        this.set(current == null ? value : (current + value));
+    }
+
+    public void substract(final int value) {
+        this.add(-value);
+    }
+
+    public void decrement() {
+        this.substract(1);
+    }
+
+    public void increment() {
+        this.add(1);
+    }
+
+    public boolean isNullOrZero() {
+        return this.get() == null || this.get() == 0l;
+    }
 }
