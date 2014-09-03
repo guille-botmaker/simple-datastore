@@ -178,96 +178,96 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return string(null, false, false, false);
     }
 
-    protected StringProperty string(final String initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
-        return new StringProperty(this, initialValue, defaultSentToClient, auditable, isIndexable);
+    protected StringProperty string(final String initialValue, final boolean sentToClient, final boolean auditable, final boolean isIndexable) {
+        return new StringProperty(this, initialValue, sentToClient, auditable, isIndexable);
     }
 
     protected IntegerProperty integer() {
         return integer(0, false, false, false);
     }
 
-    protected IntegerProperty integer(final Integer initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
-        return new IntegerProperty(this, initialValue, defaultSentToClient, auditable, isIndexable);
+    protected IntegerProperty integer(final Integer initialValue, final boolean sentToClient, final boolean auditable, final boolean isIndexable) {
+        return new IntegerProperty(this, initialValue, sentToClient, auditable, isIndexable);
     }
 
     protected BooleanProperty bool() {
         return bool(false, false, false, false);
     }
 
-    protected BooleanProperty bool(final Boolean initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
-        return new BooleanProperty(this, initialValue, defaultSentToClient, auditable, isIndexable);
+    protected BooleanProperty bool(final Boolean initialValue, final boolean sentToClient, final boolean auditable, final boolean isIndexable) {
+        return new BooleanProperty(this, initialValue, sentToClient, auditable, isIndexable);
     }
 
     protected LongProperty longInt() {
         return longInt(0l, false, false, false);
     }
 
-    protected LongProperty longInt(final Long initialValue, final boolean defaultSentToClient, final boolean auditable, final boolean isIndexable) {
-        return new LongProperty(this, initialValue, defaultSentToClient, auditable, isIndexable);
+    protected LongProperty longInt(final Long initialValue, final boolean sentToClient, final boolean auditable, final boolean isIndexable) {
+        return new LongProperty(this, initialValue, sentToClient, auditable, isIndexable);
     }
 
     protected ListIntegerProperty listInteger() {
         return listInteger(false, false);
     }
 
-    protected ListIntegerProperty listInteger(final boolean defaultSentToClient, final boolean auditable) {
-        return new ListIntegerProperty(this, defaultSentToClient, auditable);
+    protected ListIntegerProperty listInteger(final boolean sentToClient, final boolean auditable) {
+        return new ListIntegerProperty(this, sentToClient, auditable);
     }
 
     protected ListLongProperty listLong() {
         return listLong(false, false);
     }
 
-    protected ListLongProperty listLong(final boolean defaultSentToClient, final boolean auditable) {
-        return new ListLongProperty(this, defaultSentToClient, auditable);
+    protected ListLongProperty listLong(final boolean sentToClient, final boolean auditable) {
+        return new ListLongProperty(this, sentToClient, auditable);
     }
 
     protected ListStringProperty listString() {
         return listString(false, false);
     }
 
-    protected ListStringProperty listString(final boolean defaultSentToClient, final boolean auditable) {
-        return new ListStringProperty(this, defaultSentToClient, auditable);
+    protected ListStringProperty listString(final boolean sentToClient, final boolean auditable) {
+        return new ListStringProperty(this, sentToClient, auditable);
     }
 
     protected MapStringStringProperty mapStringString() {
         return mapStringString(false, false);
     }
 
-    protected MapStringStringProperty mapStringString(final boolean defaultSentToClient, final boolean auditable) {
-        return new MapStringStringProperty(this, defaultSentToClient, auditable);
+    protected MapStringStringProperty mapStringString(final boolean sentToClient, final boolean auditable) {
+        return new MapStringStringProperty(this, sentToClient, auditable);
     }
 
     protected MapStringIntegerProperty mapStringInteger() {
         return mapStringInteger(false, false);
     }
 
-    protected MapStringIntegerProperty mapStringInteger(final boolean defaultSentToClient, final boolean auditable) {
-        return new MapStringIntegerProperty(this, defaultSentToClient, auditable);
+    protected MapStringIntegerProperty mapStringInteger(final boolean sentToClient, final boolean auditable) {
+        return new MapStringIntegerProperty(this, sentToClient, auditable);
     }
 
     protected MapIntegerIntegerProperty mapIntegerInteger() {
         return mapIntegerInteger(false, false);
     }
 
-    protected MapIntegerIntegerProperty mapIntegerInteger(final boolean defaultSentToClient, final boolean auditable) {
-        return new MapIntegerIntegerProperty(this, defaultSentToClient, auditable);
+    protected MapIntegerIntegerProperty mapIntegerInteger(final boolean sentToClient, final boolean auditable) {
+        return new MapIntegerIntegerProperty(this, sentToClient, auditable);
     }
 
     protected MapIntegerStringProperty mapIntegerString() {
         return mapIntegerString(false, false);
     }
 
-    protected MapIntegerStringProperty mapIntegerString(final boolean defaultSentToClient, final boolean auditable) {
-        return new MapIntegerStringProperty(this, defaultSentToClient, auditable);
+    protected MapIntegerStringProperty mapIntegerString(final boolean sentToClient, final boolean auditable) {
+        return new MapIntegerStringProperty(this, sentToClient, auditable);
     }
 
     protected MapStringLongProperty mapStringLong() {
         return mapStringLong(false, false);
     }
 
-    protected MapStringLongProperty mapStringLong(final boolean defaultSentToClient, final boolean auditable) {
-        return new MapStringLongProperty(this, defaultSentToClient, auditable);
+    protected MapStringLongProperty mapStringLong(final boolean sentToClient, final boolean auditable) {
+        return new MapStringLongProperty(this, sentToClient, auditable);
     }
 
 
@@ -275,31 +275,39 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return mapStringMapStringInteger(false, false);
     }
 
-    protected MapStringMapStringIntegerProperty mapStringMapStringInteger(final boolean defaultSentToClient, final boolean auditable) {
-        return new MapStringMapStringIntegerProperty(this, defaultSentToClient, auditable);
+    protected MapStringMapStringIntegerProperty mapStringMapStringInteger(final boolean sentToClient, final boolean auditable) {
+        return new MapStringMapStringIntegerProperty(this, sentToClient, auditable);
     }
 
     protected MapStringMapStringStringProperty mapStringMapStringString() {
         return mapStringMapStringString(false, false);
     }
 
-    protected MapStringMapStringStringProperty mapStringMapStringString(final boolean defaultSentToClient, final boolean auditable) {
-        return new MapStringMapStringStringProperty(this, defaultSentToClient, auditable);
+    protected MapStringMapStringStringProperty mapStringMapStringString(final boolean sentToClient, final boolean auditable) {
+        return new MapStringMapStringStringProperty(this, sentToClient, auditable);
     }
 
     protected ObjectVarProperty objectVarProperty(final Class clazz) {
         return objectVarProperty(clazz, false, false);
     }
 
-    protected ObjectVarProperty objectVarProperty(final Class clazz, final boolean defaultSentToClient, final boolean auditable) {
-        return new ObjectVarProperty(this, clazz);
+    protected ObjectVarProperty objectVarProperty(final Class clazz, final boolean sentToClient, final boolean auditable) {
+        return new ObjectVarProperty(this, clazz, sentToClient, auditable);
     }
 
     protected ListObjectVarProperty listObjectVarProperty(final Class clazz) {
         return listObjectVarProperty(clazz, false, false);
     }
 
-    protected ListObjectVarProperty listObjectVarProperty(final Class clazz, final boolean defaultSentToClient, final boolean auditable) {
-        return new ListObjectVarProperty(this, clazz);
+    protected ListObjectVarProperty listObjectVarProperty(final Class clazz, final boolean sentToClient, final boolean auditable) {
+        return new ListObjectVarProperty(this, clazz, sentToClient, auditable);
+    }
+
+    protected MapStringObjectVarProperty mapStringObjectVarProperty(final Class clazz) {
+        return mapStringObjectVarProperty(clazz, false, false);
+    }
+
+    protected MapStringObjectVarProperty mapStringObjectVarProperty(final Class clazz, final boolean sentToClient, final boolean auditable) {
+        return new MapStringObjectVarProperty(this, clazz, sentToClient, auditable);
     }
 }
