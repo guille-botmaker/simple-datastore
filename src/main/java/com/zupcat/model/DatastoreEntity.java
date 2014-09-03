@@ -89,6 +89,22 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return true;
     }
 
+    public ObjectHolder getObjectHolderForClient() {
+        final ObjectHolder result = new ObjectHolder();
+        final ObjectVar resultOV = result.getObjectVar();
+
+        final ObjectVar sourceStateOV = getObjectHolder().getObjectVar();
+
+        resultOV.mergeWith(sourceStateOV);
+
+        for (final Map.Entry<String, PropertyMeta> entry : getPropertiesMetadata().entrySet()) {
+            if (!entry.getValue().hasToSendToClient()) {
+                resultOV.removeVar(entry.getKey());
+            }
+        }
+        return result;
+    }
+
     public Map<String, PropertyMeta> getPropertiesMetadata() {
         return propertiesMetadata;
     }

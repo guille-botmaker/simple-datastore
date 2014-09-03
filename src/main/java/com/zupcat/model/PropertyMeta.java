@@ -54,6 +54,10 @@ public abstract class PropertyMeta<E> implements Serializable {
         return initialValue;
     }
 
+    protected boolean hasToSendToClient() {
+        return sentToClient;
+    }
+
     public E get() {
         final E result = getValueImpl(owner.getInternalObjectHolder().getObjectVar());
 
