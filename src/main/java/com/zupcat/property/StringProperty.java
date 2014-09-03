@@ -10,9 +10,12 @@ public class StringProperty extends PropertyMeta<String> implements Serializable
 
     private static final long serialVersionUID = 6181606486836703354L;
 
+    private final boolean toLowerCase;
 
-    public StringProperty(final DatastoreEntity owner, final String initialValue, final boolean sentToClient, final boolean auditable, final boolean indexable) {
+    public StringProperty(final DatastoreEntity owner, final String initialValue, final boolean sentToClient, final boolean auditable, final boolean indexable, final boolean toLowerCase) {
         super(owner, initialValue, sentToClient, auditable, indexable);
+
+        this.toLowerCase = toLowerCase;
     }
 
     protected String getValueImpl(final ObjectVar objectVar) {
@@ -20,6 +23,6 @@ public class StringProperty extends PropertyMeta<String> implements Serializable
     }
 
     protected void setValueImpl(final String value, final ObjectVar objectVar) {
-        objectVar.set(name, value);
+        objectVar.set(name, (value == null ? null : (toLowerCase ? value.toLowerCase() : value)));
     }
 }

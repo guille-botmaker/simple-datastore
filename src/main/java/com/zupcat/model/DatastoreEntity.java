@@ -203,7 +203,11 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     }
 
     protected StringProperty string(final String initialValue, final boolean sentToClient, final boolean auditable, final boolean isIndexable) {
-        return new StringProperty(this, initialValue, sentToClient, auditable, isIndexable);
+        return string(initialValue, sentToClient, auditable, isIndexable, false);
+    }
+
+    protected StringProperty string(final String initialValue, final boolean sentToClient, final boolean auditable, final boolean isIndexable, final boolean toLowerCase) {
+        return new StringProperty(this, initialValue, sentToClient, auditable, isIndexable, toLowerCase);
     }
 
     protected ByteArrayProperty byteArray() {
