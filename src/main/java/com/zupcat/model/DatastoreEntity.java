@@ -170,6 +170,18 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         getInternalObjectHolder().getObjectVar().set("_t", type);
     }
 
+    public ObjectVar getCopiedObjectVarToObjectHolder(final ObjectHolder objectHolder) {
+        final ObjectVar objectVar = getCopiedObjectVar();
+
+        objectHolder.addItem(objectVar);
+
+        return objectVar;
+    }
+
+    public ObjectVar getCopiedObjectVar() {
+        return new ObjectVar(getObjectHolder().getObjectVar());
+    }
+
     public Date getLastModificationAsDate() {
         try {
             return new SimpleDateFormat(DATE_FORMAT).parse(Long.toString(LAST_MODIFICATION.get()));
