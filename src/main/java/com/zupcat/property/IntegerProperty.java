@@ -22,4 +22,25 @@ public class IntegerProperty extends PropertyMeta<Integer> implements Serializab
     protected void setValueImpl(final Integer value, final ObjectVar objectVar) {
         objectVar.set(name, value);
     }
+
+    public void add(final int value) {
+        final Integer current = get();
+        this.set(current == null ? value : (current + value));
+    }
+
+    public void substract(final int value) {
+        this.add(-value);
+    }
+
+    public void decrement() {
+        this.substract(1);
+    }
+
+    public void increment() {
+        this.add(1);
+    }
+
+    public boolean isNullOrZero() {
+        return this.get() == null || this.get() == 0;
+    }
 }

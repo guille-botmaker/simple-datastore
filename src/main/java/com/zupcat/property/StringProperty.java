@@ -25,4 +25,10 @@ public class StringProperty extends PropertyMeta<String> implements Serializable
     protected void setValueImpl(final String value, final ObjectVar objectVar) {
         objectVar.set(name, (value == null ? null : (toLowerCase ? value.toLowerCase() : value)));
     }
+
+    public boolean hasData() {
+        final String s = this.get();
+
+        return s != null && s.trim().length() > 0;
+    }
 }
