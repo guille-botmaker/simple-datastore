@@ -64,7 +64,7 @@ public abstract class AbstractListAnyProperty<V> extends StringProperty implemen
         }
     }
 
-    private List<V> getList() {
+    public List<V> getList() {
         if (cache == null) {
             cache = new ArrayList<>();
             final String data = get();

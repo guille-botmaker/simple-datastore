@@ -65,7 +65,7 @@ public abstract class AbstractMapStringAnyProperty<K, V> extends StringProperty 
         }
     }
 
-    private Map<K, V> getMap() {
+    public Map<K, V> getMap() {
         if (cache == null) {
             cache = new HashMap<>();
             final String data = get();
