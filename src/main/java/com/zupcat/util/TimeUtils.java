@@ -142,6 +142,11 @@ public final class TimeUtils {
         return Integer.parseInt(simpleDateFormat.format(getCalendar().getTime()));
     }
 
+    public static long buildStandardModificationTimeForFirstTimeOfDay() {
+        final long _0s = 100000000000l;
+        return (buildStandardModificationTime() / _0s) * _0s;
+    }
+
     public static long buildStandardModificationTime() {
         return buildStandardModificationTime(getCalendar().getTime());
     }
