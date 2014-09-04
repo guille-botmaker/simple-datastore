@@ -24,6 +24,16 @@ public final class Resource implements Serializable {
     private byte[] rawValue;
 
 
+    public Resource() {
+        // nothing to do
+    }
+
+    public Resource(final Resource other) {
+        this.id = other.id;
+        this.type = other.type;
+        this.rawValue = other.rawValue;
+    }
+
     public String getType() {
         return type;
     }
