@@ -69,7 +69,7 @@ public abstract class DAO<P extends DatastoreEntity> implements Serializable, ID
         return entity;
     }
 
-    protected List<P> findByQuery(final Query.Filter filter) {
+    public List<P> findByQuery(final Query.Filter filter) {
         final Query query = new Query(getEntityName());
         query.setFilter(filter);
 
