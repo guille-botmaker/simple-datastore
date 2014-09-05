@@ -154,6 +154,10 @@ public class ObjectHolder extends SpecificRecordBase implements SpecificRecord, 
         objectsList.addAll(items);
     }
 
+    public void removeAllItems() {
+        objectsList.clear();
+    }
+
     private void checkIfObjectItemExistAndRemove(final ObjectVar itemToFind) {
         int indexToRemove = -1;
         final String targetId = itemToFind.getString(AvroSerializer.ID_KEY);
