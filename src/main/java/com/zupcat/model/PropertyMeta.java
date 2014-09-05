@@ -72,7 +72,11 @@ public abstract class PropertyMeta<E> implements Serializable {
     }
 
     public void set(final E value) {
-        if (auditable) {
+        this.set(value, auditable);
+    }
+
+    public void set(final E value, final boolean forceAudit) {
+        if (forceAudit) {
             AuditHandlerServiceFactory.getAuditHandler().logPropertyDataChanged(this, value, owner.getId());
         }
 
