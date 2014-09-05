@@ -5,6 +5,7 @@ import com.zupcat.model.ObjectVar;
 import com.zupcat.model.PropertyMeta;
 
 import java.io.Serializable;
+import java.nio.charset.Charset;
 
 public class ByteArrayProperty extends PropertyMeta<byte[]> implements Serializable {
 
@@ -18,10 +19,10 @@ public class ByteArrayProperty extends PropertyMeta<byte[]> implements Serializa
     protected byte[] getValueImpl(final ObjectVar objectVar) {
         final String result = objectVar.getString(name);
 
-        return result == null ? null : result.getBytes();
+        return result == null ? null : result.getBytes(Charset.forName("UTF-8"));
     }
 
     protected void setValueImpl(final byte[] value, final ObjectVar objectVar) {
-        objectVar.set(name, value == null ? null : new String(value));
+        objectVar.set(name, value == null ? null : new String(value, Charset.forName("UTF-8")));
     }
 }

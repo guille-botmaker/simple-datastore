@@ -5,6 +5,7 @@ import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.zupcat.service.SimpleDatastoreServiceFactory;
 
+import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,8 +13,9 @@ import java.util.logging.Logger;
  * This class is a wrapper for MemCache operations so different behaviors.
  * Also has the ability to log cache calls and stacktraces to find performance problems
  */
-public class MemCache {
+public class MemCache implements Serializable {
 
+    private static final long serialVersionUID = 471847964351314234L;
     private static final Logger logger = Logger.getLogger(MemCache.class.getName());
 
     private final int cacheTimeoutSecs;

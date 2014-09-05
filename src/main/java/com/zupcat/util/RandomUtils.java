@@ -17,7 +17,7 @@ public final class RandomUtils {
     private static final Object INIT_LOCK_OBJECT = new Object();
 
     private final SecureRandom random;
-    private Boolean randomBoolean;
+    //private Boolean randomBoolean;
 
 
     public static RandomUtils getInstance() {

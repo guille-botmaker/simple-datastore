@@ -74,7 +74,7 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
                     final Serializable propertyValue = (Serializable) entity.getProperty(propertyMeta.getPropertyName());
 
                     if (propertyValue != null && propertyValue.getClass().getName().equals(Long.class.getName()) && propertyMeta.getClass().getName().equals(IntegerProperty.class.getName())) {
-                        final Long longValue = (long) propertyValue;
+                        final Long longValue = (Long) propertyValue;
 
                         if (longValue > Integer.MAX_VALUE || longValue < Integer.MIN_VALUE) {
                             throw new RuntimeException("Trying to set long value to IntegerProperty. Value was [" + longValue + "], property was [" + propertyMeta.getPropertyName() + "]");

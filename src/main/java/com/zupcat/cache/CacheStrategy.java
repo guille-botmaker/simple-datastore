@@ -11,6 +11,8 @@ public enum CacheStrategy implements Serializable {
     APPLICATION_CACHE(new MemCache(60 * 60 * 24)), // a day
     SESSION_CACHE(new MemCache(60 * 15)); // 15 minutes
 
+    private static final long serialVersionUID = 471847964351314234L;
+
     private final MemCache strategy;
 
     private CacheStrategy(final MemCache strategy) {
