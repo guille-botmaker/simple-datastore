@@ -213,9 +213,21 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
         );
     }
 
+    public int getIntegerNullIsZero(final String varName) {
+        final Integer i = getInteger(varName);
+
+        return i == null ? 0 : i;
+    }
+
     public Integer getInteger(final String varName) {
         final Var var = getVar(varName);
         return var == null || var.getIv() == null ? null : var.getIv();
+    }
+
+    public boolean getBooleanNullIfFalse(final String varName) {
+        final Boolean b = getBoolean(varName);
+
+        return b == null ? false : b;
     }
 
     public Boolean getBoolean(final String varName) {
