@@ -70,6 +70,7 @@ public abstract class AbstractTest {
             sample.FIRSTNAME.set("First Name " + randomUtils.getRandomSafeString(10));
             sample.LASTNAME.set("LAST Name " + randomUtils.getRandomSafeString(10));
             sample.AGE.set(randomUtils.getIntBetweenInclusive(1, 100));
+            sample.BYTES.set(new byte[]{0x42, 0x55});
             sample.LONG_VALUE.set(randomUtils.getRandomLong());
             sample.IS_FAKE.set(randomUtils.getRandomBoolean());
 

@@ -2,6 +2,7 @@ package com.zupcat.sample;
 
 import com.zupcat.cache.CacheStrategy;
 import com.zupcat.model.DatastoreEntity;
+import com.zupcat.model.config.*;
 import com.zupcat.property.*;
 
 public class User extends DatastoreEntity {
@@ -9,6 +10,7 @@ public class User extends DatastoreEntity {
     public StringProperty FIRSTNAME;
     public StringProperty LASTNAME;
     public IntegerProperty AGE;
+    public ByteArrayProperty BYTES;
     public LongProperty LONG_VALUE;
     public BooleanProperty IS_FAKE;
 
@@ -34,25 +36,26 @@ public class User extends DatastoreEntity {
 
     @Override
     protected void config() {
-        FIRSTNAME = string();
-        LASTNAME = string(null, false, false, true);
+        FIRSTNAME = new STRING(this).build();
+        LASTNAME = new STRING(this).indexable().build();
 
-        AGE = integer();
-        LONG_VALUE = longInt();
-        IS_FAKE = bool();
+        AGE = new INT(this).build();
+        BYTES = new BYTE_ARRAY(this).build();
+        LONG_VALUE = new LONG(this).build();
+        IS_FAKE = new BOOL(this).build();
 
-        LIST_STRING = listString();
-        LIST_INT = listInteger();
-        LIST_LONG = listLong();
+        LIST_STRING = new LIST_STRING(this).build();
+        LIST_INT = new LIST_INTEGER(this).build();
+        LIST_LONG = new LIST_LONG(this).build();
 
-        MAP_STRING_STRING = mapStringString();
-        MAP_STRING_LONG = mapStringLong();
-        MAP_STRING_INTEGER = mapStringInteger();
-        MAP_INTEGER_INTEGER = mapIntegerInteger();
-        INT_PER_STRING = mapIntegerString();
-        MAP_STRING_MAP_STRING_STRING = mapStringMapStringString();
+        MAP_STRING_STRING = new MAP_STRING_STRING(this).build();
+        MAP_STRING_LONG = new MAP_STRING_LONG(this).build();
+        MAP_STRING_INTEGER = new MAP_STRING_INTEGER(this).build();
+        MAP_INTEGER_INTEGER = new MAP_INT_INT(this).build();
+        INT_PER_STRING = new MAP_INT_STRING(this).build();
+        MAP_STRING_MAP_STRING_STRING = new MAP_STRING_MAP_STRING_STRING(this).build();
 
-        ADDRESS = objectVarProperty(Address.class);
-        ADDRESSES = listObjectVarProperty(Address.class);
+        ADDRESS = new OBJECT_VAR<>(this, Address.class).build();
+        ADDRESSES = new LIST_OBJECT_VAR<>(this, Address.class).build();
     }
 }

@@ -3,6 +3,7 @@ package com.zupcat.model;
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
 import com.zupcat.dao.DAO;
+import com.zupcat.model.config.PropertyMeta;
 import com.zupcat.property.IntegerProperty;
 
 import java.io.Serializable;

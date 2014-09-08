@@ -3,7 +3,7 @@ package com.zupcat.property;
 import com.zupcat.model.DatastoreEntity;
 import com.zupcat.model.ObjectHolder;
 import com.zupcat.model.ObjectVar;
-import com.zupcat.model.PropertyMeta;
+import com.zupcat.model.config.PropertyMeta;
 
 import java.io.Serializable;
 
@@ -16,11 +16,7 @@ public final class ObjectVarProperty<OV extends ObjectVar> extends PropertyMeta<
 
 
     public ObjectVarProperty(final DatastoreEntity owner, final Class<OV> _objectClass) {
-        this(owner, _objectClass, false, false);
-    }
-
-    public ObjectVarProperty(final DatastoreEntity owner, final Class<OV> _objectClass, final boolean sentToClient, final boolean auditable) {
-        super(owner, null, sentToClient, auditable, false);
+        super(owner);
 
         owner.addPropertyMeta(name, this);
 
@@ -30,7 +26,7 @@ public final class ObjectVarProperty<OV extends ObjectVar> extends PropertyMeta<
     @Override
     public OV get() {
         if (cache == null) {
-            final ObjectVar container = owner.getInternalObjectHolder().getObjectVar();
+            final ObjectVar container = getOwner().getInternalObjectHolder().getObjectVar();
             final ObjectHolder objectHolder = container.getObjectHolder(name);
 
             if (objectHolder != null) {
@@ -49,7 +45,7 @@ public final class ObjectVarProperty<OV extends ObjectVar> extends PropertyMeta<
 
     public void set(final OV value) {
         if (value == null) {
-            final ObjectVar container = owner.getInternalObjectHolder().getObjectVar();
+            final ObjectVar container = getOwner().getInternalObjectHolder().getObjectVar();
 
             container.set(name, ((ObjectHolder) null));
             cache = null;
@@ -73,7 +69,7 @@ public final class ObjectVarProperty<OV extends ObjectVar> extends PropertyMeta<
         if (toPersistObjectVar == null) {
             set(null);
         } else {
-            final ObjectVar container = owner.getInternalObjectHolder().getObjectVar();
+            final ObjectVar container = getOwner().getInternalObjectHolder().getObjectVar();
 
             final ObjectHolder objectHolder = new ObjectHolder();
             objectHolder.getObjectVar().mergeWith(cache);

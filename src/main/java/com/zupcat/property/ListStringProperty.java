@@ -11,8 +11,8 @@ public final class ListStringProperty extends AbstractListAnyProperty<String> im
 
     private static final long serialVersionUID = 6181606486836703354L;
 
-    public ListStringProperty(final DatastoreEntity owner, final boolean sentToClient, final boolean auditable) {
-        super(owner, sentToClient, auditable);
+    public ListStringProperty(final DatastoreEntity owner) {
+        super(owner);
     }
 
     @Override

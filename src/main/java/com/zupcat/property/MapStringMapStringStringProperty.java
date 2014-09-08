@@ -14,8 +14,8 @@ public final class MapStringMapStringStringProperty extends AbstractMapStringAny
 
     private static final long serialVersionUID = 6181606486836703354L;
 
-    public MapStringMapStringStringProperty(final DatastoreEntity owner, final boolean sentToClient, final boolean auditable) {
-        super(owner, sentToClient, auditable);
+    public MapStringMapStringStringProperty(final DatastoreEntity owner) {
+        super(owner);
     }
 
     @Override

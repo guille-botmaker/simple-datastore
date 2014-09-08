@@ -1,6 +1,6 @@
 package com.zupcat.audit;
 
-import com.zupcat.model.PropertyMeta;
+import com.zupcat.model.config.PropertyMeta;
 
 /**
  * Callback called when an auditable object property is changed.

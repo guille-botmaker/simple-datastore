@@ -1,6 +1,8 @@
-package com.zupcat.model;
+package com.zupcat.model.config;
 
 import com.zupcat.audit.AuditHandlerServiceFactory;
+import com.zupcat.model.DatastoreEntity;
+import com.zupcat.model.ObjectVar;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -13,19 +15,16 @@ public abstract class PropertyMeta<E> implements Serializable {
     private static final long serialVersionUID = 6181606486836703354L;
 
     protected String name;
-    protected final DatastoreEntity owner;
-    private final E initialValue;
-    private final boolean sentToClient;
-    private final boolean auditable;
-    private final boolean indexable;
+    protected AbstractPropertyBuilder<? extends PropertyMeta<E>, E> options;
+    private final DatastoreEntity owner;
 
 
-    protected PropertyMeta(final DatastoreEntity owner, final E initialValue, final boolean sentToClient, final boolean auditable, final boolean indexable) {
+    protected PropertyMeta(final DatastoreEntity owner) {
         this.owner = owner;
-        this.initialValue = initialValue;
-        this.sentToClient = sentToClient;
-        this.auditable = auditable;
-        this.indexable = indexable;
+    }
+
+    public void config(final AbstractPropertyBuilder<? extends PropertyMeta<E>, E> options) {
+        this.options = options;
     }
 
     public String getPropertyName() {
@@ -36,32 +35,36 @@ public abstract class PropertyMeta<E> implements Serializable {
         this.name = propertyName;
     }
 
+    protected DatastoreEntity getOwner() {
+        return owner;
+    }
+
     public boolean isFullyEquals(final PropertyMeta other) {
         // skipping owner comparisson. It is not needed and causes stackoverflow
         return !(other == null ||
                 !Objects.equals(this.name, other.name) ||
-                !Objects.equals(this.initialValue, other.initialValue) ||
-                this.sentToClient != other.sentToClient ||
-                this.auditable != other.auditable ||
-                this.indexable != other.indexable);
+                !Objects.equals(options.initialValue, other.options.initialValue) ||
+                options.sendToClient != other.options.sendToClient ||
+                options.auditable != other.options.auditable ||
+                options.indexable != other.options.indexable);
     }
 
     public boolean isIndexable() {
-        return indexable;
+        return options.indexable;
     }
 
-    public E getInitialValue() {
-        return initialValue;
-    }
+//    public E getInitialValue() {
+//        return initialValue;
+//    }
 
-    protected boolean hasToSendToClient() {
-        return sentToClient;
+    public boolean hasToSendToClient() {
+        return options.sendToClient;
     }
 
     public E get() {
         final E result = getValueImpl(owner.getInternalObjectHolder().getObjectVar());
 
-        return result == null ? initialValue : result;
+        return result == null ? options.initialValue : result;
     }
 
     /**
@@ -72,7 +75,7 @@ public abstract class PropertyMeta<E> implements Serializable {
     }
 
     public void set(final E value) {
-        this.set(value, auditable);
+        this.set(value, options.auditable);
     }
 
     public void set(final E value, final boolean forceAudit) {
@@ -82,7 +85,7 @@ public abstract class PropertyMeta<E> implements Serializable {
 
         final ObjectVar objectVar = owner.getInternalObjectHolder().getObjectVar();
 
-        if (value == null || value.equals(initialValue)) {
+        if (value == null || value.equals(options.initialValue)) {
             objectVar.removeVar(name);
         } else {
             setValueImpl(value, objectVar);

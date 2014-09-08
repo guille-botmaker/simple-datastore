@@ -3,7 +3,7 @@ package com.zupcat.property;
 import com.zupcat.model.DatastoreEntity;
 import com.zupcat.model.ObjectHolder;
 import com.zupcat.model.ObjectVar;
-import com.zupcat.model.PropertyMeta;
+import com.zupcat.model.config.PropertyMeta;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,11 +18,7 @@ public final class ListObjectVarProperty<OV extends ObjectVar> extends PropertyM
 
 
     public ListObjectVarProperty(final DatastoreEntity owner, final Class<OV> _objectClass) {
-        this(owner, _objectClass, false, false);
-    }
-
-    public ListObjectVarProperty(final DatastoreEntity owner, final Class<OV> _objectClass, final boolean sentToClient, final boolean auditable) {
-        super(owner, null, sentToClient, auditable, false);
+        super(owner);
 
         objectClass = _objectClass;
 
@@ -34,7 +30,7 @@ public final class ListObjectVarProperty<OV extends ObjectVar> extends PropertyM
         if (cache == null) {
             cache = new ArrayList<>();
 
-            final ObjectVar container = owner.getInternalObjectHolder().getObjectVar();
+            final ObjectVar container = getOwner().getInternalObjectHolder().getObjectVar();
             final ObjectHolder objectHolder = container.getObjectHolder(name);
 
             if (objectHolder != null) {
@@ -55,7 +51,7 @@ public final class ListObjectVarProperty<OV extends ObjectVar> extends PropertyM
 
     public void set(final List<OV> value) {
         if (value == null || value.isEmpty()) {
-            final ObjectVar container = owner.getInternalObjectHolder().getObjectVar();
+            final ObjectVar container = getOwner().getInternalObjectHolder().getObjectVar();
             container.set(name, ((ObjectHolder) null));
 
             if (cache != null) {
@@ -79,7 +75,7 @@ public final class ListObjectVarProperty<OV extends ObjectVar> extends PropertyM
         if (list == null || list.isEmpty()) {
             set(null);
         } else {
-            final ObjectVar container = owner.getInternalObjectHolder().getObjectVar();
+            final ObjectVar container = getOwner().getInternalObjectHolder().getObjectVar();
 
             final ObjectHolder objectHolder = new ObjectHolder();
 

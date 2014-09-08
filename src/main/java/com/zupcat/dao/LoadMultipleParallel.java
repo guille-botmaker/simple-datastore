@@ -3,7 +3,7 @@ package com.zupcat.dao;
 import com.google.appengine.api.ThreadManager;
 import com.google.appengine.api.datastore.Query;
 import com.zupcat.model.DatastoreEntity;
-import com.zupcat.model.PropertyMeta;
+import com.zupcat.model.config.PropertyMeta;
 import com.zupcat.util.CommonsParallel;
 
 import java.util.*;

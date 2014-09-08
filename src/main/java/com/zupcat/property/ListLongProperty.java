@@ -11,8 +11,8 @@ public final class ListLongProperty extends AbstractListAnyProperty<Long> implem
 
     private static final long serialVersionUID = 6181606486836703354L;
 
-    public ListLongProperty(final DatastoreEntity owner, final boolean sentToClient, final boolean auditable) {
-        super(owner, sentToClient, auditable);
+    public ListLongProperty(final DatastoreEntity owner) {
+        super(owner);
     }
 
     @Override
