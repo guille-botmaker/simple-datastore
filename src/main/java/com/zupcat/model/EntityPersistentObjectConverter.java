@@ -5,7 +5,11 @@ import com.google.appengine.api.datastore.Entity;
 import com.zupcat.dao.DAO;
 import com.zupcat.model.config.PropertyMeta;
 import com.zupcat.property.IntegerProperty;
+import com.zupcat.service.SimpleDatastoreServiceFactory;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
@@ -34,6 +38,38 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
             }
         }
         return _instance;
+    }
+
+    public void convertPersistentObjectToStream(final P persistentObject, final ObjectOutputStream outputStream) {
+        try {
+            outputStream.writeUTF(persistentObject.getEntityName());
+            outputStream.writeUTF(persistentObject.getId());
+            objectHolderSerializer.serializeTo(persistentObject.getObjectHolder(), ObjectHolder.class, true, outputStream);
+
+        } catch (final IOException _ioException) {
+            throw new RuntimeException("Problems converting PO to outputStream for object [" + persistentObject + "]: " + _ioException.getMessage(), _ioException);
+        }
+    }
+
+    public P getPersistentObjectFromStream(final ObjectInputStream inputStream) {
+        try {
+            final String entityName = inputStream.readUTF();
+            final String id = inputStream.readUTF();
+
+            final ObjectHolder objectHolder = objectHolderSerializer.deserialize(inputStream, ObjectHolder.class, true);
+
+            final DAO dao = SimpleDatastoreServiceFactory.getSimpleDatastoreService().getDAO(entityName);
+
+            final P result = (P) dao.buildPersistentObjectInstance();
+            result.setId(id);
+
+            result.getInternalObjectHolder().mergeWith(objectHolder);
+
+            return result;
+
+        } catch (final IOException _ioException) {
+            throw new RuntimeException("Problems converting stream to PO: " + _ioException.getMessage(), _ioException);
+        }
     }
 
     public Entity buildEntityFromPersistentObject(final P persistentObject, final DAO<P> dao) {

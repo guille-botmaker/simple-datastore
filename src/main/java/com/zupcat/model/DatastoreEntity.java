@@ -62,6 +62,15 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         setModified();
     }
 
+    public boolean shouldBeSentToClient() {
+        for (final PropertyMeta propertyMeta : propertiesMetadata.values()) {
+            if (propertyMeta.hasToSendToClient()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void setModified() {
         LAST_MODIFICATION.set(TimeUtils.buildStandardModificationTime());
