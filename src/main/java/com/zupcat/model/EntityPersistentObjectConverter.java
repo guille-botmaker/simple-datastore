@@ -75,20 +75,24 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
     public Entity buildEntityFromPersistentObject(final P persistentObject, final DAO<P> dao) {
         final Entity anEntity = new Entity(dao.getEntityName(), persistentObject.getId());
 
+        return buildEntityFromPersistentObject(anEntity, persistentObject);
+    }
+
+    public Entity buildEntityFromPersistentObject(final Entity entity, final P persistentObject) {
         final byte[] binaryData = objectHolderSerializer.serialize(persistentObject.getObjectHolder(), ObjectHolder.class, true);
 
         if (binaryData.length > 1000000) {
             throw new RuntimeException("BinaryData length for object [" + persistentObject + "] is bigger than permitted: " + binaryData.length);
         }
 
-        anEntity.setUnindexedProperty(DATA_CONTAINER_PROPERTY, new Blob(binaryData));
+        entity.setUnindexedProperty(DATA_CONTAINER_PROPERTY, new Blob(binaryData));
 
         for (final PropertyMeta propertyMeta : persistentObject.getPropertiesMetadata().values()) {
             if (propertyMeta.isIndexable()) {
-                anEntity.setProperty(propertyMeta.getPropertyName(), propertyMeta.get());
+                entity.setProperty(propertyMeta.getPropertyName(), propertyMeta.get());
             }
         }
-        return anEntity;
+        return entity;
     }
 
     public P buildPersistentObjectFromEntity(final Entity entity, final DAO<P> dao) {
