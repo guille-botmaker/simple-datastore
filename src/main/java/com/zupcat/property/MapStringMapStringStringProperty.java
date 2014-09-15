@@ -21,7 +21,7 @@ public final class MapStringMapStringStringProperty extends AbstractMapStringAny
     @Override
     protected void writeKeyValue(final Encoder encoder, final Entry<String, Map<String, String>> entry) throws IOException {
         // Key
-        encoder.writeString(entry.getKey());
+        writeSafeString(encoder, entry.getKey());
 
         // Value
         final Map<String, String> itemsMap = entry.getValue();
@@ -32,8 +32,8 @@ public final class MapStringMapStringStringProperty extends AbstractMapStringAny
 
             for (final Entry<String, String> itemEntry : itemsMap.entrySet()) {
                 encoder.startItem();
-                encoder.writeString(itemEntry.getKey());
-                encoder.writeString(itemEntry.getValue());
+                writeSafeString(encoder, itemEntry.getKey());
+                writeSafeString(encoder, itemEntry.getValue());
             }
 
             encoder.writeMapEnd();
@@ -44,12 +44,12 @@ public final class MapStringMapStringStringProperty extends AbstractMapStringAny
     protected Entry<String, Map<String, String>> readKeyValue(final Decoder decoder) throws IOException {
         final Map<String, String> items = new HashMap<>();
 
-        final Entry<String, Map<String, String>> result = new AbstractMap.SimpleEntry<>(decoder.readString(), items);
+        final Entry<String, Map<String, String>> result = new AbstractMap.SimpleEntry<>(readSafeString(decoder), items);
 
         for (long i = decoder.readMapStart(); i != 0; i = decoder.mapNext()) {
             for (long j = 0; j < i; j++) {
-                final String key = decoder.readString();
-                items.put(key, decoder.readString());
+                final String key = readSafeString(decoder);
+                items.put(key, readSafeString(decoder));
             }
         }
         return result;

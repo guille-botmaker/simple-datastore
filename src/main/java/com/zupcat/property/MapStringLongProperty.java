@@ -18,13 +18,13 @@ public final class MapStringLongProperty extends AbstractMapStringAnyProperty<St
 
     @Override
     protected void writeKeyValue(final Encoder encoder, final Entry<String, Long> entry) throws IOException {
-        encoder.writeString(entry.getKey());
-        encoder.writeLong(entry.getValue());
+        writeSafeString(encoder, entry.getKey());
+        writeSafeLong(encoder, entry.getValue());
     }
 
     @Override
     protected Entry<String, Long> readKeyValue(final Decoder decoder) throws IOException {
-        final String key = decoder.readString();
-        return new AbstractMap.SimpleEntry<>(key, decoder.readLong());
+        final String key = readSafeString(decoder);
+        return new AbstractMap.SimpleEntry<>(key, readSafeLong(decoder));
     }
 }

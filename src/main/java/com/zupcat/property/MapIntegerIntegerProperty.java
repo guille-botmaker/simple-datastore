@@ -18,13 +18,13 @@ public final class MapIntegerIntegerProperty extends AbstractMapStringAnyPropert
 
     @Override
     protected void writeKeyValue(final Encoder encoder, final Entry<Integer, Integer> entry) throws IOException {
-        encoder.writeInt(entry.getKey());
-        encoder.writeInt(entry.getValue());
+        writeSafeInteger(encoder, entry.getKey());
+        writeSafeInteger(encoder, entry.getValue());
     }
 
     @Override
     protected Entry<Integer, Integer> readKeyValue(final Decoder decoder) throws IOException {
-        final Integer key = decoder.readInt();
-        return new AbstractMap.SimpleEntry<>(key, decoder.readInt());
+        final Integer key = readSafeInteger(decoder);
+        return new AbstractMap.SimpleEntry<>(key, readSafeInteger(decoder));
     }
 }

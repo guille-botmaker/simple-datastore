@@ -17,11 +17,11 @@ public final class ListLongProperty extends AbstractListAnyProperty<Long> implem
 
     @Override
     protected void writeItem(final Encoder encoder, final Long item) throws IOException {
-        encoder.writeLong(item);
+        writeSafeLong(encoder, item);
     }
 
     @Override
     protected Long readItem(final Decoder decoder) throws IOException {
-        return decoder.readLong();
+        return readSafeLong(decoder);
     }
 }

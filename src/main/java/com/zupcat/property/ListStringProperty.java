@@ -17,11 +17,11 @@ public final class ListStringProperty extends AbstractListAnyProperty<String> im
 
     @Override
     protected void writeItem(final Encoder encoder, final String item) throws IOException {
-        encoder.writeString(item);
+        writeSafeString(encoder, item);
     }
 
     @Override
     protected String readItem(final Decoder decoder) throws IOException {
-        return decoder.readString();
+        return readSafeString(decoder);
     }
 }
