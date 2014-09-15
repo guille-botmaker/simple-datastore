@@ -9,6 +9,6 @@ public final class BYTE_ARRAY extends AbstractPropertyBuilder<ByteArrayProperty,
 
 
     public BYTE_ARRAY(final DatastoreEntity owner) {
-        super(new ByteArrayProperty(owner));
+        super(new ByteArrayProperty(owner), null);
     }
 }

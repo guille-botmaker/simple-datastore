@@ -9,6 +9,6 @@ public final class LIST_STRING extends AbstractPropertyBuilder<ListStringPropert
 
 
     public LIST_STRING(final DatastoreEntity owner) {
-        super(new ListStringProperty(owner));
+        super(new ListStringProperty(owner), null);
     }
 }

@@ -9,6 +9,6 @@ public final class BOOL extends AbstractPropertyBuilder<BooleanProperty, Boolean
 
 
     public BOOL(final DatastoreEntity owner) {
-        super(new BooleanProperty(owner));
+        super(new BooleanProperty(owner), false);
     }
 }

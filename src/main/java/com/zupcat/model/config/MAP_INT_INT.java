@@ -9,6 +9,6 @@ public final class MAP_INT_INT extends AbstractPropertyBuilder<MapIntegerInteger
 
 
     public MAP_INT_INT(final DatastoreEntity owner) {
-        super(new MapIntegerIntegerProperty(owner));
+        super(new MapIntegerIntegerProperty(owner), null);
     }
 }

@@ -9,6 +9,6 @@ public final class LONG extends AbstractPropertyBuilder<LongProperty, Long> {
 
 
     public LONG(final DatastoreEntity owner) {
-        super(new LongProperty(owner));
+        super(new LongProperty(owner), 0l);
     }
 }

@@ -10,6 +10,6 @@ public final class OBJECT_VAR<OV extends ObjectVar> extends AbstractPropertyBuil
 
 
     public OBJECT_VAR(final DatastoreEntity owner, final Class<OV> _objectClass) {
-        super(new ObjectVarProperty<>(owner, _objectClass));
+        super(new ObjectVarProperty<>(owner, _objectClass), null);
     }
 }

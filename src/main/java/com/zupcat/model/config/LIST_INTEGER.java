@@ -9,6 +9,6 @@ public final class LIST_INTEGER extends AbstractPropertyBuilder<ListIntegerPrope
 
 
     public LIST_INTEGER(final DatastoreEntity owner) {
-        super(new ListIntegerProperty(owner));
+        super(new ListIntegerProperty(owner), null);
     }
 }

@@ -9,6 +9,6 @@ public final class MAP_STRING_MAP_STRING_STRING extends AbstractPropertyBuilder<
 
 
     public MAP_STRING_MAP_STRING_STRING(final DatastoreEntity owner) {
-        super(new MapStringMapStringStringProperty(owner));
+        super(new MapStringMapStringStringProperty(owner), null);
     }
 }

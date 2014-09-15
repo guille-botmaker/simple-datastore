@@ -9,6 +9,6 @@ public final class INT extends AbstractPropertyBuilder<IntegerProperty, Integer>
 
 
     public INT(final DatastoreEntity owner) {
-        super(new IntegerProperty(owner));
+        super(new IntegerProperty(owner), 0);
     }
 }

@@ -10,6 +10,6 @@ public final class LIST_OBJECT_VAR<OV extends ObjectVar> extends AbstractPropert
 
 
     public LIST_OBJECT_VAR(final DatastoreEntity owner, final Class<OV> _objectClass) {
-        super(new ListObjectVarProperty<>(owner, _objectClass));
+        super(new ListObjectVarProperty<>(owner, _objectClass), null);
     }
 }

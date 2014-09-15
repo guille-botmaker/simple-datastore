@@ -15,8 +15,9 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     private final P propertyMeta;
 
 
-    protected AbstractPropertyBuilder(final P propertyMeta) {
+    protected AbstractPropertyBuilder(final P propertyMeta, final T initialValue) {
         this.propertyMeta = propertyMeta;
+        this.initialValue = initialValue;
     }
 
     public P build() {

@@ -9,6 +9,6 @@ public final class LIST_LONG extends AbstractPropertyBuilder<ListLongProperty, L
 
 
     public LIST_LONG(final DatastoreEntity owner) {
-        super(new ListLongProperty(owner));
+        super(new ListLongProperty(owner), null);
     }
 }

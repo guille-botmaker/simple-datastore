@@ -12,6 +12,6 @@ public final class MAP_STRING_OBJECT_VAR<OV extends WithIdObjectVar> extends Abs
 
 
     public MAP_STRING_OBJECT_VAR(final DatastoreEntity owner, final Class<OV> _objectClass) {
-        super(new MapStringObjectVarProperty<>(owner, _objectClass));
+        super(new MapStringObjectVarProperty<>(owner, _objectClass), null);
     }
 }

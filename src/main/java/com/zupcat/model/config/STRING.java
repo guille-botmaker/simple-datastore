@@ -8,6 +8,6 @@ public final class STRING extends AbstractPropertyBuilder<StringProperty, String
 
 
     public STRING(final DatastoreEntity owner) {
-        super(new StringProperty(owner));
+        super(new StringProperty(owner), null);
     }
 }
