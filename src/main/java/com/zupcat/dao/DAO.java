@@ -312,6 +312,10 @@ public abstract class DAO<P extends DatastoreEntity> implements Serializable, ID
         return entityPersistentObjectConverter.buildEntityFromPersistentObject(persistentObject, this);
     }
 
+    public Entity buildEntityFromPersistentObject(final Entity entity, final P persistentObject) {
+        return entityPersistentObjectConverter.buildEntityFromPersistentObject(entity, persistentObject);
+    }
+
     public P buildPersistentObjectFromEntity(final Entity entity) {
         return entityPersistentObjectConverter.buildPersistentObjectFromEntity(entity, this);
     }
