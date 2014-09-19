@@ -7,7 +7,6 @@ import org.apache.avro.specific.AvroGenerated;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.avro.specific.SpecificRecordBuilderBase;
-import org.apache.avro.util.Utf8;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.Serializable;
