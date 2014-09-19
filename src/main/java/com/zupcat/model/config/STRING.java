@@ -1,6 +1,7 @@
 package com.zupcat.model.config;
 
 import com.zupcat.model.DatastoreEntity;
+import com.zupcat.property.StringProperty;
 
 public final class STRING extends AbstractPropertyBuilder<StringProperty, String> {
 

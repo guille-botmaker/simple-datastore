@@ -1,7 +1,8 @@
-package com.zupcat.model.config;
+package com.zupcat.property;
 
 import com.zupcat.model.DatastoreEntity;
 import com.zupcat.model.ObjectVar;
+import com.zupcat.model.config.PropertyMeta;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.Encoder;
 
@@ -24,7 +25,7 @@ public class StringProperty extends PropertyMeta<String> implements Serializable
     }
 
     protected void setValueImpl(final String value, final ObjectVar objectVar) {
-        objectVar.set(name, (value == null ? null : (options.toLowerCase ? value.toLowerCase() : value)));
+        objectVar.set(name, (value == null ? null : (options.isToLowerCase() ? value.toLowerCase() : value)));
     }
 
     public boolean hasData() {

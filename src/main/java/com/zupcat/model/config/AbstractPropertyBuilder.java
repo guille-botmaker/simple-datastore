@@ -10,6 +10,7 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     protected boolean sendToClient;
     protected boolean auditable;
     protected boolean toLowerCase;
+    protected boolean mandatory;
     protected T initialValue;
 
     private final P propertyMeta;
@@ -44,6 +45,12 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
         return this;
     }
 
+    public AbstractPropertyBuilder<P, T> mandatory() {
+        this.mandatory = true;
+
+        return this;
+    }
+
     public AbstractPropertyBuilder<P, T> auditable() {
         this.auditable = true;
 
@@ -54,5 +61,9 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
         this.toLowerCase = true;
 
         return this;
+    }
+
+    public boolean isToLowerCase() {
+        return toLowerCase;
     }
 }
