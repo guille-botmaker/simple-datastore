@@ -3,6 +3,7 @@ package com.zupcat.model.config;
 import com.zupcat.audit.AuditHandlerServiceFactory;
 import com.zupcat.model.DatastoreEntity;
 import com.zupcat.model.ObjectVar;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -102,7 +103,7 @@ public abstract class PropertyMeta<E> implements Serializable {
 
         builder.
                 append("[").
-                append(getClass().getName()).
+                append(StringUtils.replace(getClass().getName(), "com.zupcat.property.", "")).
                 append("|").
                 append(name).
                 append("->").
