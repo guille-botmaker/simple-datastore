@@ -95,4 +95,20 @@ public abstract class PropertyMeta<E> implements Serializable {
     protected abstract E getValueImpl(final ObjectVar objectVar);
 
     protected abstract void setValueImpl(final E value, final ObjectVar objectVar);
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(100);
+
+        builder.
+                append("[").
+                append(getClass().getName()).
+                append("|").
+                append(name).
+                append("->").
+                append(get()).
+                append("]");
+
+        return builder.toString();
+    }
 }
