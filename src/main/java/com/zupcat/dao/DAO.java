@@ -32,7 +32,7 @@ public abstract class DAO<P extends DatastoreEntity> implements Serializable, ID
     private final EntityPersistentObjectConverter<P> entityPersistentObjectConverter;
 
 
-    protected DAO(final Class<P> _beanClass) {
+    protected DAO(final Class<? extends P> _beanClass) {
         try {
             sample = _beanClass.newInstance();
         } catch (final Exception _exception) {
