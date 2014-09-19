@@ -198,7 +198,7 @@ public class ObjectHolder extends SpecificRecordBase implements SpecificRecord, 
     }
 
     public String toString(final StringBuilder builder) {
-        builder.append("ObjectHolder {");
+        builder.append("OH {");
         objectVar.toString(builder);
 
         if (!objectsList.isEmpty()) {

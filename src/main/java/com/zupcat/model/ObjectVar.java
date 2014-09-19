@@ -264,7 +264,7 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
     }
 
     public String toString(final StringBuilder builder) {
-        builder.append("ObjectVar{");
+        builder.append("OV{");
         boolean empty = true;
 
         for (final Map.Entry<String, Var> entry : vars.entrySet()) {

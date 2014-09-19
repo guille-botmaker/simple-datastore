@@ -182,19 +182,62 @@ public final class Var extends SpecificRecordBase implements SpecificRecord, Ser
     @Override
     public String toString() {
         if (iv != null) {
-            return "Var.Integer[" + iv + "]";
+            return "int[" + iv + "]";
         }
         if (sv != null) {
-            return "Var.String[" + getSv() + "]";
+            return "string[" + (isBinaryStringChar(getSv()) ? "*seems binary*" : getSv()) + "]";
         }
         if (bv != null) {
-            return "Var.Boolean[" + bv + "]";
+            return "bool[" + bv + "]";
         }
         if (lv != null) {
-            return "Var.Long[" + lv + "]";
+            return "long[" + lv + "]";
         } else {
-            return "Var.UnknownType[null]";
+            return "unknownType[null]";
         }
+    }
+
+    private boolean isBinaryStringChar(final String s) {
+        if (s == null) {
+            return false;
+        }
+
+        final char[] chars = s.toCharArray();
+
+        for (int i = 0; i < Math.min(s.length(), 30); i++) {
+            if (isBinaryStringChar(chars[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isBinaryStringChar(final char ch) {
+        if (ch >= 'a' && ch <= 'z')
+            return true;
+        if (ch >= 'A' && ch <= 'Z')
+            return true;
+        if (ch >= '0' && ch <= '9')
+            return true;
+        switch (ch) {
+            case '/':
+            case '-':
+            case ':':
+            case '.':
+            case ',':
+            case '_':
+            case '$':
+            case '%':
+            case '\'':
+            case '(':
+            case ')':
+            case '[':
+            case ']':
+            case '<':
+            case '>':
+                return true;
+        }
+        return false;
     }
 
     /**
