@@ -27,7 +27,7 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
 
     public static final Schema SCHEMA$ = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ObjectVar\",\"namespace\":\"com.zupcat.model\",\"fields\":[{\"name\":\"vars\",\"type\":[\"null\",{\"type\":\"map\",\"values\":{\"type\":\"record\",\"name\":\"Var\",\"fields\":[{\"name\":\"iv\",\"type\":[\"null\",\"int\"],\"default\":null},{\"name\":\"sv\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"bv\",\"type\":[\"null\",\"boolean\"],\"default\":null},{\"name\":\"lv\",\"type\":[\"null\",\"long\"],\"default\":null}]}}],\"default\":null}]}");
 
-    private final Map<CharSequence, Var> vars = new HashMap<>();
+    private final Map<String, Var> vars = new HashMap<>();
 
     /**
      * Default constructor.
@@ -45,7 +45,7 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
             return false;
         }
 
-        for (final Map.Entry<CharSequence, Var> entry : this.vars.entrySet()) {
+        for (final Map.Entry<String, Var> entry : this.vars.entrySet()) {
             if (!entry.getValue().isFullyEquals(other.vars.get(entry.getKey()))) {
                 return false;
             }
@@ -75,7 +75,7 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
     /**
      * All-args constructor.
      */
-    public ObjectVar(final Map<CharSequence, Var> varsMap) {
+    public ObjectVar(final Map<String, Var> varsMap) {
         this.vars.putAll(varsMap);
     }
 
@@ -98,7 +98,18 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
     public void put(final int field$, final Object value$) {
         switch (field$) {
             case 0:
-                setVars((Map<CharSequence, Var>) value$);
+                final Map<CharSequence, Var> v = (Map<CharSequence, Var>) value$;
+                if (v == null) {
+                    setVars(null);
+                } else {
+                    final Map<String, Var> vmap = new HashMap<>(v.size());
+
+                    for (final Map.Entry<CharSequence, Var> entry : v.entrySet()) {
+                        vmap.put(entry.getKey().toString(), entry.getValue());
+                    }
+                    setVars(vmap);
+                }
+
                 break;
             default:
                 throw new org.apache.avro.AvroRuntimeException("Bad index");
@@ -108,7 +119,7 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
     /**
      * Gets the value of the 'vars' field.
      */
-    public Map<CharSequence, Var> getVars() {
+    public Map<String, Var> getVars() {
         return vars;
     }
 
@@ -117,7 +128,7 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
      *
      * @param value the value to set.
      */
-    public void setVars(final Map<CharSequence, Var> value) {
+    public void setVars(final Map<String, Var> value) {
         this.vars.clear();
         this.vars.putAll(value);
     }
@@ -145,7 +156,7 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
 
     public void mergeWith(final ObjectVar other) {
         if (!other.vars.isEmpty()) {
-            for (final Map.Entry<CharSequence, Var> otherEntry : other.vars.entrySet()) {
+            for (final Map.Entry<String, Var> otherEntry : other.vars.entrySet()) {
                 this.vars.put(otherEntry.getKey(), otherEntry.getValue());
             }
         }
@@ -186,11 +197,11 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
     }
 
     private void set(final String key, final Var var) {
-        vars.put(new Utf8(key), var);
+        vars.put(key, var);
     }
 
     public void removeVar(final String varName) {
-        vars.remove(new Utf8(varName));
+        vars.remove(varName);
     }
 
     public String getString(final String varName) {
@@ -244,7 +255,7 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
     }
 
     private Var getVar(final String varName) {
-        return vars.get(new Utf8(varName));
+        return vars.get(varName);
     }
 
     @Override
@@ -256,7 +267,7 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
         builder.append("ObjectVar{");
         boolean empty = true;
 
-        for (final Map.Entry<CharSequence, Var> entry : vars.entrySet()) {
+        for (final Map.Entry<String, Var> entry : vars.entrySet()) {
             builder.append(entry.getKey()).append("->").append(entry.getValue()).append("|");
             empty = false;
         }
@@ -274,7 +285,7 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
 
         private static final long serialVersionUID = 471847964351314234L;
 
-        private Map<java.lang.CharSequence, Var> varsMap;
+        private Map<String, Var> varsMap;
 
         /**
          * Creates a new Builder
@@ -305,7 +316,7 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
         /**
          * Gets the value of the 'vars' field
          */
-        public Map<CharSequence, Var> getVarsMap() {
+        public Map<String, Var> getVarsMap() {
             if (varsMap == null) {
                 varsMap = new HashMap<>();
             }
@@ -315,7 +326,7 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
         /**
          * Sets the value of the 'vars' field
          */
-        public ObjectVar.Builder setVarsMap(final Map<CharSequence, Var> value) {
+        public ObjectVar.Builder setVarsMap(final Map<String, Var> value) {
             validate(fields()[0], value);
 
             this.varsMap = value;
@@ -345,7 +356,15 @@ public class ObjectVar extends SpecificRecordBase implements SpecificRecord, Ser
             try {
                 final ObjectVar record = new ObjectVar();
                 record.vars.clear();
-                record.vars.putAll(fieldSetFlags()[0] ? this.varsMap : (Map<CharSequence, Var>) defaultValue(fields()[0]));
+                final Map<CharSequence, Var> tmap = (Map<CharSequence, Var>) defaultValue(fields()[0]);
+
+                final Map<String, Var> ttmap = new HashMap<>(tmap.size());
+
+                for (final Map.Entry<CharSequence, Var> entry : tmap.entrySet()) {
+                    ttmap.put(entry.getKey().toString(), entry.getValue());
+                }
+                record.vars.putAll(fieldSetFlags()[0] ? this.varsMap : ttmap);
+
                 return record;
             } catch (final Exception e) {
                 throw new AvroRuntimeException(e);

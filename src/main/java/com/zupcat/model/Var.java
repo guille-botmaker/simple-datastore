@@ -21,7 +21,7 @@ public final class Var extends SpecificRecordBase implements SpecificRecord, Ser
     public static final Schema SCHEMA$ = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Var\",\"namespace\":\"com.zupcat.model\",\"fields\":[{\"name\":\"iv\",\"type\":[\"null\",\"int\"],\"default\":null},{\"name\":\"sv\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"bv\",\"type\":[\"null\",\"boolean\"],\"default\":null},{\"name\":\"lv\",\"type\":[\"null\",\"long\"],\"default\":null}]}");
 
     private Integer iv;
-    private CharSequence sv;
+    private String sv;
     private Boolean bv;
     private Long lv;
 
@@ -37,7 +37,7 @@ public final class Var extends SpecificRecordBase implements SpecificRecord, Ser
      */
     public Var(final Integer integerVar, final CharSequence stringVar, final Boolean booleanVar, final Long longVar) {
         this.iv = integerVar;
-        this.sv = stringVar;
+        this.sv = stringVar == null ? null : stringVar.toString();
         this.bv = booleanVar;
         this.lv = longVar;
     }
@@ -70,7 +70,8 @@ public final class Var extends SpecificRecordBase implements SpecificRecord, Ser
                 iv = (Integer) value$;
                 break;
             case 1:
-                sv = (CharSequence) value$;
+                final CharSequence v = (CharSequence) value$;
+                sv = v == null ? null : v.toString();
                 break;
             case 2:
                 bv = (Boolean) value$;
@@ -111,8 +112,8 @@ public final class Var extends SpecificRecordBase implements SpecificRecord, Ser
     /**
      * Gets the value of the 'sv' field.
      */
-    public CharSequence getSv() {
-        return sv == null ? null : sv.toString();
+    public String getSv() {
+        return sv == null ? null : sv;
     }
 
     /**
@@ -120,7 +121,7 @@ public final class Var extends SpecificRecordBase implements SpecificRecord, Ser
      *
      * @param value the value to set.
      */
-    public void setSv(final CharSequence value) {
+    public void setSv(final String value) {
         this.sv = value;
     }
 
@@ -204,7 +205,7 @@ public final class Var extends SpecificRecordBase implements SpecificRecord, Ser
         private static final long serialVersionUID = 471847964351314234L;
 
         private Integer integerVar;
-        private CharSequence stringVar;
+        private String stringVar;
         private Boolean booleanVar;
         private Long longVar;
 
@@ -233,7 +234,8 @@ public final class Var extends SpecificRecordBase implements SpecificRecord, Ser
                 fieldSetFlags()[0] = true;
             }
             if (isValidValue(fields()[1], other.sv)) {
-                this.stringVar = data().deepCopy(fields()[1].schema(), other.sv);
+                final CharSequence charSequence = data().deepCopy(fields()[1].schema(), other.sv);
+                this.stringVar = charSequence == null ? null : charSequence.toString();
                 fieldSetFlags()[1] = true;
             }
             if (isValidValue(fields()[2], other.bv)) {
@@ -282,16 +284,16 @@ public final class Var extends SpecificRecordBase implements SpecificRecord, Ser
         /**
          * Gets the value of the 'sv' field
          */
-        public CharSequence getStringVar() {
+        public String getStringVar() {
             return stringVar;
         }
 
         /**
          * Sets the value of the 'sv' field
          */
-        public Builder setStringVar(final CharSequence value) {
+        public Builder setStringVar(final String value) {
             validate(fields()[1], value);
-            this.stringVar = value;
+            this.stringVar = value == null ? null : value;
             fieldSetFlags()[1] = true;
             return this;
         }
@@ -383,7 +385,8 @@ public final class Var extends SpecificRecordBase implements SpecificRecord, Ser
             try {
                 final Var record = new Var();
                 record.iv = fieldSetFlags()[0] ? this.integerVar : (Integer) defaultValue(fields()[0]);
-                record.sv = fieldSetFlags()[1] ? this.stringVar : (CharSequence) defaultValue(fields()[1]);
+                final CharSequence v = (CharSequence) defaultValue(fields()[1]);
+                record.sv = fieldSetFlags()[1] ? this.stringVar : v == null ? null : v.toString();
                 record.bv = fieldSetFlags()[2] ? this.booleanVar : (Boolean) defaultValue(fields()[2]);
                 record.lv = fieldSetFlags()[3] ? this.longVar : (Long) defaultValue(fields()[3]);
                 return record;
