@@ -12,7 +12,6 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     protected boolean indexable;
     protected boolean sendToClient;
     protected boolean auditable;
-    protected boolean toLowerCase;
     protected T initialValue;
 
     private final P propertyMeta;
@@ -24,6 +23,7 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     public int stringMinLength;
     public int stringMaxLength;
     public boolean stringWithoutSpaces;
+    public boolean stringIsOnlyLowerCase;
     public final List<String> stringSpecificValues = new ArrayList<>();
 
 
@@ -68,12 +68,6 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
         return this;
     }
 
-    public AbstractPropertyBuilder<P, T> toLowerCase() {
-        this.toLowerCase = true;
-
-        return this;
-    }
-
     public AbstractPropertyBuilder<P, T> numberInclusiveMin(final long v) {
         this.numberInclusiveMin = v;
 
@@ -100,6 +94,12 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
 
     public AbstractPropertyBuilder<P, T> stringWithoutSpaces() {
         this.stringWithoutSpaces = true;
+
+        return this;
+    }
+
+    public AbstractPropertyBuilder<P, T> stringIsOnlyLowerCase() {
+        this.stringIsOnlyLowerCase = true;
 
         return this;
     }

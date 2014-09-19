@@ -25,7 +25,7 @@ public class StringProperty extends PropertyMeta<String> implements Serializable
     }
 
     protected void setValueImpl(final String value, final ObjectVar objectVar) {
-        objectVar.set(name, (value == null ? null : (options.isToLowerCase() ? value.toLowerCase() : value)));
+        objectVar.set(name, (value == null ? null : (options.stringIsOnlyLowerCase ? value.toLowerCase() : value)));
     }
 
     public boolean hasData() {
