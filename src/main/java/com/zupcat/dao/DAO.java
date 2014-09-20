@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  * <p/>
  * Every X_DataStoreEntity should have its X_DAO implementation. See tests for examples
  */
-public abstract class DAO<P extends DatastoreEntity> implements Serializable, IDAO<P> {
+public class DAO<P extends DatastoreEntity> implements Serializable, IDAO<P> {
 
     private static final long serialVersionUID = 471847964351314234L;
     private static final RetryingHandler RETRYING_HANDLER = new RetryingHandler();
