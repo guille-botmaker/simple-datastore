@@ -7,10 +7,7 @@ import com.zupcat.model.config.PropertyMeta;
 import com.zupcat.property.IntegerProperty;
 import com.zupcat.service.SimpleDatastoreServiceFactory;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,6 +65,9 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
             result.getInternalObjectHolder().mergeWith(objectHolder);
 
             return result;
+
+        } catch (final EOFException _eofException) {
+            return null;
 
         } catch (final IOException _ioException) {
             throw new RuntimeException("Problems converting stream to PO: " + _ioException.getMessage(), _ioException);
