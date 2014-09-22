@@ -4,7 +4,6 @@ import org.apache.avro.io.*;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.specific.SpecificRecordBase;
-import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.util.zip.DeflaterOutputStream;
@@ -101,21 +100,30 @@ public final class AvroSerializer<T extends SpecificRecordBase> implements Seria
         }
     }
 
-    public T deserialize(final InputStream inputStream, final Class<T> recordClass, final boolean compressed) {
+    public T deserialize(final byte[] bytes, final Class<T> recordClass, final boolean compressed) {
+        ByteArrayInputStream inputStream = null;
+
         try {
-            return deserialize(IOUtils.toByteArray(inputStream), recordClass, compressed);
-        } catch (final IOException _ioException) {
-            throw new RuntimeException("Problems when deserializing record [" + recordClass.getName() + "]: " + _ioException.getMessage(), _ioException);
+            inputStream = new ByteArrayInputStream(bytes);
+            return deserialize(inputStream, recordClass, compressed);
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (final IOException e) {
+                    // ok to ignore
+                }
+            }
         }
     }
 
-    public T deserialize(final byte[] bytes, final Class<T> recordClass, final boolean compressed) {
+    public T deserialize(final InputStream inputStream, final Class<T> recordClass, final boolean compressed) {
         try {
 //            enc(bytes);
 
             final SpecificDatumReader<T> reader = new SpecificDatumReader<>(recordClass);
             synchronized (LOCK_OBJECT) {
-                final Decoder decoder = DecoderFactory.get().binaryDecoder(compressed ? new InflaterInputStream(new ByteArrayInputStream(bytes)) : new ByteArrayInputStream(bytes), getReusableBinaryDecoder());
+                final Decoder decoder = DecoderFactory.get().binaryDecoder(compressed ? new InflaterInputStream(inputStream) : inputStream, getReusableBinaryDecoder());
 
                 return reader.read(null, decoder);
             }
