@@ -93,23 +93,16 @@ public abstract class PropertyMeta<E> implements Serializable {
         }
     }
 
+    public AbstractPropertyBuilder<? extends PropertyMeta<E>, E> getOptions() {
+        return options;
+    }
+
     protected abstract E getValueImpl(final ObjectVar objectVar);
 
     protected abstract void setValueImpl(final E value, final ObjectVar objectVar);
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder(100);
-
-        builder.
-                append("[").
-                append(StringUtils.replace(getClass().getName(), "com.zupcat.property.", "")).
-                append("|").
-                append(name).
-                append("->").
-                append(get()).
-                append("]");
-
-        return builder.toString();
+        return "[" + StringUtils.replace(getClass().getName(), "com.zupcat.property.", "") + "|" + name + "->" + get() + "]";
     }
 }
