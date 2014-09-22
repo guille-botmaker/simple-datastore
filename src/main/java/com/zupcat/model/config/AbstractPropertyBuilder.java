@@ -10,7 +10,7 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     private static final long serialVersionUID = -2702019046191004750L;
 
     protected boolean indexable;
-    protected boolean sendToClient;
+    public boolean sendToClient;
     protected boolean auditable;
     protected T initialValue;
 
