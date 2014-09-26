@@ -13,9 +13,7 @@ import org.junit.Before;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public abstract class AbstractTest {
 
@@ -92,19 +90,17 @@ public abstract class AbstractTest {
                 sample.MAP_STRING_STRING.put("" + j, randomUtils.getRandomSafeString(10));
                 sample.MAP_STRING_LONG.put("" + j, randomUtils.getRandomLong());
                 sample.MAP_STRING_INTEGER.put("" + j, randomUtils.getRandomInt(Integer.MAX_VALUE));
-                sample.MAP_INTEGER_INTEGER.put(j, randomUtils.getRandomInt(Integer.MAX_VALUE));
-                sample.INT_PER_STRING.put(j, randomUtils.getRandomSafeString(10));
                 sample.LIST_STRING.add(randomUtils.getRandomSafeString(10));
                 sample.LIST_INT.add(randomUtils.getRandomInt(Integer.MAX_VALUE));
                 sample.LIST_LONG.add(randomUtils.getRandomLong());
 
-                final Map<String, String> innerMap = new HashMap<>();
-                for (int k = 0; k < 5; k++) {
-                    innerMap.put(randomUtils.getRandomSafeAlphaNumberString(10), randomUtils.getRandomSafeString(10));
-                }
+//                final Map<String, String> innerMap = new HashMap<>();
+//                for (int k = 0; k < 5; k++) {
+//                    innerMap.put(randomUtils.getRandomSafeAlphaNumberString(10), randomUtils.getRandomSafeString(10));
+//                }
 
-                sample.MAP_STRING_MAP_STRING_STRING.put(randomUtils.getRandomSafeAlphaNumberString(10), innerMap);
-                sample.MAP_STRING_MAP_STRING_STRING.put(randomUtils.getRandomSafeAlphaNumberString(10), innerMap);
+//                sample.MAP_STRING_MAP_STRING_STRING.put(randomUtils.getRandomSafeAlphaNumberString(10), innerMap);
+//                sample.MAP_STRING_MAP_STRING_STRING.put(randomUtils.getRandomSafeAlphaNumberString(10), innerMap);
             }
 
             result.add(sample);

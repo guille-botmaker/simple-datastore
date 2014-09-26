@@ -7,7 +7,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import java.io.Serializable;
 
-public class ByteArrayProperty extends PropertyMeta<byte[]> implements Serializable {
+public final class ByteArrayProperty extends PropertyMeta<byte[]> implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
 

@@ -6,11 +6,16 @@ import com.zupcat.model.DataObjectSerializer;
 import com.zupcat.util.RandomUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 
 @RunWith(Parameterized.class)
 public class DataObjectTest extends AbstractTest {
+
+    private final DataObjectSerializer<DataObject> dataObjectAvroSerializer = new DataObjectSerializer<>();
+    private boolean compress;
 
     @Parameterized.Parameters
     public static java.util.List<Object[]> data() {
@@ -23,31 +28,18 @@ public class DataObjectTest extends AbstractTest {
         sourceInnerDataObject.put("str", "an inner str");
         sourceInnerDataObject.put("int", "an inner int");
 
-        final DataObject innerDataObject = new DataObject();
-        innerDataObject.setDataObject(sourceInnerDataObject);
-
         final DataObject sourceDataObject = new DataObject();
-        sourceDataObject.getDataObject().set("str", "a string");
-        sourceDataObject.getDataObject().set("int", "an int");
-        sourceDataObject.getDataObject().set("aov", innerDataObject);
+        sourceDataObject.put("str", "a string");
+        sourceDataObject.put("int", "an int");
+        sourceDataObject.put("aov", sourceInnerDataObject);
 
-        final DataObjectSerializer<DataObject> DataObjectAvroSerializer = new DataObjectSerializer<>();
+        compress = true;
 
-        final DataObject targetDataObject =
-                DataObjectAvroSerializer.deserialize(
-                        DataObjectAvroSerializer.serialize(
-                                DataObjectAvroSerializer.deserialize(
-                                        DataObjectAvroSerializer.serialize(sourceDataObject, true),
-                                        DataObject.class,
-                                        true
-                                )
-                                , DataObject.class, true)
-
-                        , DataObject.class, true);
+        final DataObject targetDataObject = des(ser(des(ser(sourceDataObject))));
 
         Assert.assertTrue(sourceDataObject.isFullyEquals(targetDataObject));
 
-        Assert.assertEquals(targetDataObject.getDataObject().getDataObject("aov").getDataObject().getString("str"), "an inner str");
+        Assert.assertEquals(targetDataObject.getJSONObject("aov").getString("str"), "an inner str");
     }
 
 
@@ -62,55 +54,58 @@ public class DataObjectTest extends AbstractTest {
     }
 
     private void trySimpleSerialization(final boolean compress) {
+        this.compress = compress;
+
         for (int i = 0; i < 10; i++) {
             final DataObject source = build();
 
-            final DataObjectSerializer<DataObject> DataObjectAvroSerializer = new DataObjectSerializer<>();
-
-            final DataObject target =
-                    DataObjectAvroSerializer.deserialize(
-                            DataObjectAvroSerializer.serialize(
-                                    DataObjectAvroSerializer.deserialize(
-                                            DataObjectAvroSerializer.serialize(source, DataObject.class, compress),
-                                            DataObject.class,
-                                            compress
-                                    )
-                                    , DataObject.class, compress)
-
-                            , DataObject.class, compress);
-
+            final DataObject target = des(ser(des(ser(source))));
 
             assertTrue(source.isFullyEquals(target));
             assertTrue(target.isFullyEquals(source));
             assertTrue(source.isFullyEquals(source));
             assertTrue(target.isFullyEquals(target));
             assertEquals(source.toString(), target.toString());
-
-//            final int size = source.serialize(compress).length;
-//            System.err.println("");
         }
     }
 
-    private DataObject build() {
-        final DataObject DataObject = new DataObject();
+    private byte[] ser(final DataObject dataObject) {
+        return dataObjectAvroSerializer.serialize(dataObject, compress);
+    }
 
-        fillDataObject(DataObject.getDataObject());
+    private DataObject des(final byte[] bytes) {
+        final DataObject result = new DataObject();
+
+        dataObjectAvroSerializer.deserialize(bytes, result, compress);
+
+        return result;
+    }
+
+    private DataObject build() {
+        final DataObject dataObject = new DataObject();
+
+        fillDataObject(dataObject);
 
         for (int i = 0; i < 1000; i++) {
             final DataObject item = new DataObject();
             fillDataObject(item);
 
-            DataObject.addItem(item);
+            dataObject.addItem(item);
         }
-        return DataObject;
+        return dataObject;
     }
 
-    private void fillDataObject(final DataObject DataObject) {
+    private void fillDataObject(final DataObject dataObject) {
         final RandomUtils randomUtils = RandomUtils.getInstance();
 
-        DataObject.set("string", randomUtils.getRandomSafeAlphaNumberString(20));
-        DataObject.set("long", randomUtils.getRandomLong());
-        DataObject.set("bool", randomUtils.getRandomBoolean());
-        DataObject.set("int", randomUtils.getRandomInt(Integer.MAX_VALUE));
+        dataObject.put("string", randomUtils.getRandomSafeAlphaNumberString(20));
+        dataObject.put("long", randomUtils.getRandomLong());
+        dataObject.put("bool", randomUtils.getRandomBoolean());
+        dataObject.put("int", randomUtils.getRandomInt(Integer.MAX_VALUE));
+
+        final DataObject another = new DataObject();
+        another.put("string", randomUtils.getRandomSafeAlphaNumberString(20));
+
+        dataObject.put("anotherJSON", another);
     }
 }

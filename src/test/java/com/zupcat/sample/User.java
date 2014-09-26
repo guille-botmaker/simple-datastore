@@ -15,18 +15,16 @@ public class User extends DatastoreEntity {
     public BooleanProperty IS_FAKE;
 
     public ListProperty<String> LIST_STRING;
-    public ListIntegerProperty LIST_INT;
-    public ListLongProperty LIST_LONG;
+    public ListProperty<Integer> LIST_INT;
+    public ListProperty<Long> LIST_LONG;
 
-    public MapStringStringProperty MAP_STRING_STRING;
-    public MapStringLongProperty MAP_STRING_LONG;
-    public MapStringIntegerProperty MAP_STRING_INTEGER;
-    public MapIntegerIntegerProperty MAP_INTEGER_INTEGER;
+    public MapProperty<String> MAP_STRING_STRING;
+    public MapProperty<Long> MAP_STRING_LONG;
+    public MapProperty<Integer> MAP_STRING_INTEGER;
 
-    public MapIntegerStringProperty INT_PER_STRING;
-    public MapStringMapStringStringProperty MAP_STRING_MAP_STRING_STRING;
+//    public MapStringMapStringStringProperty MAP_STRING_MAP_STRING_STRING;
 
-    public ObjectVarProperty<Address> ADDRESS;
+    public DataObjectProperty<Address> ADDRESS;
     public ListProperty<Address> ADDRESSES;
 
 
@@ -45,17 +43,15 @@ public class User extends DatastoreEntity {
         IS_FAKE = new BOOL(this).build();
 
         LIST_STRING = new LIST<String>(this).build();
-        LIST_INT = new LIST_INTEGER(this).build();
-        LIST_LONG = new LIST_LONG(this).build();
+        LIST_INT = new LIST<Integer>(this).build();
+        LIST_LONG = new LIST<Long>(this).build();
 
-        MAP_STRING_STRING = new MAP_STRING_STRING(this).build();
-        MAP_STRING_LONG = new MAP_STRING_LONG(this).build();
-        MAP_STRING_INTEGER = new MAP_STRING_INTEGER(this).build();
-        MAP_INTEGER_INTEGER = new MAP(this).build();
-        INT_PER_STRING = new MAP_INT_STRING(this).build();
-        MAP_STRING_MAP_STRING_STRING = new MAP_STRING_MAP_STRING_STRING(this).build();
+        MAP_STRING_STRING = new MAP<String>(this).build();
+        MAP_STRING_LONG = new MAP<Long>(this).build();
+        MAP_STRING_INTEGER = new MAP<Integer>(this).build();
+//        MAP_STRING_MAP_STRING_STRING = new MAP_STRING_MAP_STRING_STRING(this).build();
 
-        ADDRESS = new OBJECT_VAR<>(this, Address.class).build();
+        ADDRESS = new DATA_OBJECT<Address>(this).build();
         ADDRESSES = new LIST<Address>(this).build();
     }
 }

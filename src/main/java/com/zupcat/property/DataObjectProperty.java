@@ -6,15 +6,12 @@ import com.zupcat.model.config.PropertyMeta;
 
 import java.io.Serializable;
 
-/**
- * Work as Map<String, Object>
- */
-public final class JSONObjectProperty<T extends DataObject> extends PropertyMeta<T> implements Serializable {
+public final class DataObjectProperty<T extends DataObject> extends PropertyMeta<T> implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
 
 
-    public JSONObjectProperty(final DatastoreEntity owner) {
+    public DataObjectProperty(final DatastoreEntity owner) {
         super(owner);
     }
 

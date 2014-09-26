@@ -6,7 +6,7 @@ import com.zupcat.model.config.PropertyMeta;
 
 import java.io.Serializable;
 
-public class BooleanProperty extends PropertyMeta<Boolean> implements Serializable {
+public final class BooleanProperty extends PropertyMeta<Boolean> implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
 
