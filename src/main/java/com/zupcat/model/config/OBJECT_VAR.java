@@ -1,7 +1,6 @@
 package com.zupcat.model.config;
 
 import com.zupcat.model.DatastoreEntity;
-import com.zupcat.model.ObjectVar;
 import com.zupcat.property.ObjectVarProperty;
 
 public final class OBJECT_VAR<OV extends ObjectVar> extends AbstractPropertyBuilder<ObjectVarProperty, OV> {

@@ -1,8 +1,6 @@
 package com.zupcat.property;
 
 import com.zupcat.model.DatastoreEntity;
-import com.zupcat.model.ObjectHolder;
-import com.zupcat.model.ObjectVar;
 import com.zupcat.model.WithIdObjectVar;
 import com.zupcat.model.config.PropertyMeta;
 

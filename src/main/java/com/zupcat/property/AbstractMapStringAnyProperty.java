@@ -1,7 +1,6 @@
 package com.zupcat.property;
 
 import com.zupcat.model.DatastoreEntity;
-import com.zupcat.model.ObjectVar;
 import org.apache.avro.io.*;
 import org.apache.commons.codec.binary.Base64;
 

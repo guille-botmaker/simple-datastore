@@ -2,7 +2,6 @@ package com.zupcat.model.config;
 
 import com.zupcat.audit.AuditHandlerServiceFactory;
 import com.zupcat.model.DatastoreEntity;
-import com.zupcat.model.ObjectVar;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;

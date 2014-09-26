@@ -1,7 +1,6 @@
 package com.zupcat.property;
 
 import com.zupcat.model.DatastoreEntity;
-import com.zupcat.model.ObjectVar;
 import com.zupcat.model.config.PropertyMeta;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.Encoder;

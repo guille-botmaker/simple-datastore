@@ -1,7 +1,5 @@
 package com.zupcat.sample;
 
-import com.zupcat.model.ObjectVar;
-
 /**
  * Subobjects don't have own state. They should delegate its state to ObjectVar, just like this example
  */
