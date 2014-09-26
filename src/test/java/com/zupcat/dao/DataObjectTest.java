@@ -61,11 +61,11 @@ public class DataObjectTest extends AbstractTest {
 
             final DataObject target = des(ser(des(ser(source))));
 
-            assertTrue(source.isFullyEquals(target));
-            assertTrue(target.isFullyEquals(source));
-            assertTrue(source.isFullyEquals(source));
-            assertTrue(target.isFullyEquals(target));
-            assertEquals(source.toString(), target.toString());
+            Assert.assertTrue(source.isFullyEquals(target));
+            Assert.assertTrue(target.isFullyEquals(source));
+            Assert.assertTrue(source.isFullyEquals(source));
+            Assert.assertTrue(target.isFullyEquals(target));
+            Assert.assertEquals(source.toString(), target.toString());
         }
     }
 
