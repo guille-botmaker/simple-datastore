@@ -14,7 +14,7 @@ public class User extends DatastoreEntity {
     public LongProperty LONG_VALUE;
     public BooleanProperty IS_FAKE;
 
-    public ListStringProperty LIST_STRING;
+    public ListProperty<String> LIST_STRING;
     public ListIntegerProperty LIST_INT;
     public ListLongProperty LIST_LONG;
 
@@ -27,7 +27,7 @@ public class User extends DatastoreEntity {
     public MapStringMapStringStringProperty MAP_STRING_MAP_STRING_STRING;
 
     public ObjectVarProperty<Address> ADDRESS;
-    public ListObjectVarProperty<Address> ADDRESSES;
+    public ListProperty<Address> ADDRESSES;
 
 
     public User() {
@@ -44,18 +44,18 @@ public class User extends DatastoreEntity {
         LONG_VALUE = new LONG(this).build();
         IS_FAKE = new BOOL(this).build();
 
-        LIST_STRING = new LIST_STRING(this).build();
+        LIST_STRING = new LIST<String>(this).build();
         LIST_INT = new LIST_INTEGER(this).build();
         LIST_LONG = new LIST_LONG(this).build();
 
         MAP_STRING_STRING = new MAP_STRING_STRING(this).build();
         MAP_STRING_LONG = new MAP_STRING_LONG(this).build();
         MAP_STRING_INTEGER = new MAP_STRING_INTEGER(this).build();
-        MAP_INTEGER_INTEGER = new MAP_INT_INT(this).build();
+        MAP_INTEGER_INTEGER = new MAP(this).build();
         INT_PER_STRING = new MAP_INT_STRING(this).build();
         MAP_STRING_MAP_STRING_STRING = new MAP_STRING_MAP_STRING_STRING(this).build();
 
         ADDRESS = new OBJECT_VAR<>(this, Address.class).build();
-        ADDRESSES = new LIST_OBJECT_VAR<>(this, Address.class).build();
+        ADDRESSES = new LIST<Address>(this).build();
     }
 }

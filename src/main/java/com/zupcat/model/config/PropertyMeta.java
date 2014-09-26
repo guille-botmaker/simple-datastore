@@ -1,6 +1,7 @@
 package com.zupcat.model.config;
 
 import com.zupcat.audit.AuditHandlerServiceFactory;
+import com.zupcat.model.DataObject;
 import com.zupcat.model.DatastoreEntity;
 import org.apache.commons.lang3.StringUtils;
 
@@ -62,16 +63,9 @@ public abstract class PropertyMeta<E> implements Serializable {
     }
 
     public E get() {
-        final E result = getValueImpl(owner.getInternalObjectHolder().getObjectVar());
+        final E result = getValueImpl(owner.getDataObject());
 
         return result == null ? options.initialValue : result;
-    }
-
-    /**
-     * Called when object is about to become a Datastore Entity
-     */
-    public void commit() {
-        // nothing to do
     }
 
     public void set(final E value) {
@@ -83,12 +77,12 @@ public abstract class PropertyMeta<E> implements Serializable {
             AuditHandlerServiceFactory.getAuditHandler().logPropertyDataChanged(this, value, owner.getId());
         }
 
-        final ObjectVar objectVar = owner.getInternalObjectHolder().getObjectVar();
+        final DataObject dataObject = owner.getDataObject();
 
         if (value == null || value.equals(options.initialValue)) {
-            objectVar.removeVar(name);
+            dataObject.remove(name);
         } else {
-            setValueImpl(value, objectVar);
+            setValueImpl(value, dataObject);
         }
     }
 
@@ -96,9 +90,9 @@ public abstract class PropertyMeta<E> implements Serializable {
         return options;
     }
 
-    protected abstract E getValueImpl(final ObjectVar objectVar);
+    protected abstract E getValueImpl(final DataObject dataObject);
 
-    protected abstract void setValueImpl(final E value, final ObjectVar objectVar);
+    protected abstract void setValueImpl(final E value, final DataObject dataObject);
 
     @Override
     public String toString() {

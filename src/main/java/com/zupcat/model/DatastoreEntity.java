@@ -9,6 +9,7 @@ import com.zupcat.property.LongProperty;
 import com.zupcat.util.TimeUtils;
 
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,10 +18,11 @@ import java.util.*;
 public abstract class DatastoreEntity extends PersistentObject implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
+
     public static final int MAX_GROUPS = 100;
 
     // persistent state
-    private final ObjectHolder objectHolder = new ObjectHolder();
+    private final DataObject dataObject = new DataObject();
 
     private final String entityName;
     private final CacheStrategy cacheStrategy;
@@ -89,7 +91,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
                         !Objects.equals(this.GROUP_ID.get(), other.GROUP_ID.get()) ||
                         !Objects.equals(this.LAST_MODIFICATION.get(), other.LAST_MODIFICATION.get()) ||
                         this.propertiesMetadata.size() != other.propertiesMetadata.size() ||
-                        !this.objectHolder.isFullyEquals(other.objectHolder)
+                        !this.dataObject.isFullyEquals(other.dataObject)
                 ) {
             return false;
         }
@@ -102,17 +104,15 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return true;
     }
 
-    public ObjectHolder getObjectHolderForClient() {
-        final ObjectHolder result = new ObjectHolder();
-        final ObjectVar resultOV = result.getObjectVar();
+    public DataObject getObjectHolderForClient() {
+        final DataObject result = new DataObject();
+        final DataObject source = getDataObject();
 
-        final ObjectVar sourceStateOV = getObjectHolder().getObjectVar();
-
-        resultOV.mergeWith(sourceStateOV);
+        result.mergeWith(source);
 
         for (final Map.Entry<String, PropertyMeta> entry : getPropertiesMetadata().entrySet()) {
             if (!entry.getValue().hasToSendToClient()) {
-                resultOV.removeVar(entry.getKey());
+                result.remove(entry.getKey());
             }
         }
         return result;
@@ -129,19 +129,8 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         propertiesMetadata.put(name, propertyMeta);
     }
 
-    /**
-     * For framework internal calls. Do not use this method directly
-     */
-    public ObjectHolder getInternalObjectHolder() {
-        return objectHolder;
-    }
-
-    public ObjectHolder getObjectHolder() {
-        // commiting changes
-        for (final PropertyMeta propertyMeta : getPropertiesMetadata().values()) {
-            propertyMeta.commit();
-        }
-        return objectHolder;
+    public DataObject getDataObject() {
+        return dataObject;
     }
 
     public CacheStrategy getCacheStrategy() {
@@ -150,23 +139,16 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder(500);
+        final StringWriter stringWriter = new StringWriter(500);
 
-        builder
-                .append("[")
-                .append(entityName)
-                .append("|")
-                .append(getId())
-                .append("|")
-                .append(objectHolder.toString(builder));
+        stringWriter.write("[" + entityName + "|" + getId() + "|");
+        dataObject.write(stringWriter);
+        stringWriter.write("]");
 
-        builder.append("]");
-
-        return builder.toString();
+        return stringWriter.toString();
     }
 
     protected abstract void config();
-
 
     public int getDaysSinceLastModification() {
         return getMinutesSinceLastModification() / (60 * 24);
@@ -196,19 +178,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     }
 
     protected void setObjectVarType(final String type) {
-        getInternalObjectHolder().getObjectVar().set("_t", type);
-    }
-
-    public ObjectVar getCopiedObjectVarToObjectHolder(final ObjectHolder objectHolder) {
-        final ObjectVar objectVar = getCopiedObjectVar();
-
-        objectHolder.addItem(objectVar);
-
-        return objectVar;
-    }
-
-    public ObjectVar getCopiedObjectVar() {
-        return new ObjectVar(getObjectHolder().getObjectVar());
+        getDataObject().put("_t", type);
     }
 
     public Date getLastModificationAsDate() {

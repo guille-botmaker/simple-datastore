@@ -1,5 +1,6 @@
 package com.zupcat.property;
 
+import com.zupcat.model.DataObject;
 import com.zupcat.model.DatastoreEntity;
 import com.zupcat.model.config.PropertyMeta;
 import org.apache.commons.codec.binary.Base64;
@@ -10,33 +11,22 @@ public class ByteArrayProperty extends PropertyMeta<byte[]> implements Serializa
 
     private static final long serialVersionUID = 6181606486836703354L;
 
-    private transient byte[] cache;
 
     public ByteArrayProperty(final DatastoreEntity owner) {
         super(owner);
     }
 
-    protected byte[] getValueImpl(final ObjectVar objectVar) {
-        if (cache == null) {
-            final String result = objectVar.getString(name);
+    protected byte[] getValueImpl(final DataObject dataObject) {
+        final String s = dataObject.getString(name);
 
-            cache = result == null ? null : Base64.decodeBase64(result);
+        return s == null ? null : Base64.decodeBase64(s);
+    }
+
+    protected void setValueImpl(final byte[] value, final DataObject dataObject) {
+        if (value == null) {
+            dataObject.remove(name);
+        } else {
+            dataObject.put(name, Base64.encodeBase64String(value));
         }
-        return cache;
-    }
-
-    protected void setValueImpl(final byte[] value, final ObjectVar objectVar) {
-        cache = value;
-    }
-
-    @Override
-    public void commit() {
-        super.commit();
-
-        final byte[] value = get();
-
-        final ObjectVar objectVar = getOwner().getInternalObjectHolder().getObjectVar();
-
-        objectVar.set(name, value == null ? null : Base64.encodeBase64String(value));
     }
 }

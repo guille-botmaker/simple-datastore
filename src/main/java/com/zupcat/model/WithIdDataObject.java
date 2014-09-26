@@ -1,7 +1,6 @@
 package com.zupcat.model;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Map;
 
@@ -9,6 +8,8 @@ import java.util.Map;
  * It adds features to JSONObject
  */
 public class WithIdDataObject extends DataObject {
+
+    private static final long serialVersionUID = 471847964351314234L;
 
     public static final String ID_KEY = "_i";
 
@@ -22,10 +23,6 @@ public class WithIdDataObject extends DataObject {
 
     public WithIdDataObject(final String source) throws JSONException {
         super(source);
-    }
-
-    public WithIdDataObject(final JSONObject jo, final String[] names) {
-        super(jo, names);
     }
 
     public String getId() {

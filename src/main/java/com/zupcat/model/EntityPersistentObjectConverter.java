@@ -21,11 +21,11 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
 
     public static final String DATA_CONTAINER_PROPERTY = "bdata";
 
-    private final AvroSerializer<ObjectHolder> objectHolderSerializer;
+    private final DataObjectSerializer<DataObject> objectHolderSerializer;
 
 
     private EntityPersistentObjectConverter() {
-        objectHolderSerializer = new AvroSerializer<>();
+        objectHolderSerializer = new DataObjectSerializer<>();
     }
 
     public static EntityPersistentObjectConverter instance() {
@@ -43,7 +43,7 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
         try {
             outputStream.writeUTF(persistentObject.getEntityName());
             outputStream.writeUTF(persistentObject.getId());
-            objectHolderSerializer.serializeTo(persistentObject.getObjectHolder(), ObjectHolder.class, true, outputStream);
+            objectHolderSerializer.serializeTo(persistentObject.getDataObject(), true, outputStream);
 
         } catch (final IOException _ioException) {
             throw new RuntimeException("Problems converting PO to outputStream for object [" + persistentObject + "]: " + _ioException.getMessage(), _ioException);
@@ -55,14 +55,11 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
             final String entityName = inputStream.readUTF();
             final String id = inputStream.readUTF();
 
-            final ObjectHolder objectHolder = objectHolderSerializer.deserialize(inputStream, ObjectHolder.class, true);
-
             final DAO dao = SimpleDatastoreServiceFactory.getSimpleDatastoreService().getDAO(entityName);
-
             final P result = (P) dao.buildPersistentObjectInstance();
             result.setId(id);
 
-            result.getInternalObjectHolder().mergeWith(objectHolder);
+            objectHolderSerializer.deserialize(inputStream, result.getDataObject(), true);
 
             return result;
 
@@ -74,16 +71,15 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
         }
     }
 
-    public Map<String, Object> buildMapFromPersistentObject(final P persistentObject, final DAO<P> dao) {
+    public Map<String, Object> buildMapFromPersistentObject(final P persistentObject) {
         final Map<String, Object> result = new HashMap<>();
 
         if (persistentObject != null) {
-            result.put("___entityName___", dao.getEntityName());
             result.put("___id___", persistentObject.getId());
 
-            final byte[] binaryData = objectHolderSerializer.serialize(persistentObject.getObjectHolder(), ObjectHolder.class, true);
+            final byte[] binaryData = objectHolderSerializer.serialize(persistentObject.getDataObject(), true);
 
-            result.put(DATA_CONTAINER_PROPERTY, new Blob(binaryData));
+            result.put(DATA_CONTAINER_PROPERTY, binaryData);
 
             for (final PropertyMeta propertyMeta : persistentObject.getPropertiesMetadata().values()) {
                 if (propertyMeta.isIndexable()) {
@@ -102,11 +98,10 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
 
             result.setId(map.get("___id___").toString());
 
-            final Blob binaryData = (Blob) map.get(DATA_CONTAINER_PROPERTY);
-            final ObjectHolder objectHolder = binaryData == null ? null : objectHolderSerializer.deserialize(binaryData.getBytes(), ObjectHolder.class, true);
+            final byte[] binaryData = (byte[]) map.get(DATA_CONTAINER_PROPERTY);
 
-            if (objectHolder != null) {
-                result.getInternalObjectHolder().mergeWith(objectHolder);
+            if (binaryData != null) {
+                objectHolderSerializer.deserialize(binaryData, result.getDataObject(), true);
             }
 
             for (final PropertyMeta propertyMeta : result.getPropertiesMetadata().values()) {
@@ -133,7 +128,7 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
     public Entity buildEntityFromPersistentObject(final P persistentObject, final DAO<P> dao) {
         final Entity anEntity = new Entity(dao.getEntityName(), persistentObject.getId());
 
-        final byte[] binaryData = objectHolderSerializer.serialize(persistentObject.getObjectHolder(), ObjectHolder.class, true);
+        final byte[] binaryData = objectHolderSerializer.serialize(persistentObject.getDataObject(), true);
 
         if (binaryData.length > 1000000) {
             throw new RuntimeException("BinaryData length for object [" + persistentObject + "] is bigger than permitted: " + binaryData.length);
@@ -158,10 +153,9 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
             result.setId(entity.getKey().getName());
 
             final Blob binaryData = (Blob) entity.getProperty(DATA_CONTAINER_PROPERTY);
-            final ObjectHolder objectHolder = binaryData == null ? null : objectHolderSerializer.deserialize(binaryData.getBytes(), ObjectHolder.class, true);
 
-            if (objectHolder != null) {
-                result.getInternalObjectHolder().mergeWith(objectHolder);
+            if (binaryData != null) {
+                objectHolderSerializer.deserialize(binaryData.getBytes(), result.getDataObject(), true);
             }
 
             for (final PropertyMeta propertyMeta : result.getPropertiesMetadata().values()) {

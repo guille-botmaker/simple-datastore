@@ -1,16 +1,18 @@
 package com.zupcat.sample;
 
+import com.zupcat.model.DataObject;
+
 /**
  * Subobjects don't have own state. They should delegate its state to ObjectVar, just like this example
  */
-public final class Address extends ObjectVar {
+public final class Address extends DataObject {
 
     public String getStreet() {
         return getString("s");
     }
 
     public void setStreet(final String street) {
-        set("s", street);
+        put("s", street);
     }
 
     public String getNumber() {
@@ -18,14 +20,14 @@ public final class Address extends ObjectVar {
     }
 
     public void setNumber(final String number) {
-        set("n", number);
+        put("n", number);
     }
 
     public int getOrder() {
-        return getInteger("o");
+        return getInt("o");
     }
 
     public void setOrder(final int order) {
-        set("o", order);
+        put("o", order);
     }
 }

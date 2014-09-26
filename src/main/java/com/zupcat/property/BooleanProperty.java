@@ -1,5 +1,6 @@
 package com.zupcat.property;
 
+import com.zupcat.model.DataObject;
 import com.zupcat.model.DatastoreEntity;
 import com.zupcat.model.config.PropertyMeta;
 
@@ -14,11 +15,11 @@ public class BooleanProperty extends PropertyMeta<Boolean> implements Serializab
         super(owner);
     }
 
-    protected Boolean getValueImpl(final ObjectVar objectVar) {
-        return objectVar.getBoolean(name);
+    protected Boolean getValueImpl(final DataObject dataObject) {
+        return dataObject.getBoolean(name);
     }
 
-    protected void setValueImpl(final Boolean value, final ObjectVar objectVar) {
-        objectVar.set(name, value);
+    protected void setValueImpl(final Boolean value, final DataObject dataObject) {
+        dataObject.put(name, value);
     }
 }

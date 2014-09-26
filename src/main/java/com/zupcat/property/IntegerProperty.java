@@ -1,5 +1,6 @@
 package com.zupcat.property;
 
+import com.zupcat.model.DataObject;
 import com.zupcat.model.DatastoreEntity;
 import com.zupcat.model.config.PropertyMeta;
 
@@ -14,12 +15,12 @@ public class IntegerProperty extends PropertyMeta<Integer> implements Serializab
         super(owner);
     }
 
-    protected Integer getValueImpl(final ObjectVar objectVar) {
-        return objectVar.getInteger(name);
+    protected Integer getValueImpl(final DataObject dataObject) {
+        return dataObject.getInt(name);
     }
 
-    protected void setValueImpl(final Integer value, final ObjectVar objectVar) {
-        objectVar.set(name, value);
+    protected void setValueImpl(final Integer value, final DataObject dataObject) {
+        dataObject.put(name, value);
     }
 
     public void add(final int value) {

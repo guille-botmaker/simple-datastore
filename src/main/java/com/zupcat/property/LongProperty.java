@@ -1,5 +1,6 @@
 package com.zupcat.property;
 
+import com.zupcat.model.DataObject;
 import com.zupcat.model.DatastoreEntity;
 import com.zupcat.model.config.PropertyMeta;
 
@@ -14,12 +15,12 @@ public class LongProperty extends PropertyMeta<Long> implements Serializable {
         super(owner);
     }
 
-    protected Long getValueImpl(final ObjectVar objectVar) {
-        return objectVar.getLong(name);
+    protected Long getValueImpl(final DataObject dataObject) {
+        return dataObject.getLong(name);
     }
 
-    protected void setValueImpl(final Long value, final ObjectVar objectVar) {
-        objectVar.set(name, value);
+    protected void setValueImpl(final Long value, final DataObject dataObject) {
+        dataObject.put(name, value);
     }
 
     public void add(final long value) {
