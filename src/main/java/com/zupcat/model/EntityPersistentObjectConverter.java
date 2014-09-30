@@ -6,6 +6,7 @@ import com.zupcat.dao.DAO;
 import com.zupcat.model.config.PropertyMeta;
 import com.zupcat.property.IntegerProperty;
 import com.zupcat.service.SimpleDatastoreServiceFactory;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.util.HashMap;
@@ -43,7 +44,7 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
         try {
             outputStream.writeUTF(persistentObject.getEntityName());
             outputStream.writeUTF(persistentObject.getId());
-            objectHolderSerializer.serializeTo(persistentObject.getDataObject(), true, outputStream);
+            outputStream.write(objectHolderSerializer.serialize(persistentObject.getDataObject(), true));
 
         } catch (final IOException _ioException) {
             throw new RuntimeException("Problems converting PO to outputStream for object [" + persistentObject + "]: " + _ioException.getMessage(), _ioException);
@@ -59,7 +60,7 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
             final P result = (P) dao.buildPersistentObjectInstance();
             result.setId(id);
 
-            objectHolderSerializer.deserialize(inputStream, result.getDataObject(), true);
+            objectHolderSerializer.deserialize(IOUtils.toByteArray(inputStream), result.getDataObject(), true);
 
             return result;
 
