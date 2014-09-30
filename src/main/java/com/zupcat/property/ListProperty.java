@@ -7,7 +7,10 @@ import org.json.JSONArray;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 public final class ListProperty<V> extends PropertyMeta<List<V>> implements Serializable, List<V> {
 
@@ -21,9 +24,7 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
 
     @Override
     protected List<V> getValueImpl(final DataObject dataObject) {
-        final JSONArray jsonArray = dataObject.getJSONArray(name);
-
-        return jsonArray == null ? new ArrayList<V>() : getFromJSONArray(jsonArray);
+        return getJSONArrayFrom(dataObject);
     }
 
     @Override
@@ -35,15 +36,25 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
         }
     }
 
-    private List<V> getList() {
-        final JSONArray jsonArray = getOwner().getDataObject().getJSONArray(getPropertyName());
+    private List<V> getJSONArrayFrom(final DataObject dataObject) {
+        final JSONArray jsonArray;
 
-        return jsonArray == null ? new ArrayList<V>() : getFromJSONArray(jsonArray);
+        if (dataObject.has(name)) {
+            jsonArray = dataObject.getJSONArray(name);
+        } else {
+            jsonArray = new JSONArray();
+            dataObject.put(name, jsonArray);
+        }
+        return getInternalListFromJSONArray(jsonArray);
     }
 
-    private List<V> getFromJSONArray(final JSONArray jsonArray) {
+    private List<V> getList() {
+        return getJSONArrayFrom(getOwner().getDataObject());
+    }
+
+    private List<V> getInternalListFromJSONArray(final JSONArray jsonArray) {
         try {
-            final Field arrayField = jsonArray.getClass().getField("myArrayList");
+            final Field arrayField = jsonArray.getClass().getDeclaredField("myArrayList");
 
             arrayField.setAccessible(true);
 

@@ -8,7 +8,6 @@ import org.json.JSONObject;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,9 +25,7 @@ public final class MapProperty<V> extends PropertyMeta<Map<String, V>> implement
 
     @Override
     protected Map<String, V> getValueImpl(final DataObject dataObject) {
-        final JSONObject jsonObject = dataObject.getJSONObject(name);
-
-        return jsonObject == null ? new HashMap<String, V>() : getJSONObject(jsonObject);
+        return getMapImpl(dataObject);
     }
 
     @Override
@@ -42,14 +39,25 @@ public final class MapProperty<V> extends PropertyMeta<Map<String, V>> implement
 
 
     private Map<String, V> getMap() {
-        final JSONObject jsonObject = getOwner().getDataObject().getJSONObject(getPropertyName());
-
-        return jsonObject == null ? new HashMap<String, V>() : getJSONObject(jsonObject);
+        return getMapImpl(getOwner().getDataObject());
     }
 
-    private Map<String, V> getJSONObject(final JSONObject jsonObject) {
+    private Map<String, V> getMapImpl(final DataObject dataObject) {
+        final JSONObject jsonObject;
+
+        if (dataObject.has(name)) {
+            jsonObject = dataObject.getJSONObject(name);
+        } else {
+            jsonObject = new JSONObject();
+            dataObject.put(name, jsonObject);
+        }
+        return getInternalMapFromJSONObject(jsonObject);
+    }
+
+
+    private Map<String, V> getInternalMapFromJSONObject(final JSONObject jsonObject) {
         try {
-            final Field arrayField = jsonObject.getClass().getField("map");
+            final Field arrayField = jsonObject.getClass().getDeclaredField("map");
 
             arrayField.setAccessible(true);
 
