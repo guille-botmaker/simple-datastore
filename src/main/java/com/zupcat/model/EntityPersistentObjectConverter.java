@@ -127,6 +127,10 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
     }
 
     public Entity buildEntityFromPersistentObject(final P persistentObject, final DAO<P> dao) {
+        if (persistentObject == null) {
+            return null;
+        }
+
         final Entity anEntity = new Entity(dao.getEntityName(), persistentObject.getId());
 
         final byte[] binaryData = objectHolderSerializer.serialize(persistentObject.getDataObject(), true);

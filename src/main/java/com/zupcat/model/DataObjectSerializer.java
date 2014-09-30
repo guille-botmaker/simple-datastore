@@ -25,12 +25,13 @@ public final class DataObjectSerializer<T extends DataObject> implements Seriali
     public void serializeTo(final T record, final boolean compressing, final OutputStream outputStream) {
         final OutputStream stream = compressing ? new DeflaterOutputStream(outputStream) : outputStream;
 
-        try {
-            final StringWriter stringWriter = new StringWriter(10240);
-            record.write(stringWriter);
-            final String content = stringWriter.toString();
+        final StringWriter stringWriter = new StringWriter(10240); //10k
+        record.write(stringWriter);
+        final String content = stringWriter.toString();
 
+        try {
             stream.write(content.getBytes(charset));
+            stream.close();
 
         } catch (final IOException _ioException) {
             throw new RuntimeException("Problems serializing record [" + record + "]: " + _ioException.getMessage(), _ioException);
@@ -44,11 +45,13 @@ public final class DataObjectSerializer<T extends DataObject> implements Seriali
     public void deserialize(final InputStream inputStream, final T recordInstance, final boolean compressed) {
         final InputStream stream = compressed ? new InflaterInputStream(inputStream) : inputStream;
 
+        String content;
+
         try {
-            final String content = new String(IOUtils.toByteArray(stream), charset);
-            recordInstance.mergeWith(new DataObject(content));
+            content = new String(IOUtils.toByteArray(stream), charset);
         } catch (final IOException _ioException) {
             throw new RuntimeException("Problems deserializing record: " + _ioException.getMessage(), _ioException);
         }
+        recordInstance.mergeWith(new DataObject(content));
     }
 }
