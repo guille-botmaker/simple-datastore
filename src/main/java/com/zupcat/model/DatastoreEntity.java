@@ -9,7 +9,6 @@ import com.zupcat.property.LongProperty;
 import com.zupcat.util.TimeUtils;
 
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -139,13 +138,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
 
     @Override
     public String toString() {
-        final StringWriter stringWriter = new StringWriter(500);
-
-        stringWriter.write("[" + entityName + "|" + getId() + "|");
-        dataObject.write(stringWriter);
-        stringWriter.write("]");
-
-        return stringWriter.toString();
+        return "[" + entityName + "|" + getId() + "|" + getDataObject().toString(5) + "]";
     }
 
     protected abstract void config();

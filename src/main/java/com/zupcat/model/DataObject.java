@@ -9,6 +9,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * It adds features to JSONObject
@@ -34,7 +35,38 @@ public class DataObject extends JSONObject implements Serializable {
     }
 
     public boolean isFullyEquals(final DataObject another) {
-        return another != null && this.toString().equals(another.toString());
+        if (another == null) {
+            return false;
+        }
+
+        final JSONArray myKeys = this.names();
+        final JSONArray otherKeys = another.names();
+
+        if (myKeys == null) {
+            return otherKeys == null;
+        }
+
+        if (otherKeys == null) {
+            return false;
+        }
+
+        if (myKeys.length() != otherKeys.length()) {
+            return false;
+        }
+
+        if (myKeys.length() == 0) {
+            return true;
+        }
+
+        for (int i = 0; i < myKeys.length(); i++) {
+            final Object myValue = this.get(myKeys.get(i).toString());
+            final Object otherValue = another.get(otherKeys.get(i).toString());
+
+            if (!Objects.equals(myValue, otherValue)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void addItem(final DataObject item) {
