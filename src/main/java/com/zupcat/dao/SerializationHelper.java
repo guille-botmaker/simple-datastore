@@ -14,36 +14,11 @@ public final class SerializationHelper {
 
     private static final Logger log = Logger.getLogger(SerializationHelper.class.getName());
 
+    public static byte[] getBytes(final Object obj) {
+        return getBytes(obj, true);
+    }
 
-//    public static Object fromBytes(final byte[] _b) {
-//        return fromInputStream(new ByteArrayInputStream(_b));
-//    }
-//
-//    public static Object fromInputStream(InputStream stream) {
-//        ObjectInputStream inputStream = null;
-//        Object result = null;
-//
-//        try {
-//            inputStream = new ObjectInputStream(stream);
-//            result = inputStream.readObject();
-//            inputStream.close();
-//            inputStream = null;
-//
-//        } catch (final Throwable e) {
-//            throw new GAEException(ErrorType.PROGRAMMING, e);
-//        } finally {
-//            if (inputStream != null) {
-//                try {
-//                    inputStream.close();
-//                } catch (IOException e) {
-//                    log.log(Level.WARNING, "Error closing fromBytes stream: " + e.getMessage(), e);
-//                }
-//            }
-//        }
-//        return result;
-//    }
-
-    public static byte[] getCompressedBytes(final Object obj) {
+    public static byte[] getBytes(final Object obj, final boolean compressed) {
         ByteArrayOutputStream byteOutputStream = null;
         ObjectOutputStream objectOutputStream = null;
         byte[] result = null;
@@ -52,7 +27,7 @@ public final class SerializationHelper {
             try {
                 byteOutputStream = new ByteArrayOutputStream(2000);
 
-                objectOutputStream = new ObjectOutputStream(new DeflaterOutputStream(byteOutputStream));
+                objectOutputStream = new ObjectOutputStream(compressed ? new DeflaterOutputStream(byteOutputStream) : byteOutputStream);
                 objectOutputStream.writeObject(obj);
                 objectOutputStream.close();
 
@@ -65,14 +40,14 @@ public final class SerializationHelper {
                     try {
                         objectOutputStream.close();
                     } catch (final IOException e) {
-                        log.log(Level.WARNING, "Error closing getCompressedBytes stream: " + e.getMessage(), e);
+                        log.log(Level.WARNING, "Error closing getBytes stream: " + e.getMessage(), e);
                     }
                 }
                 if (byteOutputStream != null) {
                     try {
                         byteOutputStream.close();
                     } catch (final IOException e) {
-                        log.log(Level.WARNING, "Error closing getCompressedBytes stream: " + e.getMessage(), e);
+                        log.log(Level.WARNING, "Error closing getBytes stream: " + e.getMessage(), e);
                     }
                 }
             }
@@ -81,13 +56,17 @@ public final class SerializationHelper {
     }
 
 
-    public static Object getObjectFromCompressedBytes(final byte[] compressedBytes) {
+    public static Object getObjectFromBytes(final byte[] compressedBytes) {
+        return getObjectFromBytes(compressedBytes, true);
+    }
+
+    public static Object getObjectFromBytes(final byte[] _bytes, final boolean compressed) {
         ObjectInputStream objectIntputStream = null;
         Object result = null;
 
-        if (compressedBytes != null) {
+        if (_bytes != null) {
             try {
-                objectIntputStream = new ObjectInputStream(new InflaterInputStream(new ByteArrayInputStream(compressedBytes)));
+                objectIntputStream = new ObjectInputStream(compressed ? new InflaterInputStream(new ByteArrayInputStream(_bytes)) : new ByteArrayInputStream(_bytes));
                 result = objectIntputStream.readObject();
 
             } catch (final Exception ioe) {

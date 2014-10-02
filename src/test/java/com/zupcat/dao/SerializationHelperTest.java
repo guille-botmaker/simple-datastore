@@ -21,10 +21,10 @@ public class SerializationHelperTest extends AbstractTest {
 
     @Test
     public void testSerialization() {
-        final TestClass result = (TestClass) SerializationHelper.getObjectFromCompressedBytes(
-                SerializationHelper.getCompressedBytes(
-                        SerializationHelper.getObjectFromCompressedBytes(
-                                SerializationHelper.getCompressedBytes(testClass)
+        final TestClass result = (TestClass) SerializationHelper.getObjectFromBytes(
+                SerializationHelper.getBytes(
+                        SerializationHelper.getObjectFromBytes(
+                                SerializationHelper.getBytes(testClass)
                         )
 
                 )

@@ -13,7 +13,9 @@ import org.junit.Before;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractTest {
 
@@ -69,6 +71,13 @@ public abstract class AbstractTest {
             sample.LASTNAME.set("LAST Name " + randomUtils.getRandomSafeString(10));
             sample.AGE.set(randomUtils.getIntBetweenInclusive(1, 100));
             sample.BYTES.set(new byte[]{0x42, 0x55});
+
+            final Map<String, String> complexValue = new HashMap<>();
+            complexValue.put(randomUtils.getRandomSafeAlphaNumberString(5), randomUtils.getRandomSafeAlphaNumberString(10));
+            complexValue.put(randomUtils.getRandomSafeAlphaNumberString(5), randomUtils.getRandomSafeAlphaNumberString(10));
+            complexValue.put(randomUtils.getRandomSafeAlphaNumberString(5), randomUtils.getRandomSafeAlphaNumberString(10));
+            sample.COMPLEX_MAP_STRING_STRING.set(complexValue);
+
             sample.LONG_VALUE.set(randomUtils.getRandomLong());
             sample.IS_FAKE.set(randomUtils.getRandomBoolean());
 

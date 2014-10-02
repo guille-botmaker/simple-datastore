@@ -71,7 +71,7 @@ public final class MassiveDownload implements Serializable {
     }
 
     public List<Entity> getResultsEntities() {
-        return resultBytes == null ? Collections.EMPTY_LIST : (List<Entity>) SerializationHelper.getObjectFromCompressedBytes(resultBytes);
+        return resultBytes == null ? Collections.EMPTY_LIST : (List<Entity>) SerializationHelper.getObjectFromBytes(resultBytes);
     }
 
     public String getKind() {
@@ -138,7 +138,7 @@ public final class MassiveDownload implements Serializable {
             filterList(list);
         }
 
-        resultBytes = SerializationHelper.getCompressedBytes(list);
+        resultBytes = SerializationHelper.getBytes(list);
         hasMore = !noMore;
         webCursor = cursor.toWebSafeString();
     }

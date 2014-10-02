@@ -39,7 +39,7 @@ public final class Resource implements Serializable {
     }
 
     public Object getJavaObject() {
-        return rawValue == null ? null : SerializationHelper.getObjectFromCompressedBytes(rawValue);
+        return rawValue == null ? null : SerializationHelper.getObjectFromBytes(rawValue);
     }
 
     public byte[] getRawValue() {
@@ -119,7 +119,7 @@ public final class Resource implements Serializable {
 
         resource.id = id;
         resource.type = "application/x-java-serialized-object";
-        resource.rawValue = javaObject == null ? null : SerializationHelper.getCompressedBytes(javaObject);
+        resource.rawValue = javaObject == null ? null : SerializationHelper.getBytes(javaObject);
 
         return resource;
     }

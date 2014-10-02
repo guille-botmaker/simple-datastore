@@ -5,6 +5,8 @@ import com.zupcat.model.DatastoreEntity;
 import com.zupcat.model.config.*;
 import com.zupcat.property.*;
 
+import java.util.Map;
+
 public class User extends DatastoreEntity {
 
     public StringProperty FIRSTNAME;
@@ -25,6 +27,7 @@ public class User extends DatastoreEntity {
     public DataObjectProperty<Address> ADDRESS;
     public ListProperty<Address> ADDRESSES;
     public MapProperty<Address> ADDRESSES_MAP;
+    public ComplexAnyProperty<Map<String, String>> COMPLEX_MAP_STRING_STRING; // slow implementation but supports anything serializable
 
 
     public User() {
@@ -52,5 +55,6 @@ public class User extends DatastoreEntity {
         ADDRESS = new DATA_OBJECT<>(this, Address.class).build();
         ADDRESSES = new LIST<Address>(this, Address.class).build();
         ADDRESSES_MAP = new MAP<Address>(this, Address.class).build();
+        COMPLEX_MAP_STRING_STRING = new COMPLEX_ANY<>(this).build();
     }
 }
