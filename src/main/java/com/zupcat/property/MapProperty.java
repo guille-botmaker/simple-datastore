@@ -63,7 +63,7 @@ public final class MapProperty<V> extends PropertyMeta<Map<String, V>> implement
         if (value == null || value.isEmpty()) {
             dataObject.remove(name);
         } else {
-            dataObject.put(name, new DataObject(value));
+            dataObject.put(name, value);
         }
     }
 

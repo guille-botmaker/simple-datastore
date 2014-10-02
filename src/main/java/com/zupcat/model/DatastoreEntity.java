@@ -202,7 +202,9 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 
         final GregorianCalendar now = new GregorianCalendar();
+        now.setTimeZone(TimeZone.getTimeZone("GMT"));
         final GregorianCalendar modified = new GregorianCalendar();
+        modified.setTimeZone(TimeZone.getTimeZone("GMT"));
 
         try {
             now.setTime(dateFormat.parse(Long.toString(TimeUtils.buildStandardModificationTime())));
