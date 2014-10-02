@@ -37,7 +37,7 @@ public final class ComplexAnyProperty<T> extends PropertyMeta<T> implements Seri
         if (value == null) {
             dataObject.remove(name);
         } else {
-            dataObject.put(name, Base64.encodeBase64String(SerializationHelper.getBytes(value)));
+            dataObject.put(name, Base64.encodeBase64String(SerializationHelper.getBytes(value, false)));
         }
     }
 }
