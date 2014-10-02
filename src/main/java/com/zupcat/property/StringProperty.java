@@ -15,7 +15,7 @@ public final class StringProperty extends PropertyMeta<String> implements Serial
     }
 
     protected String getValueImpl(final DataObject dataObject) {
-        return dataObject.getString(name);
+        return dataObject.has(name) ? dataObject.getString(name) : null;
     }
 
     protected void setValueImpl(final String value, final DataObject dataObject) {

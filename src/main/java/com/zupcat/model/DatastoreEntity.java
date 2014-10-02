@@ -4,9 +4,13 @@ import com.zupcat.cache.CacheStrategy;
 import com.zupcat.model.config.INT;
 import com.zupcat.model.config.LONG;
 import com.zupcat.model.config.PropertyMeta;
+import com.zupcat.property.ByteArrayProperty;
 import com.zupcat.property.IntegerProperty;
+import com.zupcat.property.ListProperty;
 import com.zupcat.property.LongProperty;
 import com.zupcat.util.TimeUtils;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang.ArrayUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -90,7 +94,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
                         !Objects.equals(this.GROUP_ID.get(), other.GROUP_ID.get()) ||
                         !Objects.equals(this.LAST_MODIFICATION.get(), other.LAST_MODIFICATION.get()) ||
                         this.propertiesMetadata.size() != other.propertiesMetadata.size() ||
-                        !this.dataObject.isFullyEquals(other.dataObject)
+                        !comparePropertiesWith(other)
                 ) {
             return false;
         }
@@ -98,6 +102,47 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         for (final Map.Entry<String, PropertyMeta> entry : this.propertiesMetadata.entrySet()) {
             if (!entry.getValue().isFullyEquals(other.propertiesMetadata.get(entry.getKey()))) {
                 return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean comparePropertiesWith(final DatastoreEntity anotherDatastoreEntity) {
+        if (anotherDatastoreEntity == null) {
+            return false;
+        }
+
+        if (this.propertiesMetadata.size() != anotherDatastoreEntity.propertiesMetadata.size()) {
+            return false;
+        }
+
+        if (this.propertiesMetadata.isEmpty()) {
+            return true;
+        }
+
+        for (final Map.Entry<String, PropertyMeta> myEntries : this.propertiesMetadata.entrySet()) {
+            final PropertyMeta anotherPropertyMeta = anotherDatastoreEntity.propertiesMetadata.get(myEntries.getKey());
+
+            if (anotherPropertyMeta == null) {
+                return false;
+            }
+
+            final PropertyMeta object1Property = myEntries.getValue();
+            final Object object1 = object1Property.get();
+            final Object object2 = anotherPropertyMeta.get();
+
+            if (object1Property instanceof ByteArrayProperty) {
+                if (!ArrayUtils.isEquals(object1, object2)) {
+                    return false;
+                }
+            } else if (object1Property instanceof ListProperty) {
+                if (!ListUtils.isEqualList((Collection<?>) object1, (Collection<?>) object2)) {
+                    return false;
+                }
+            } else {
+                if (!Objects.equals(object1, object2)) {
+                    return false;
+                }
             }
         }
         return true;

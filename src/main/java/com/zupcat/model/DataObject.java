@@ -4,10 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Map;
 import java.util.Objects;
 
@@ -34,41 +31,6 @@ public class DataObject extends JSONObject implements Serializable {
         super(source);
     }
 
-    public boolean isFullyEquals(final DataObject another) {
-        if (another == null) {
-            return false;
-        }
-
-        final JSONArray myKeys = this.names();
-        final JSONArray otherKeys = another.names();
-
-        if (myKeys == null) {
-            return otherKeys == null;
-        }
-
-        if (otherKeys == null) {
-            return false;
-        }
-
-        if (myKeys.length() != otherKeys.length()) {
-            return false;
-        }
-
-        if (myKeys.length() == 0) {
-            return true;
-        }
-
-        for (int i = 0; i < myKeys.length(); i++) {
-            final Object myValue = this.get(myKeys.get(i).toString());
-            final Object otherValue = another.get(otherKeys.get(i).toString());
-
-            if (!Objects.equals(myValue, otherValue)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public void addItem(final DataObject item) {
         JSONArray array;
 
@@ -81,7 +43,7 @@ public class DataObject extends JSONObject implements Serializable {
         array.put(item);
     }
 
-    public void mergeWith(final DataObject another) {
+    public void mergeWith(final JSONObject another) {
         if (another == null) {
             return;
         }
@@ -105,5 +67,106 @@ public class DataObject extends JSONObject implements Serializable {
         objectInputStream.defaultReadObject();
 
         this.mergeWith(new DataObject(objectInputStream.readUTF()));
+    }
+
+    public boolean isFullyEquals(final DataObject another) {
+        return compareJSONS(this, another);
+    }
+
+    private boolean compareJSONS(final JSONObject object1, final JSONObject object2) {
+        if (object1 == null) {
+            return object2 == null;
+        }
+
+        if (object2 == null) {
+            return false;
+        }
+
+        final JSONArray object1Keys = object1.names();
+        final JSONArray object2Keys = object2.names();
+
+        if (object1Keys == null) {
+            return object2Keys == null;
+        }
+
+        if (object2Keys == null) {
+            return false;
+        }
+
+        if (object1Keys.length() != object2Keys.length()) {
+            return false;
+        }
+
+        if (object1Keys.length() == 0) {
+            return true;
+        }
+
+        for (int i = 0; i < object1Keys.length(); i++) {
+            final String key = object1Keys.get(i).toString();
+
+            final Object object1ItemValue = object1.get(key);
+            final Object object2ItemValue = object2.get(key);
+
+            if (!compareObjects(object1ItemValue, object2ItemValue)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean compareObjects(final Object object1, final Object object2) {
+        if (object1 == null) {
+            return object2 == null;
+        }
+
+        if (object2 == null) {
+            return false;
+        }
+
+        if (object1 instanceof JSONObject) {
+            if (!(object2 instanceof JSONObject)) {
+                return false;
+            }
+
+            return compareJSONS((JSONObject) object1, (JSONObject) object2);
+        } else if (object1 instanceof JSONArray) {
+            if (!(object2 instanceof JSONArray)) {
+                return false;
+            }
+
+            final JSONArray array1 = (JSONArray) object1;
+            final JSONArray array2 = (JSONArray) object2;
+
+            if (array1.length() != array2.length()) {
+                return false;
+            }
+
+            if (array1.length() == 0) {
+                return true;
+            }
+
+            for (int j = 0; j < array1.length(); j++) {
+                if (!compareObjects(array1.get(j), array2.get(j))) {
+                    return false;
+                }
+            }
+
+            return true;
+
+        } else {
+            return Objects.equals(object1, object2);
+        }
+    }
+
+    @Override
+    public boolean equals(final Object other) {
+        return other != null && other instanceof DataObject && compareJSONS(this, (JSONObject) other);
+    }
+
+    @Override
+    public int hashCode() {
+        final StringWriter stringWriter = new StringWriter(1024);
+        write(stringWriter);
+        return stringWriter.toString().hashCode();
     }
 }

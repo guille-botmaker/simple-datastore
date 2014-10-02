@@ -16,7 +16,7 @@ public final class BooleanProperty extends PropertyMeta<Boolean> implements Seri
     }
 
     protected Boolean getValueImpl(final DataObject dataObject) {
-        return dataObject.getBoolean(name);
+        return dataObject.has(name) ? dataObject.getBoolean(name) : null;
     }
 
     protected void setValueImpl(final Boolean value, final DataObject dataObject) {

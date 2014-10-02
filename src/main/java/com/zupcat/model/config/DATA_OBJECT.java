@@ -9,7 +9,7 @@ public final class DATA_OBJECT<T extends DataObject> extends AbstractPropertyBui
     private static final long serialVersionUID = -2702019046191004750L;
 
 
-    public DATA_OBJECT(final DatastoreEntity owner) {
-        super(new DataObjectProperty(owner), null);
+    public DATA_OBJECT(final DatastoreEntity owner, final Class<T> itemClass) {
+        super(new DataObjectProperty(owner, itemClass), null);
     }
 }

@@ -17,6 +17,10 @@ public final class ByteArrayProperty extends PropertyMeta<byte[]> implements Ser
     }
 
     protected byte[] getValueImpl(final DataObject dataObject) {
+        if (!dataObject.has(name)) {
+            return null;
+        }
+
         final String s = dataObject.getString(name);
 
         return s == null ? null : Base64.decodeBase64(s);

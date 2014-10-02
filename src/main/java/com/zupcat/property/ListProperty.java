@@ -4,27 +4,51 @@ import com.zupcat.model.DataObject;
 import com.zupcat.model.DatastoreEntity;
 import com.zupcat.model.config.PropertyMeta;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 public final class ListProperty<V> extends PropertyMeta<List<V>> implements Serializable, List<V> {
 
     private static final long serialVersionUID = 6181606486836703354L;
 
+    private final Class<? extends DataObject> itemClass;
 
-    public ListProperty(final DatastoreEntity owner) {
+    public ListProperty(final DatastoreEntity owner, final Class<? extends DataObject> _itemClass) {
         super(owner);
+        itemClass = _itemClass;
     }
-
 
     @Override
     protected List<V> getValueImpl(final DataObject dataObject) {
-        return getJSONArrayFrom(dataObject);
+        final List result = getJSONArrayFrom(dataObject);
+
+        if (!result.isEmpty() && itemClass != null) {
+            final boolean isSameType = itemClass.isInstance(result.get(0));
+
+            if (!isSameType) {
+                final List<DataObject> tempList = new ArrayList<>(result.size());
+
+                for (final Object v : result) {
+                    final DataObject convertedItem;
+
+                    try {
+                        convertedItem = itemClass.newInstance();
+                    } catch (final Exception _exception) {
+                        throw new RuntimeException("Could not instantiate object of class [" + itemClass.getName() + "]. Maybe missing empty constructor?: " + _exception.getMessage(), _exception);
+                    }
+
+                    convertedItem.mergeWith((JSONObject) v);
+                    tempList.add(convertedItem);
+                }
+
+                result.clear();
+                result.addAll(tempList);
+            }
+        }
+        return (List<V>) result;
     }
 
     @Override
@@ -49,7 +73,7 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
     }
 
     private List<V> getList() {
-        return getJSONArrayFrom(getOwner().getDataObject());
+        return getValueImpl(getOwner().getDataObject());
     }
 
     private List<V> getInternalListFromJSONArray(final JSONArray jsonArray) {

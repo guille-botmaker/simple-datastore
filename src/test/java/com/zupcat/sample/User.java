@@ -51,7 +51,7 @@ public class User extends DatastoreEntity {
         MAP_STRING_INTEGER = new MAP<Integer>(this).build();
 //        MAP_STRING_MAP_STRING_STRING = new MAP_STRING_MAP_STRING_STRING(this).build(); // TODO
 
-        ADDRESS = new DATA_OBJECT<Address>(this).build();
-        ADDRESSES = new LIST<Address>(this).build();
+        ADDRESS = new DATA_OBJECT<>(this, Address.class).build();
+        ADDRESSES = new LIST<Address>(this, Address.class).build();
     }
 }
