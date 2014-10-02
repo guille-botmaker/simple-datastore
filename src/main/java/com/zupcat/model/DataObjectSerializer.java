@@ -4,6 +4,8 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
@@ -53,5 +55,63 @@ public final class DataObjectSerializer<T extends DataObject> implements Seriali
             throw new RuntimeException("Problems deserializing record: " + _ioException.getMessage(), _ioException);
         }
         recordInstance.mergeWith(new DataObject(content));
+    }
+
+    public void serializeList(final List<T> records, final ObjectOutputStream objectOutputStream) {
+        try {
+            serializeListImpl(records, objectOutputStream);
+
+        } catch (final IOException _exception) {
+            throw new RuntimeException("Problems writing to stream: " + _exception.getMessage(), _exception);
+        }
+    }
+
+    private void serializeListImpl(final List<T> records, final ObjectOutputStream objectOutputStream) throws IOException {
+        if (records == null || records.isEmpty()) {
+            throw new RuntimeException("Could not serialize empty lists");
+        }
+
+        objectOutputStream.writeUTF(records.get(0).getClass().getName());
+
+        final StringWriter stringWriter = new StringWriter(10240); //10k
+
+        for (final T record : records) {
+            stringWriter.getBuffer().setLength(0);
+            record.write(stringWriter);
+
+            objectOutputStream.writeUTF(stringWriter.toString());
+        }
+
+        objectOutputStream.flush();
+    }
+
+    public List<T> deserializeList(final ObjectInputStream objectInputStream) {
+        try {
+            return deserializeListImpl(objectInputStream);
+
+        } catch (final ClassNotFoundException | InstantiationException | IllegalAccessException | IOException _exception) {
+            throw new RuntimeException("Problems reading stream: " + _exception.getMessage(), _exception);
+        }
+    }
+
+    private List<T> deserializeListImpl(final ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        final List<T> result = new ArrayList<>(500);
+
+        try {
+            final String className = objectInputStream.readUTF();
+            final Class<T> recordClass = (Class<T>) Class.forName(className);
+
+            String recordValue;
+
+            while ((recordValue = objectInputStream.readUTF()) != null) {
+                final T r = recordClass.newInstance();
+                r.mergeWith(new DataObject(recordValue));
+
+                result.add(r);
+            }
+        } catch (final EOFException _eofException) {
+            // ok to ignore
+        }
+        return result;
     }
 }
