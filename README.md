@@ -1,3 +1,4 @@
+
 <img width="15%" src="https://raw.githubusercontent.com/ZupCat/simple-datastore/master/doc/zupcat.png" alt="ZupCat Logo" title="ZupCat" align="center" />
 
 simple-datastore
@@ -21,7 +22,7 @@ Major problems that **simple-datastore** addresses are:
 | **Feature changing is usual**. They impact in the data model and they have to be deployed very quickly | Adding a new attribute requires adding it to a Java object: no mapping is required, no "ALTER TABLE" scripts, no migration of old rows |
 | **Downtime should be avoided** as much as possible | No need to stop a running app. Deploying a new version automatically deploys a new model. The migration occurs when the entity is loader, with no overhead |
 | Reducing Google Datastore paradigm **learning curve** | Because of even higher abstraction level when modeling |
-| Achieving very **high performance** | No reflection usage, very little extra steps on entity convertion to model |
+| Achieving very **high performance** | Little reflection usage, very little extra steps on entity convertion to model |
 
 
 ## Main Features
@@ -29,7 +30,7 @@ Major problems that **simple-datastore** addresses are:
 * **Complex business object data model conversion** to single [Google Datastore Entity]
 * **Automatic migration** of models versions 
 * Handy **data access methods** for common [DatastoreService] features (Queries, CRUD on both synchronous and asynchronous model)
-* [Apache Avro] based fast Java objects serialization without Java Reflection usage
+* [JSON] based fast Java objects serialization
 * **Easy, declarative** way to model
 * Very **low overhead**, extreme reduction of queries when materializing a persisted model 
 * Support for **massive, parallel data access outside of Google App Engine**
@@ -88,5 +89,5 @@ We would love to get your contributions! If you spot a bug, then please [raise a
 [Distribution Directory]:https://github.com/ZupCat/simple-datastore/tree/master/dist
 [raise an issue]:https://github.com/ZupCat/simple-datastore/issues
 [modeling samples]:https://github.com/ZupCat/simple-datastore/wiki/simple-datastore-Samples
-[Apache Avro]:http://avro.apache.org/
+[JSON]:http://json.org//
 
