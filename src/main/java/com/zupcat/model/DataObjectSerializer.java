@@ -1,11 +1,15 @@
 package com.zupcat.model;
 
+import com.zupcat.dao.SerializationHelper;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
@@ -57,7 +61,7 @@ public final class DataObjectSerializer<T extends DataObject> implements Seriali
         recordInstance.mergeWith(new DataObject(content));
     }
 
-    public void serializeList(final List<T> records, final ObjectOutputStream objectOutputStream) {
+    public void serializeList(final Map<Class, List<T>> records, final ObjectOutputStream objectOutputStream) {
         try {
             serializeListImpl(records, objectOutputStream);
 
@@ -66,26 +70,39 @@ public final class DataObjectSerializer<T extends DataObject> implements Seriali
         }
     }
 
-    private void serializeListImpl(final List<T> records, final ObjectOutputStream objectOutputStream) throws IOException {
-        if (records == null || records.isEmpty()) {
+    private void serializeListImpl(final Map<Class, List<T>> recordsMap, final ObjectOutputStream objectOutputStream) throws IOException {
+        if (recordsMap == null || recordsMap.isEmpty()) {
             throw new RuntimeException("Could not serialize empty lists");
         }
 
-        objectOutputStream.writeUTF(records.get(0).getClass().getName());
-
+        final List<DataObjectSerializedData> serializedData = new ArrayList<>(recordsMap.size());
+        final List<String> itemsSerializedList = new ArrayList<>(5000);
         final StringWriter stringWriter = new StringWriter(10240); //10k
 
-        for (final T record : records) {
-            stringWriter.getBuffer().setLength(0);
-            record.write(stringWriter);
+        for (final Map.Entry<Class, List<T>> entry : recordsMap.entrySet()) {
+            final List<T> items = entry.getValue();
 
-            objectOutputStream.writeUTF(stringWriter.toString());
+            final DataObjectSerializedData data = new DataObjectSerializedData();
+            data.itemsQty = items.size();
+            data.className = entry.getKey().getName();
+
+            for (final T item : items) {
+                stringWriter.getBuffer().setLength(0);
+                item.write(stringWriter);
+
+                itemsSerializedList.add(stringWriter.toString());
+            }
+        }
+
+        objectOutputStream.writeUTF(Base64.encodeBase64String(SerializationHelper.getBytes(serializedData, false)));
+        for (final String serializedItem : itemsSerializedList) {
+            objectOutputStream.writeUTF(serializedItem);
         }
 
         objectOutputStream.flush();
     }
 
-    public List<T> deserializeList(final ObjectInputStream objectInputStream) {
+    public Map<Class, List<T>> deserializeList(final ObjectInputStream objectInputStream) {
         try {
             return deserializeListImpl(objectInputStream);
 
@@ -94,23 +111,24 @@ public final class DataObjectSerializer<T extends DataObject> implements Seriali
         }
     }
 
-    private List<T> deserializeListImpl(final ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-        final List<T> result = new ArrayList<>(500);
+    private Map<Class, List<T>> deserializeListImpl(final ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        final Map<Class, List<T>> result = new HashMap<>();
 
-        try {
-            final String className = objectInputStream.readUTF();
-            final Class<T> recordClass = (Class<T>) Class.forName(className);
+        final List<DataObjectSerializedData> serializedData = (List<DataObjectSerializedData>) SerializationHelper.getObjectFromBytes(Base64.decodeBase64(objectInputStream.readUTF()), false);
 
-            String recordValue;
+        for (final DataObjectSerializedData data : serializedData) {
+            final Class<T> recordClass = (Class<T>) Class.forName(data.className);
+            final List<T> list = new ArrayList<>();
+            result.put(recordClass, list);
 
-            while ((recordValue = objectInputStream.readUTF()) != null) {
+            for (int i = 0; i < data.itemsQty; i++) {
+                final String recordValue = objectInputStream.readUTF();
+
                 final T r = recordClass.newInstance();
                 r.mergeWith(new DataObject(recordValue));
 
-                result.add(r);
+                list.add(r);
             }
-        } catch (final EOFException _eofException) {
-            // ok to ignore
         }
         return result;
     }
