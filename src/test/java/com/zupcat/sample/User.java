@@ -22,10 +22,9 @@ public class User extends DatastoreEntity {
     public MapProperty<Long> MAP_STRING_LONG;
     public MapProperty<Integer> MAP_STRING_INTEGER;
 
-//    public MapStringMapStringStringProperty MAP_STRING_MAP_STRING_STRING;
-
     public DataObjectProperty<Address> ADDRESS;
     public ListProperty<Address> ADDRESSES;
+    public MapProperty<Address> ADDRESSES_MAP;
 
 
     public User() {
@@ -49,9 +48,9 @@ public class User extends DatastoreEntity {
         MAP_STRING_STRING = new MAP<String>(this).build();
         MAP_STRING_LONG = new MAP<Long>(this).build();
         MAP_STRING_INTEGER = new MAP<Integer>(this).build();
-//        MAP_STRING_MAP_STRING_STRING = new MAP_STRING_MAP_STRING_STRING(this).build(); // TODO
 
         ADDRESS = new DATA_OBJECT<>(this, Address.class).build();
         ADDRESSES = new LIST<Address>(this, Address.class).build();
+        ADDRESSES_MAP = new MAP<Address>(this, Address.class).build();
     }
 }

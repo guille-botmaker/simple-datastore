@@ -78,13 +78,15 @@ public abstract class AbstractTest {
             address.setOrder(randomUtils.getRandomInt(Integer.MAX_VALUE));
             sample.ADDRESS.set(address);
 
-            sample.ADDRESSES.get().add(address);
+            sample.ADDRESSES.add(address);
+            sample.ADDRESSES_MAP.put(address.getStreet(), address);
 
             final Address address2 = new Address();
             address2.setStreet("Sesamo Street " + randomUtils.getRandomSafeString(10));
             address2.setNumber("1st " + randomUtils.getRandomSafeString(10));
             address2.setOrder(randomUtils.getRandomInt(Integer.MAX_VALUE));
-            sample.ADDRESSES.get().add(address2);
+            sample.ADDRESSES.add(address2);
+            sample.ADDRESSES_MAP.put(address2.getStreet(), address2);
 
             for (int j = 0; j < 10; j++) {
                 sample.MAP_STRING_STRING.put("" + j, randomUtils.getRandomSafeString(10));
@@ -93,14 +95,6 @@ public abstract class AbstractTest {
                 sample.LIST_STRING.add(randomUtils.getRandomSafeString(10));
                 sample.LIST_INT.add(randomUtils.getRandomInt(Integer.MAX_VALUE));
                 sample.LIST_LONG.add(randomUtils.getRandomLong());
-
-//                final Map<String, String> innerMap = new HashMap<>();
-//                for (int k = 0; k < 5; k++) {
-//                    innerMap.put(randomUtils.getRandomSafeAlphaNumberString(10), randomUtils.getRandomSafeString(10));
-//                }
-
-//                sample.MAP_STRING_MAP_STRING_STRING.put(randomUtils.getRandomSafeAlphaNumberString(10), innerMap);
-//                sample.MAP_STRING_MAP_STRING_STRING.put(randomUtils.getRandomSafeAlphaNumberString(10), innerMap);
             }
 
             result.add(sample);

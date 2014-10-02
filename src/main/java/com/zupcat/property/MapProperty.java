@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,14 +19,43 @@ public final class MapProperty<V> extends PropertyMeta<Map<String, V>> implement
 
     private static final long serialVersionUID = 6181606486836703354L;
 
+    private final Class<? extends DataObject> valueClass;
 
-    public MapProperty(final DatastoreEntity owner) {
+
+    public MapProperty(final DatastoreEntity owner, final Class<? extends DataObject> _valueClass) {
         super(owner);
+        valueClass = _valueClass;
     }
 
     @Override
     protected Map<String, V> getValueImpl(final DataObject dataObject) {
-        return getMapImpl(dataObject);
+        final Map result = (Map) getMapImpl(dataObject);
+
+        if (!result.isEmpty() && valueClass != null) {
+            final boolean isSameType = valueClass.isInstance(result.values().iterator().next());
+
+            if (!isSameType) {
+                final Map<String, DataObject> tempMap = new HashMap<>(result.size());
+
+                for (final Object entryObject : result.entrySet()) {
+                    final Entry<String, JSONObject> entry = (Entry<String, JSONObject>) entryObject;
+                    final DataObject convertedItem;
+
+                    try {
+                        convertedItem = valueClass.newInstance();
+                    } catch (final Exception _exception) {
+                        throw new RuntimeException("Could not instantiate object of class [" + valueClass.getName() + "]. Maybe missing empty constructor?: " + _exception.getMessage(), _exception);
+                    }
+
+                    convertedItem.mergeWith(entry.getValue());
+                    tempMap.put(entry.getKey(), convertedItem);
+                }
+
+                result.clear();
+                result.putAll(tempMap);
+            }
+        }
+        return (Map<String, V>) result;
     }
 
     @Override
@@ -39,7 +69,7 @@ public final class MapProperty<V> extends PropertyMeta<Map<String, V>> implement
 
 
     private Map<String, V> getMap() {
-        return getMapImpl(getOwner().getDataObject());
+        return getValueImpl(getOwner().getDataObject());
     }
 
     private Map<String, V> getMapImpl(final DataObject dataObject) {
