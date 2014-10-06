@@ -1,10 +1,12 @@
 package com.zupcat.model;
 
+import com.zupcat.property.ListProperty;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -32,6 +34,18 @@ public class DataObject extends JSONObject implements Serializable {
     }
 
     public void addItem(final DataObject item) {
+        final JSONArray array = getJsonArray();
+
+        array.put(item);
+    }
+
+    public List<DataObject> getItems() {
+        final JSONArray array = getJsonArray();
+
+        return ListProperty.getInternalListFromJSONArray(array);
+    }
+
+    private JSONArray getJsonArray() {
         JSONArray array;
 
         if (has(LIST_KEY)) {
@@ -40,7 +54,7 @@ public class DataObject extends JSONObject implements Serializable {
             array = new JSONArray();
             put(LIST_KEY, array);
         }
-        array.put(item);
+        return array;
     }
 
     public void mergeWith(final JSONObject another) {

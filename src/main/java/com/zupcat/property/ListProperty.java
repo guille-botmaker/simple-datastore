@@ -76,13 +76,13 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
         return getValueImpl(getOwner().getDataObject());
     }
 
-    private List<V> getInternalListFromJSONArray(final JSONArray jsonArray) {
+    public static List getInternalListFromJSONArray(final JSONArray jsonArray) {
         try {
             final Field arrayField = jsonArray.getClass().getDeclaredField("myArrayList");
 
             arrayField.setAccessible(true);
 
-            return (List<V>) arrayField.get(jsonArray);
+            return (List) arrayField.get(jsonArray);
         } catch (final Exception _exception) {
             throw new RuntimeException("Problems when getting JSONArray internal array field using reflection for array [" + jsonArray + ": " + _exception.getMessage(), _exception);
         }
