@@ -21,6 +21,10 @@ public class WithIdDataObject extends DataObject {
         super(map);
     }
 
+    public WithIdDataObject(final WithIdDataObject another) {
+        super(another);
+    }
+
     public WithIdDataObject(final String source) throws JSONException {
         super(source);
     }
