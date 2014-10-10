@@ -163,7 +163,7 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
     // Writing operations
     @Override
     public boolean add(final V v) {
-        return SetUniqueList.setUniqueList(getList()).add(v);
+        return keepUniqueElements ? SetUniqueList.setUniqueList(getList()).add(v) : getList().add(v);
     }
 
     @Override
@@ -173,12 +173,12 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
 
     @Override
     public boolean addAll(final Collection<? extends V> c) {
-        return SetUniqueList.setUniqueList(getList()).addAll(c);
+        return keepUniqueElements ? SetUniqueList.setUniqueList(getList()).addAll(c) : getList().addAll(c);
     }
 
     @Override
     public boolean addAll(final int index, final Collection<? extends V> c) {
-        return SetUniqueList.setUniqueList(getList()).addAll(index, c);
+        return keepUniqueElements ? SetUniqueList.setUniqueList(getList()).addAll(index, c) : getList().addAll(index, c);
     }
 
     @Override
@@ -188,7 +188,7 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
 
     @Override
     public boolean retainAll(final Collection<?> c) {
-        return SetUniqueList.setUniqueList(getList()).retainAll(c);
+        return keepUniqueElements ? SetUniqueList.setUniqueList(getList()).retainAll(c) : getList().retainAll(c);
     }
 
     @Override
@@ -198,12 +198,16 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
 
     @Override
     public V set(final int index, final V element) {
-        return SetUniqueList.setUniqueList(getList()).set(index, element);
+        return keepUniqueElements ? SetUniqueList.setUniqueList(getList()).set(index, element) : getList().set(index, element);
     }
 
     @Override
     public void add(final int index, final V element) {
-        SetUniqueList.setUniqueList(getList()).add(index, element);
+        if (keepUniqueElements) {
+            SetUniqueList.setUniqueList(getList()).add(index, element);
+        } else {
+            getList().add(index, element);
+        }
     }
 
     @Override
