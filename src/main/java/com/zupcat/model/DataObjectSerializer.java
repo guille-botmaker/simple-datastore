@@ -118,17 +118,14 @@ public final class DataObjectSerializer<T extends DataObject> implements Seriali
         final List<DataObjectSerializedData> serializedData = (List<DataObjectSerializedData>) SerializationHelper.getObjectFromBytes(Base64.decodeBase64(objectInputStream.readUTF()), false);
 
         for (final DataObjectSerializedData data : serializedData) {
-            final Class<T> recordClass = (Class<T>) Class.forName(data.className);
+            final Class<DatastoreEntity> recordClass = (Class<DatastoreEntity>) Class.forName(data.className);
             final List<T> list = new ArrayList<>();
             result.put(recordClass, list);
 
             for (int i = 0; i < data.itemsQty; i++) {
                 final String recordValue = objectInputStream.readUTF();
 
-                final T r = recordClass.newInstance();
-                r.mergeWith(new DataObject(recordValue));
-
-                list.add(r);
+                list.add((T) new DataObject(recordValue));
             }
         }
         return result;
