@@ -83,6 +83,7 @@ public final class DataObjectSerializer<T extends DataObject> implements Seriali
             final List<T> items = entry.getValue();
 
             final DataObjectSerializedData data = new DataObjectSerializedData();
+            serializedData.add(data);
             data.itemsQty = items.size();
             data.className = entry.getKey().getName();
 
