@@ -14,6 +14,10 @@ public final class LIST<T> extends AbstractPropertyBuilder<ListProperty<T>, T> {
     }
 
     public LIST(final DatastoreEntity owner, final Class<? extends DataObject> itemClass) {
-        super(new ListProperty<T>(owner, itemClass), null);
+        this(owner, itemClass, false);
+    }
+
+    public LIST(final DatastoreEntity owner, final Class<? extends DataObject> itemClass, final boolean keepUniqueElements) {
+        super(new ListProperty<T>(owner, itemClass, keepUniqueElements), null);
     }
 }

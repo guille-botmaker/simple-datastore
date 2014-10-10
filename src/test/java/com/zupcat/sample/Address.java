@@ -3,7 +3,7 @@ package com.zupcat.sample;
 import com.zupcat.model.DataObject;
 
 /**
- * Subobjects don't have own state. They should delegate its state to ObjectVar, just like this example
+ * Subobjects don't have own state. They should delegate its state to DataObject, just like this example
  */
 public final class Address extends DataObject {
 

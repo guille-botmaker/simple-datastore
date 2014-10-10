@@ -217,7 +217,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return ((int) (Math.abs((now.getTime().getTime() - modified.getTime().getTime())) / 60000));
     }
 
-    protected void setObjectVarType(final String type) {
+    protected void setDataObjectType(final String type) {
         getDataObject().put("_t", type);
     }
 

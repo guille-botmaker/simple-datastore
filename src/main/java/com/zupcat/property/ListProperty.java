@@ -3,6 +3,7 @@ package com.zupcat.property;
 import com.zupcat.model.DataObject;
 import com.zupcat.model.DatastoreEntity;
 import com.zupcat.model.config.PropertyMeta;
+import org.apache.commons.collections4.list.SetUniqueList;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -15,10 +16,12 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
     private static final long serialVersionUID = 6181606486836703354L;
 
     private final Class<? extends DataObject> itemClass;
+    private final boolean keepUniqueElements;
 
-    public ListProperty(final DatastoreEntity owner, final Class<? extends DataObject> _itemClass) {
+    public ListProperty(final DatastoreEntity owner, final Class<? extends DataObject> _itemClass, final boolean _keepUniqueElements) {
         super(owner);
         itemClass = _itemClass;
+        keepUniqueElements = _keepUniqueElements;
     }
 
     @Override
@@ -160,7 +163,7 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
     // Writing operations
     @Override
     public boolean add(final V v) {
-        return getList().add(v);
+        return SetUniqueList.setUniqueList(getList()).add(v);
     }
 
     @Override
@@ -170,12 +173,12 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
 
     @Override
     public boolean addAll(final Collection<? extends V> c) {
-        return getList().addAll(c);
+        return SetUniqueList.setUniqueList(getList()).addAll(c);
     }
 
     @Override
     public boolean addAll(final int index, final Collection<? extends V> c) {
-        return getList().addAll(index, c);
+        return SetUniqueList.setUniqueList(getList()).addAll(index, c);
     }
 
     @Override
@@ -185,7 +188,7 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
 
     @Override
     public boolean retainAll(final Collection<?> c) {
-        return getList().retainAll(c);
+        return SetUniqueList.setUniqueList(getList()).retainAll(c);
     }
 
     @Override
@@ -195,12 +198,12 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
 
     @Override
     public V set(final int index, final V element) {
-        return getList().set(index, element);
+        return SetUniqueList.setUniqueList(getList()).set(index, element);
     }
 
     @Override
     public void add(final int index, final V element) {
-        getList().add(index, element);
+        SetUniqueList.setUniqueList(getList()).add(index, element);
     }
 
     @Override
