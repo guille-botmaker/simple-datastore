@@ -77,6 +77,7 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
 
         if (persistentObject != null) {
             result.put("___id___", persistentObject.getId());
+            result.put("___entityName___", persistentObject.getEntityName());
 
             final byte[] binaryData = objectHolderSerializer.serialize(persistentObject.getDataObject(), true);
 
