@@ -19,6 +19,10 @@ public abstract class PersistentObject implements Serializable {
 
 
     protected PersistentObject() {
+        setNewId();
+    }
+
+    public void setNewId() {
         setId(RandomUtils.getInstance().getRandomSafeAlphaNumberString(20));
     }
 
