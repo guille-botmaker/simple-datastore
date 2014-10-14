@@ -90,7 +90,7 @@ public class DataObjectTest extends AbstractTest {
             final DataObject item = new DataObject();
             fillDataObject(item);
 
-            dataObject.addItem(item);
+            dataObject.addChild(item);
         }
         return dataObject;
     }

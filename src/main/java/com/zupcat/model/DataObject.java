@@ -1,11 +1,11 @@
 package com.zupcat.model;
 
-import com.zupcat.property.ListProperty;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,26 +33,52 @@ public class DataObject extends JSONObject implements Serializable {
         super(source);
     }
 
-    public void addItem(final DataObject item) {
-        final JSONArray array = getJsonArray();
+    public void addChild(final DataObject item) {
+        final JSONArray array = getJsonArray(LIST_KEY);
 
         array.put(item);
     }
 
-    public List<DataObject> getItems() {
-        final JSONArray array = getJsonArray();
+    public List<DataObject> getChildren() {
+        final JSONArray array = getJsonArray(LIST_KEY);
 
-        return ListProperty.getInternalListFromJSONArray(array);
+        return getInternalListFromJSONArray(array);
     }
 
-    private JSONArray getJsonArray() {
+    public List<DataObject> getItemsForList(final String listKey) {
+        final JSONArray array = getJsonArray(listKey);
+
+        return getInternalListFromJSONArray(array);
+    }
+
+    public String getType() {
+        return getString("_t");
+    }
+
+    public void setType(final String _type) {
+        put("_t", _type);
+    }
+
+    public static List getInternalListFromJSONArray(final JSONArray jsonArray) {
+        try {
+            final Field arrayField = jsonArray.getClass().getDeclaredField("myArrayList");
+
+            arrayField.setAccessible(true);
+
+            return (List) arrayField.get(jsonArray);
+        } catch (final Exception _exception) {
+            throw new RuntimeException("Problems when getting JSONArray internal array field using reflection for array [" + jsonArray + ": " + _exception.getMessage(), _exception);
+        }
+    }
+
+    private JSONArray getJsonArray(final String listKey) {
         JSONArray array;
 
-        if (has(LIST_KEY)) {
-            array = getJSONArray(LIST_KEY);
+        if (has(listKey)) {
+            array = getJSONArray(listKey);
         } else {
             array = new JSONArray();
-            put(LIST_KEY, array);
+            put(listKey, array);
         }
         return array;
     }
