@@ -38,22 +38,6 @@ public final class MassiveDownload implements Serializable {
         this.bshFilter = bshFilter;
     }
 
-    public void setKind(final String kind) {
-        this.kind = kind;
-    }
-
-    public void setPageSize(final int pageSize) {
-        this.pageSize = pageSize;
-    }
-
-    public void setFromFormattedTime(final long fromFormattedTime) {
-        this.fromFormattedTime = fromFormattedTime;
-    }
-
-    public void setGroupId(final int groupId) {
-        this.groupId = groupId;
-    }
-
     public Collection<PersistentObject> getResults() {
         final List<Entity> results = getResultsEntities();
 
@@ -78,6 +62,10 @@ public final class MassiveDownload implements Serializable {
         return kind;
     }
 
+    public void setKind(final String kind) {
+        this.kind = kind;
+    }
+
     public String getWebCursor() {
         return webCursor;
     }
@@ -86,12 +74,24 @@ public final class MassiveDownload implements Serializable {
         return fromFormattedTime;
     }
 
+    public void setFromFormattedTime(final long fromFormattedTime) {
+        this.fromFormattedTime = fromFormattedTime;
+    }
+
     public int getGroupId() {
         return groupId;
     }
 
+    public void setGroupId(final int groupId) {
+        this.groupId = groupId;
+    }
+
     public int getPageSize() {
         return pageSize;
+    }
+
+    public void setPageSize(final int pageSize) {
+        this.pageSize = pageSize;
     }
 
     public boolean hasMore() {

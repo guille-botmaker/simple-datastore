@@ -8,17 +8,18 @@ import java.util.*;
  */
 public final class RandomUtils {
 
-    private static RandomUtils instance;
-
     private final static char[] SAFE_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
     private final static char[] SAFE_NUMBERS = "0123456789".toCharArray();
     private final static char[] SAFE_ALPHANUMBERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
-
     private static final Object INIT_LOCK_OBJECT = new Object();
-
+    private static RandomUtils instance;
     private final SecureRandom random;
     //private Boolean randomBoolean;
 
+
+    private RandomUtils() {
+        this.random = new SecureRandom();
+    }
 
     public static RandomUtils getInstance() {
         if (instance == null) {
@@ -29,10 +30,6 @@ public final class RandomUtils {
             }
         }
         return instance;
-    }
-
-    private RandomUtils() {
-        this.random = new SecureRandom();
     }
 
     public String getRandomSafeString() {

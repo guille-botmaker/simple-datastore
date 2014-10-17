@@ -20,45 +20,9 @@ import java.util.Map;
 public abstract class AbstractTest {
 
     private static final Object LOCK_OBJECT = new Object();
-
-    protected SimpleDatastoreService service;
     private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+    protected SimpleDatastoreService service;
     protected TestClass testClass;
-
-    @Before
-    public void setUp() throws Exception {
-        synchronized (LOCK_OBJECT) {
-            helper.setUp();
-
-            service = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
-            service.registerDAO(new UserDAO());
-
-            testClass = new TestClass();
-            testClass.other = new TestClass();
-
-            final RandomUtils randomUtils = RandomUtils.getInstance();
-
-            testClass.s = randomUtils.getRandomSafeAlphaNumberString(5);
-            testClass.i = randomUtils.getRandomInt(1000000);
-            testClass.l = randomUtils.getRandomLong();
-
-            testClass.other.s = randomUtils.getRandomSafeAlphaNumberString(5);
-            testClass.other.i = randomUtils.getRandomInt(1000000);
-            testClass.other.l = randomUtils.getRandomLong();
-        }
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
-
-//    @BeforeClass
-//    public static void oneTimeSetUp() {
-//    }
-
-//    @AfterClass
-//    public static void oneTimeTearDown() {
-//    }
 
     protected static List<User> buildUsers() {
         final int samples = 100;
@@ -121,6 +85,40 @@ public abstract class AbstractTest {
         return result;
     }
 
+    @Before
+    public void setUp() throws Exception {
+        synchronized (LOCK_OBJECT) {
+            helper.setUp();
+
+            service = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
+            service.registerDAO(new UserDAO());
+
+            testClass = new TestClass();
+            testClass.other = new TestClass();
+
+            final RandomUtils randomUtils = RandomUtils.getInstance();
+
+            testClass.s = randomUtils.getRandomSafeAlphaNumberString(5);
+            testClass.i = randomUtils.getRandomInt(1000000);
+            testClass.l = randomUtils.getRandomLong();
+
+            testClass.other.s = randomUtils.getRandomSafeAlphaNumberString(5);
+            testClass.other.i = randomUtils.getRandomInt(1000000);
+            testClass.other.l = randomUtils.getRandomLong();
+        }
+    }
+
+//    @BeforeClass
+//    public static void oneTimeSetUp() {
+//    }
+
+//    @AfterClass
+//    public static void oneTimeTearDown() {
+//    }
+
+    @After
+    public void tearDown() throws Exception {
+    }
 
     public static final class TestClass implements Serializable {
 

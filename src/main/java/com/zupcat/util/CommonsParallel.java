@@ -121,8 +121,8 @@ public abstract class CommonsParallel<T> {
 
     public static final class Result<T> {
 
-        private Throwable throwable = null;
         private final T inputObject;
+        private Throwable throwable = null;
 
 
         public Result(final T _inputObject) {

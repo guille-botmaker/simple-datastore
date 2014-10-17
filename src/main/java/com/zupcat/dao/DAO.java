@@ -24,10 +24,9 @@ import java.util.logging.Logger;
  */
 public class DAO<P extends DatastoreEntity> implements Serializable, IDAO<P> {
 
+    protected static final Logger log = Logger.getLogger(DAO.class.getName());
     private static final long serialVersionUID = 471847964351314234L;
     private static final RetryingHandler RETRYING_HANDLER = new RetryingHandler();
-    protected static final Logger log = Logger.getLogger(DAO.class.getName());
-
     protected final P sample;
     private final EntityPersistentObjectConverter<P> entityPersistentObjectConverter;
 
@@ -42,6 +41,9 @@ public class DAO<P extends DatastoreEntity> implements Serializable, IDAO<P> {
         entityPersistentObjectConverter = EntityPersistentObjectConverter.instance();
     }
 
+    public static Key buildKey(final String entityName, final String id) {
+        return KeyFactory.createKey(entityName, id);
+    }
 
     public void updateOrPersist(final P persistentObject) {
         final Entity entity = prepareForUpdateOrPersist(persistentObject);
@@ -125,7 +127,6 @@ public class DAO<P extends DatastoreEntity> implements Serializable, IDAO<P> {
         return findByQuery(null);
     }
 
-
     public P findById(final String id) {
         final String entityName = sample.getEntityName();
         final String cacheKey = entityName + id;
@@ -196,6 +197,15 @@ public class DAO<P extends DatastoreEntity> implements Serializable, IDAO<P> {
         getRetryingHandler().tryDSRemoveAsync(buildKey(entityName, id));
     }
 
+//    public Iterator<C> getByGroupId(final int groupId, final BuildQuery _buildQuery) {
+//        final QueryData queryData = new QueryData(getEntityDescriptor().getKind(), null, 150);
+//        queryData.addOp(EntityDescriptor.GROUP_ID.getPropertyName(), Query.FilterOperator.EQUAL, groupId);
+//
+//        _buildQuery.buildQuery(queryData);
+//
+//        return this.findByQueryLazy(queryData);
+//    }
+
     public void remove(final Collection<String> ids) {
         final String entityName = sample.getEntityName();
         final MemCache cache = sample.getCacheStrategy().get();
@@ -209,15 +219,6 @@ public class DAO<P extends DatastoreEntity> implements Serializable, IDAO<P> {
 
         getRetryingHandler().tryDSRemove(keys);
     }
-
-//    public Iterator<C> getByGroupId(final int groupId, final BuildQuery _buildQuery) {
-//        final QueryData queryData = new QueryData(getEntityDescriptor().getKind(), null, 150);
-//        queryData.addOp(EntityDescriptor.GROUP_ID.getPropertyName(), Query.FilterOperator.EQUAL, groupId);
-//
-//        _buildQuery.buildQuery(queryData);
-//
-//        return this.findByQueryLazy(queryData);
-//    }
 
     protected P findUnique(final Query.Filter filter) {
         final Query query = new Query(getEntityName());
@@ -302,10 +303,6 @@ public class DAO<P extends DatastoreEntity> implements Serializable, IDAO<P> {
 
     public RetryingHandler getRetryingHandler() {
         return RETRYING_HANDLER;
-    }
-
-    public static Key buildKey(final String entityName, final String id) {
-        return KeyFactory.createKey(entityName, id);
     }
 
     public Entity buildEntityFromPersistentObject(final P persistentObject) {

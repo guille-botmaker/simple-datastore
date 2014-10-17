@@ -8,14 +8,9 @@ import java.util.List;
 public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> implements Serializable {
 
     private static final long serialVersionUID = -2702019046191004750L;
-
-    protected boolean indexable;
-    public boolean sendToClient;
-    protected boolean auditable;
-    protected T initialValue;
-
+    public final List<String> stringSpecificValues = new ArrayList<>();
     private final P propertyMeta;
-
+    public boolean sendToClient;
     // properties attributes
     public boolean mandatory;
     public long numberInclusiveMin;
@@ -24,7 +19,9 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     public int stringMaxLength;
     public boolean stringWithoutSpaces;
     public boolean stringIsOnlyLowerCase;
-    public final List<String> stringSpecificValues = new ArrayList<>();
+    protected boolean indexable;
+    protected boolean auditable;
+    protected T initialValue;
 
 
     protected AbstractPropertyBuilder(final P propertyMeta, final T initialValue) {

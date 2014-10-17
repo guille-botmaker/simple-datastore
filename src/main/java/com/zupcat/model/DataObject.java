@@ -33,6 +33,18 @@ public class DataObject extends JSONObject implements Serializable {
         super(source);
     }
 
+    public static List getInternalListFromJSONArray(final JSONArray jsonArray) {
+        try {
+            final Field arrayField = jsonArray.getClass().getDeclaredField("myArrayList");
+
+            arrayField.setAccessible(true);
+
+            return (List) arrayField.get(jsonArray);
+        } catch (final Exception _exception) {
+            throw new RuntimeException("Problems when getting JSONArray internal array field using reflection for array [" + jsonArray + ": " + _exception.getMessage(), _exception);
+        }
+    }
+
     public void addChild(final DataObject item) {
         final JSONArray array = getJsonArray(LIST_KEY);
 
@@ -57,18 +69,6 @@ public class DataObject extends JSONObject implements Serializable {
 
     public void setType(final String _type) {
         put("_t", _type);
-    }
-
-    public static List getInternalListFromJSONArray(final JSONArray jsonArray) {
-        try {
-            final Field arrayField = jsonArray.getClass().getDeclaredField("myArrayList");
-
-            arrayField.setAccessible(true);
-
-            return (List) arrayField.get(jsonArray);
-        } catch (final Exception _exception) {
-            throw new RuntimeException("Problems when getting JSONArray internal array field using reflection for array [" + jsonArray + ": " + _exception.getMessage(), _exception);
-        }
     }
 
     private JSONArray getJsonArray(final String listKey) {

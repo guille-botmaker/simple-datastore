@@ -15,11 +15,9 @@ import java.io.*;
  */
 public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
 
+    public static final String DATA_CONTAINER_PROPERTY = "bdata";
     private static final Object LOCK_OBJECT = new Object();
     private static EntityPersistentObjectConverter _instance;
-
-    public static final String DATA_CONTAINER_PROPERTY = "bdata";
-
     private final DataObjectSerializer<DataObject> objectHolderSerializer;
 
 

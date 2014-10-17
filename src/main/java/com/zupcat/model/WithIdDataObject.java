@@ -9,9 +9,8 @@ import java.util.Map;
  */
 public class WithIdDataObject extends DataObject {
 
-    private static final long serialVersionUID = 471847964351314234L;
-
     public static final String ID_KEY = "_i";
+    private static final long serialVersionUID = 471847964351314234L;
 
 
     public WithIdDataObject() {

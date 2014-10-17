@@ -12,11 +12,10 @@ import java.util.logging.Logger;
 public final class RetryingExecutor {
 
     private static final Logger log = Logger.getLogger(RetryingExecutor.class.getName());
-
-    private int maxRetries;
     private final int timeBetweenRetries;
     private final IClosure closure;
     private final Object params;
+    private int maxRetries;
 
     public RetryingExecutor(final IClosure closure, final Object params) {
         this(4, 800, closure, params);

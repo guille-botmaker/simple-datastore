@@ -14,11 +14,9 @@ import java.io.Serializable;
  */
 public final class Resource implements Serializable {
 
+    public static final int MAX_BLOB_SIZE = 1150 * 1024; //(1150k);
     private static final long serialVersionUID = -2259862423311176614L;
     private static final String ENTITY_NAME = "Resource";
-
-    public static final int MAX_BLOB_SIZE = 1150 * 1024; //(1150k);
-
     private String id;
     private String type;
     private byte[] rawValue;
@@ -32,50 +30,6 @@ public final class Resource implements Serializable {
         this.id = other.id;
         this.type = other.type;
         this.rawValue = other.rawValue;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public Object getJavaObject() {
-        return rawValue == null ? null : SerializationHelper.getObjectFromBytes(rawValue);
-    }
-
-    public byte[] getRawValue() {
-        return rawValue;
-    }
-
-    public void save() {
-        save(false);
-    }
-
-    public void save(final boolean saveAsync) {
-        validateSize();
-
-        final Entity anEntity = new Entity(ENTITY_NAME, id);
-
-        if (type != null) {
-            anEntity.setProperty("type", type);
-        }
-        if (rawValue != null) {
-            anEntity.setUnindexedProperty("bdata", new Blob(rawValue));
-        }
-
-        final RetryingHandler retryingHandler = new RetryingHandler();
-
-        if (saveAsync) {
-            retryingHandler.tryDSPutAsync(anEntity);
-        } else {
-            retryingHandler.tryDSPut(anEntity);
-        }
-        CacheStrategy.APPLICATION_CACHE.get().put(ENTITY_NAME + id, this);
-    }
-
-    public void validateSize() {
-        if (this.rawValue != null && this.rawValue.length > MAX_BLOB_SIZE) {
-            throw new RuntimeException("Resource with key [" + id + "] is bigger than permitted(" + MAX_BLOB_SIZE + "): " + this.rawValue.length);
-        }
     }
 
     public static Resource load(final String id) {
@@ -122,6 +76,50 @@ public final class Resource implements Serializable {
         resource.rawValue = javaObject == null ? null : SerializationHelper.getBytes(javaObject);
 
         return resource;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public Object getJavaObject() {
+        return rawValue == null ? null : SerializationHelper.getObjectFromBytes(rawValue);
+    }
+
+    public byte[] getRawValue() {
+        return rawValue;
+    }
+
+    public void save() {
+        save(false);
+    }
+
+    public void save(final boolean saveAsync) {
+        validateSize();
+
+        final Entity anEntity = new Entity(ENTITY_NAME, id);
+
+        if (type != null) {
+            anEntity.setProperty("type", type);
+        }
+        if (rawValue != null) {
+            anEntity.setUnindexedProperty("bdata", new Blob(rawValue));
+        }
+
+        final RetryingHandler retryingHandler = new RetryingHandler();
+
+        if (saveAsync) {
+            retryingHandler.tryDSPutAsync(anEntity);
+        } else {
+            retryingHandler.tryDSPut(anEntity);
+        }
+        CacheStrategy.APPLICATION_CACHE.get().put(ENTITY_NAME + id, this);
+    }
+
+    public void validateSize() {
+        if (this.rawValue != null && this.rawValue.length > MAX_BLOB_SIZE) {
+            throw new RuntimeException("Resource with key [" + id + "] is bigger than permitted(" + MAX_BLOB_SIZE + "): " + this.rawValue.length);
+        }
     }
 
     @Override

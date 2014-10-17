@@ -28,6 +28,14 @@ public final class RetryingHandler implements Serializable {
     private static final int MAX_RETRIES = 6;
     private static final int WAIT_MS = 800;
 
+    public static void sleep(final int millis) {
+        try {
+            Thread.sleep(millis);
+
+        } catch (final InterruptedException ie) {
+            // nothing to do
+        }
+    }
 
     public Entity tryExecuteQueryWithSingleResult(final Query query) {
         final Entity[] result = new Entity[1];
@@ -82,7 +90,6 @@ public final class RetryingHandler implements Serializable {
         }, null);
     }
 
-
     public Entity tryDSGet(final Key entityKey) {
         final Entity[] result = new Entity[1];
         result[0] = null;
@@ -120,7 +127,6 @@ public final class RetryingHandler implements Serializable {
         });
     }
 
-
     public void tryDSRemove(final Key entityKey) {
         tryClosure(new Closure() {
             public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
@@ -132,7 +138,6 @@ public final class RetryingHandler implements Serializable {
             }
         }, null);
     }
-
 
     public void tryDSRemoveAsync(final Key key) {
         tryClosureAsync(new AsyncClosure<Void>() {
@@ -146,7 +151,6 @@ public final class RetryingHandler implements Serializable {
             }
         });
     }
-
 
     public void tryDSPutMultipleAsync(final Iterable<Entity> entities) {
         tryClosureAsync(new AsyncClosure<List<Key>>() {
@@ -166,6 +170,17 @@ public final class RetryingHandler implements Serializable {
     }
 
 
+//    public void tryDSPutMultiple(final Iterable<Entity> entities) {
+//        tryClosure(new Closure() {
+//            public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
+//                if (loggingActivated) {
+//                    log.log(Level.SEVERE, "PERF - tryDSPutMultiple", new Exception());
+//                }
+//                datastore.put(entities);
+//            }
+//        }, null);
+//    }
+
     public Map<Key, Entity> tryDSGetMultiple(final Collection<Key> keys) {
         final Map<Key, Entity> result = new HashMap<>();
 
@@ -184,19 +199,6 @@ public final class RetryingHandler implements Serializable {
         return result;
     }
 
-
-//    public void tryDSPutMultiple(final Iterable<Entity> entities) {
-//        tryClosure(new Closure() {
-//            public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
-//                if (loggingActivated) {
-//                    log.log(Level.SEVERE, "PERF - tryDSPutMultiple", new Exception());
-//                }
-//                datastore.put(entities);
-//            }
-//        }, null);
-//    }
-
-
     public void tryDSPut(final Entity entity) {
         tryClosure(new Closure() {
             public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
@@ -209,7 +211,6 @@ public final class RetryingHandler implements Serializable {
             }
         }, null);
     }
-
 
     public void tryDSPutAsync(final Entity entity) {
         tryClosureAsync(new AsyncClosure<Key>() {
@@ -239,7 +240,6 @@ public final class RetryingHandler implements Serializable {
         }
     }
 
-
     private <T> Future<T> tryClosureAsync(final AsyncClosure<T> closure) {
         final ValuesContainer values = new ValuesContainer();
         final AsyncDatastoreService datastore = DatastoreServiceFactory.getAsyncDatastoreService();
@@ -259,7 +259,6 @@ public final class RetryingHandler implements Serializable {
         return result;
     }
 
-
     private void handleError(final ValuesContainer values, final Exception exception, final boolean isTimeoutException) {
         values.retry = values.retry - 1;
 
@@ -272,16 +271,6 @@ public final class RetryingHandler implements Serializable {
 
         if (isTimeoutException) {
             values.retryWait = values.retryWait * 3;
-        }
-    }
-
-
-    public static void sleep(final int millis) {
-        try {
-            Thread.sleep(millis);
-
-        } catch (final InterruptedException ie) {
-            // nothing to do
         }
     }
 

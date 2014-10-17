@@ -10,11 +10,9 @@ import java.util.logging.Logger;
  */
 public abstract class PersistentObject implements Serializable {
 
-    private static final long serialVersionUID = 6181606486836703354L;
-    protected static final Logger LOGGER = Logger.getLogger(PersistentObject.class.getName());
-
     public static final String DATE_FORMAT = "yyMMddHHmmssSSS";
-
+    protected static final Logger LOGGER = Logger.getLogger(PersistentObject.class.getName());
+    private static final long serialVersionUID = 6181606486836703354L;
     private String id;
 
 

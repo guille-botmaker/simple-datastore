@@ -20,10 +20,8 @@ import java.util.*;
 
 public abstract class DatastoreEntity extends PersistentObject implements Serializable {
 
-    private static final long serialVersionUID = 6181606486836703354L;
-
     public static final int MAX_GROUPS = 100;
-
+    private static final long serialVersionUID = 6181606486836703354L;
     // persistent state
     private final DataObject dataObject = new DataObject();
 

@@ -8,7 +8,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.util.*;
 
 public final class ListProperty<V> extends PropertyMeta<List<V>> implements Serializable, List<V> {
@@ -78,7 +77,6 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
     private List<V> getList() {
         return getValueImpl(getOwner().getDataObject());
     }
-
 
 
     // Reading operations

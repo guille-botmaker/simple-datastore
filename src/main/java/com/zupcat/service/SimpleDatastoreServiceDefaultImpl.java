@@ -7,10 +7,9 @@ import java.util.Map;
 
 public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreService {
 
-    private boolean loggingDatastoreCalls = false;
     private final Map<Class, DAO> daoMap = new HashMap<>();
     private final Map<String, DAO> daoByEntityNameMap = new HashMap<>();
-
+    private boolean loggingDatastoreCalls = false;
 
     @Override
     public void setDatastoreCallsLogging(final boolean activate) {

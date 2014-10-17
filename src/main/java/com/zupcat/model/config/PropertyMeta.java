@@ -14,10 +14,9 @@ import java.util.Objects;
 public abstract class PropertyMeta<E> implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
-
+    private final DatastoreEntity owner;
     protected String name;
     protected AbstractPropertyBuilder<? extends PropertyMeta<E>, E> options;
-    private final DatastoreEntity owner;
 
 
     protected PropertyMeta(final DatastoreEntity owner) {
