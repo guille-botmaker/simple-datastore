@@ -8,6 +8,7 @@ import com.zupcat.property.ByteArrayProperty;
 import com.zupcat.property.IntegerProperty;
 import com.zupcat.property.ListProperty;
 import com.zupcat.property.LongProperty;
+import com.zupcat.util.RandomUtils;
 import com.zupcat.util.TimeUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -26,7 +27,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     private final DataObject dataObject = new DataObject();
 
     private final String entityName;
-    private final CacheStrategy cacheStrategy;
+    private CacheStrategy cacheStrategy;
     private final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();
 
     // entity usefull properties
@@ -34,19 +35,29 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     public LongProperty LAST_MODIFICATION;
 
 
-    protected DatastoreEntity(final CacheStrategy cacheStrategy) {
-        GROUP_ID = new INT(this).indexable().build();
-        LAST_MODIFICATION = new LONG(this).indexable().build();
-
-        this.cacheStrategy = cacheStrategy;
-
+    protected DatastoreEntity() {
         final Class<? extends DatastoreEntity> clazz = this.getClass();
         final String className = clazz.getName();
         entityName = className.substring(className.lastIndexOf(".") + 1);
+        this.cacheStrategy = CacheStrategy.NO_CACHE;
+
+        setNewId();
+    }
+
+    public void setNewId() {
+        setId(RandomUtils.getInstance().getRandomSafeAlphaNumberString(20));
+    }
+
+    protected DatastoreEntity(final CacheStrategy cacheStrategy) {
+        this();
+
+        this.cacheStrategy = cacheStrategy;
+        GROUP_ID = new INT(this).indexable().build();
+        LAST_MODIFICATION = new LONG(this).indexable().build();
 
         config();
 
-        for (final Field field : clazz.getFields()) {
+        for (final Field field : getClass().getFields()) {
             if (PropertyMeta.class.isAssignableFrom(field.getType())) {
                 final String propertyName = field.getName();
 
@@ -57,7 +68,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
                     addPropertyMeta(propertyName, propertyMeta);
 
                 } catch (final IllegalAccessException _illegalAccessException) {
-                    throw new RuntimeException("Problems getting value for field [" + propertyName + "], of class [" + clazz + "]. Possible private variable?: " + _illegalAccessException.getMessage(), _illegalAccessException);
+                    throw new RuntimeException("Problems getting value for field [" + propertyName + "], of class [" + getClass() + "]. Possible private variable?: " + _illegalAccessException.getMessage(), _illegalAccessException);
                 }
             }
         }

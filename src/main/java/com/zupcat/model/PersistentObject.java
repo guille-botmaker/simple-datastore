@@ -1,7 +1,5 @@
 package com.zupcat.model;
 
-import com.zupcat.util.RandomUtils;
-
 import java.io.Serializable;
 import java.util.logging.Logger;
 
@@ -13,15 +11,6 @@ public abstract class PersistentObject implements Serializable {
     public static final String DATE_FORMAT = "yyMMddHHmmssSSS";
     protected static final Logger LOGGER = Logger.getLogger(PersistentObject.class.getName());
     private static final long serialVersionUID = 6181606486836703354L;
-
-
-    protected PersistentObject() {
-        setNewId();
-    }
-
-    public void setNewId() {
-        setId(RandomUtils.getInstance().getRandomSafeAlphaNumberString(20));
-    }
 
     public abstract String getId();
 
