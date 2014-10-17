@@ -160,6 +160,17 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return result;
     }
 
+    @Override
+    public void setId(final String id) {
+        getDataObject().put("_id_", id);
+    }
+
+    @Override
+    public String getId() {
+        return getDataObject().optString("_id_", null);
+    }
+
+
     public Map<String, PropertyMeta> getPropertiesMetadata() {
         return propertiesMetadata;
     }

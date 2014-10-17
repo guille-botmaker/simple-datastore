@@ -13,7 +13,6 @@ public abstract class PersistentObject implements Serializable {
     public static final String DATE_FORMAT = "yyMMddHHmmssSSS";
     protected static final Logger LOGGER = Logger.getLogger(PersistentObject.class.getName());
     private static final long serialVersionUID = 6181606486836703354L;
-    private String id;
 
 
     protected PersistentObject() {
@@ -24,13 +23,9 @@ public abstract class PersistentObject implements Serializable {
         setId(RandomUtils.getInstance().getRandomSafeAlphaNumberString(20));
     }
 
-    public String getId() {
-        return id;
-    }
+    public abstract String getId();
 
-    public void setId(final String id) {
-        this.id = id;
-    }
+    public abstract void setId(final String id);
 
     public abstract void setModified();
 
@@ -46,12 +41,16 @@ public abstract class PersistentObject implements Serializable {
         }
 
         final PersistentObject that = (PersistentObject) o;
+        final String myId = getId();
+        final String thatId = that.getId();
 
-        return !(id != null ? !id.equals(that.id) : that.id != null);
+        return !(myId != null ? !myId.equals(thatId) : thatId != null);
     }
 
     @Override
     public int hashCode() {
+        final String id = getId();
+
         return id != null ? id.hashCode() : 0;
     }
 }
