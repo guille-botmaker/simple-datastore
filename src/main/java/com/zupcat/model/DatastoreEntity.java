@@ -157,7 +157,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return true;
     }
 
-    public DataObject getObjectHolderForClient() {
+    public DataObject getDataObjectForClient() {
         final DataObject result = new DataObject();
         final DataObject source = getDataObject();
 
