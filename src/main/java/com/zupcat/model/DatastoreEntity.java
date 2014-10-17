@@ -173,12 +173,12 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
 
     @Override
     public void setId(final String id) {
-        getDataObject().put("_id_", id);
+        getDataObject().put(WithIdDataObject.ID_KEY, id);
     }
 
     @Override
     public String getId() {
-        return getDataObject().optString("_id_", null);
+        return getDataObject().optString(WithIdDataObject.ID_KEY, null);
     }
 
 
