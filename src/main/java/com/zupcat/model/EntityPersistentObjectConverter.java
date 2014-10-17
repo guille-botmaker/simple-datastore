@@ -9,8 +9,6 @@ import com.zupcat.service.SimpleDatastoreServiceFactory;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Helper that converts Datastore Entities to Java Objects
@@ -72,60 +70,60 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
         }
     }
 
-    public Map<String, Object> buildMapFromPersistentObject(final P persistentObject) {
-        final Map<String, Object> result = new HashMap<>();
+//    public Map<String, Object> buildMapFromPersistentObject(final P persistentObject) {
+//        final Map<String, Object> result = new HashMap<>();
+//
+//        if (persistentObject != null) {
+//            result.put("___id___", persistentObject.getId());
+//            result.put("___entityName___", persistentObject.getEntityName());
+//
+//            final byte[] binaryData = objectHolderSerializer.serialize(persistentObject.getDataObject(), true);
+//
+//            result.put(DATA_CONTAINER_PROPERTY, binaryData);
+//
+//            for (final PropertyMeta propertyMeta : persistentObject.getPropertiesMetadata().values()) {
+//                if (propertyMeta.isIndexable()) {
+//                    result.put(propertyMeta.getPropertyName(), propertyMeta.get());
+//                }
+//            }
+//        }
+//        return result;
+//    }
 
-        if (persistentObject != null) {
-            result.put("___id___", persistentObject.getId());
-            result.put("___entityName___", persistentObject.getEntityName());
-
-            final byte[] binaryData = objectHolderSerializer.serialize(persistentObject.getDataObject(), true);
-
-            result.put(DATA_CONTAINER_PROPERTY, binaryData);
-
-            for (final PropertyMeta propertyMeta : persistentObject.getPropertiesMetadata().values()) {
-                if (propertyMeta.isIndexable()) {
-                    result.put(propertyMeta.getPropertyName(), propertyMeta.get());
-                }
-            }
-        }
-        return result;
-    }
-
-    public P buildPersistentObjectFromMap(final Map<String, Object> map, final DAO<P> dao) {
-        P result = null;
-
-        if (map != null && !map.isEmpty()) {
-            result = dao.buildPersistentObjectInstance();
-
-            result.setId(map.get("___id___").toString());
-
-            final byte[] binaryData = (byte[]) map.get(DATA_CONTAINER_PROPERTY);
-
-            if (binaryData != null) {
-                objectHolderSerializer.deserialize(binaryData, result.getDataObject(), true);
-            }
-
-            for (final PropertyMeta propertyMeta : result.getPropertiesMetadata().values()) {
-                if (propertyMeta.isIndexable()) {
-                    final Serializable propertyValue = (Serializable) map.get(propertyMeta.getPropertyName());
-
-                    if (propertyValue != null && propertyValue.getClass().getName().equals(Long.class.getName()) && propertyMeta.getClass().getName().equals(IntegerProperty.class.getName())) {
-                        final Long longValue = (Long) propertyValue;
-
-                        if (longValue > Integer.MAX_VALUE || longValue < Integer.MIN_VALUE) {
-                            throw new RuntimeException("Trying to set long value to IntegerProperty. Value was [" + longValue + "], property was [" + propertyMeta.getPropertyName() + "]");
-                        }
-
-                        propertyMeta.set(longValue.intValue());
-                    } else {
-                        propertyMeta.set(propertyValue);
-                    }
-                }
-            }
-        }
-        return result;
-    }
+//    public P buildPersistentObjectFromMap(final Map<String, Object> map, final DAO<P> dao) {
+//        P result = null;
+//
+//        if (map != null && !map.isEmpty()) {
+//            result = dao.buildPersistentObjectInstance();
+//
+//            result.setId(map.get("___id___").toString());
+//
+//            final byte[] binaryData = (byte[]) map.get(DATA_CONTAINER_PROPERTY);
+//
+//            if (binaryData != null) {
+//                objectHolderSerializer.deserialize(binaryData, result.getDataObject(), true);
+//            }
+//
+//            for (final PropertyMeta propertyMeta : result.getPropertiesMetadata().values()) {
+//                if (propertyMeta.isIndexable()) {
+//                    final Serializable propertyValue = (Serializable) map.get(propertyMeta.getPropertyName());
+//
+//                    if (propertyValue != null && propertyValue.getClass().getName().equals(Long.class.getName()) && propertyMeta.getClass().getName().equals(IntegerProperty.class.getName())) {
+//                        final Long longValue = (Long) propertyValue;
+//
+//                        if (longValue > Integer.MAX_VALUE || longValue < Integer.MIN_VALUE) {
+//                            throw new RuntimeException("Trying to set long value to IntegerProperty. Value was [" + longValue + "], property was [" + propertyMeta.getPropertyName() + "]");
+//                        }
+//
+//                        propertyMeta.set(longValue.intValue());
+//                    } else {
+//                        propertyMeta.set(propertyValue);
+//                    }
+//                }
+//            }
+//        }
+//        return result;
+//    }
 
     public Entity buildEntityFromPersistentObject(final P persistentObject, final DAO<P> dao) {
         if (persistentObject == null) {

@@ -312,14 +312,6 @@ public class DAO<P extends DatastoreEntity> implements Serializable, IDAO<P> {
         return entityPersistentObjectConverter.buildEntityFromPersistentObject(persistentObject, this);
     }
 
-    public Map<String, Object> buildMapFromPersistentObject(final P persistentObject) {
-        return entityPersistentObjectConverter.buildMapFromPersistentObject(persistentObject);
-    }
-
-    public P buildPersistentObjectFromMap(final Map<String, Object> map) {
-        return entityPersistentObjectConverter.buildPersistentObjectFromMap(map, this);
-    }
-
     public P buildPersistentObjectFromEntity(final Entity entity) {
         return entityPersistentObjectConverter.buildPersistentObjectFromEntity(entity, this);
     }
