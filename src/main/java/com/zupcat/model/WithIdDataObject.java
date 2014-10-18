@@ -2,6 +2,9 @@ package com.zupcat.model;
 
 import org.json.JSONException;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Map;
 
 /**
@@ -29,11 +32,23 @@ public class WithIdDataObject extends DataObject {
     }
 
     public String getId() {
-        return getString(ID_KEY);
+        return optString(ID_KEY, null);
     }
 
     public void setId(final String id) {
         put(ID_KEY, id);
+    }
+
+    private void writeObject(final ObjectOutputStream objectOutputStream) throws IOException {
+        objectOutputStream.defaultWriteObject();
+        objectOutputStream.writeUTF(this.toString());
+    }
+
+    private void readObject(final ObjectInputStream objectInputStream) throws ClassNotFoundException, IOException {
+        // default deserialization
+        objectInputStream.defaultReadObject();
+
+        this.mergeWith(new WithIdDataObject(objectInputStream.readUTF()));
     }
 
     @Override

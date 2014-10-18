@@ -64,7 +64,7 @@ public class DataObject extends JSONObject implements Serializable {
     }
 
     public String getType() {
-        return getString("_t");
+        return optString("_t", null);
     }
 
     public void setType(final String _type) {
