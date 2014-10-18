@@ -51,13 +51,23 @@ public class DataObject extends JSONObject implements Serializable {
         array.put(item);
     }
 
+    public void addChildren(final List<DataObject> items) {
+        if (items != null && !items.isEmpty()) {
+            final JSONArray array = getJsonArray(LIST_KEY);
+
+            for (final DataObject item : items) {
+                array.put(item);
+            }
+        }
+    }
+
     public List<DataObject> getChildren() {
         final JSONArray array = getJsonArray(LIST_KEY);
 
         return getInternalListFromJSONArray(array);
     }
 
-    public List<DataObject> getItemsForList(final String listKey) {
+    public <V> List<V> getItemsForList(final String listKey) {
         final JSONArray array = getJsonArray(listKey);
 
         return getInternalListFromJSONArray(array);
