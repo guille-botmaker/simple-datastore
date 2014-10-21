@@ -27,12 +27,11 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     private final DataObject dataObject = new DataObject();
 
     private final String entityName;
-    private CacheStrategy cacheStrategy;
     private final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();
-
     // entity usefull properties
     public IntegerProperty GROUP_ID;
     public LongProperty LAST_MODIFICATION;
+    private CacheStrategy cacheStrategy;
 
 
     protected DatastoreEntity() {
@@ -42,10 +41,6 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         this.cacheStrategy = CacheStrategy.NO_CACHE;
 
         setNewId();
-    }
-
-    public void setNewId() {
-        setId(RandomUtils.getInstance().getRandomSafeAlphaNumberString(20));
     }
 
     protected DatastoreEntity(final CacheStrategy cacheStrategy) {
@@ -74,6 +69,10 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         }
         GROUP_ID.set(Math.abs(getId().hashCode() % MAX_GROUPS));
         setModified();
+    }
+
+    public void setNewId() {
+        setId(RandomUtils.getInstance().getRandomSafeAlphaNumberString(20));
     }
 
     public boolean shouldBeSentToClient() {
@@ -172,15 +171,14 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     }
 
     @Override
-    public void setId(final String id) {
-        getDataObject().put(WithIdDataObject.ID_KEY, id);
-    }
-
-    @Override
     public String getId() {
         return getDataObject().optString(WithIdDataObject.ID_KEY, null);
     }
 
+    @Override
+    public void setId(final String id) {
+        getDataObject().put(WithIdDataObject.ID_KEY, id);
+    }
 
     public Map<String, PropertyMeta> getPropertiesMetadata() {
         return propertiesMetadata;
