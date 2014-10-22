@@ -48,7 +48,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
 
         this.cacheStrategy = cacheStrategy;
         GROUP_ID = new INT(this).indexable().build();
-        LAST_MODIFICATION = new LONG(this).indexable().build();
+        LAST_MODIFICATION = new LONG(this).sendToClient().indexable().build();
 
         config();
 
