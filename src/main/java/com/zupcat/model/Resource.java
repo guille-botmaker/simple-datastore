@@ -129,9 +129,7 @@ public final class Resource implements Serializable {
 
         final Resource resource = (Resource) o;
 
-        if (id != null ? !id.equals(resource.id) : resource.id != null) return false;
-
-        return true;
+        return !(id != null ? !id.equals(resource.id) : resource.id != null);
     }
 
     @Override
