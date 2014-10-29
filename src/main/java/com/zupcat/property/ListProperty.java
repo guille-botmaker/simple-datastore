@@ -23,6 +23,10 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
         keepUniqueElements = _keepUniqueElements;
     }
 
+    public Class<? extends DataObject> getItemClass() {
+        return itemClass;
+    }
+
     @Override
     protected List<V> getValueImpl(final DataObject dataObject) {
         final List result = getJSONArrayFrom(dataObject);

@@ -18,6 +18,10 @@ public final class DataObjectProperty<T extends DataObject> extends PropertyMeta
         itemClass = _itemClass;
     }
 
+    public Class<T> getItemClass() {
+        return itemClass;
+    }
+
     @Override
     protected T getValueImpl(final DataObject dataObject) {
         if (!dataObject.has(name)) {

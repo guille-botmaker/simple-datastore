@@ -27,6 +27,10 @@ public final class MapProperty<V> extends PropertyMeta<Map<String, V>> implement
         valueClass = _valueClass;
     }
 
+    public Class<? extends DataObject> getValueClass() {
+        return valueClass;
+    }
+
     @Override
     protected Map<String, V> getValueImpl(final DataObject dataObject) {
         final Map result = (Map) getMapImpl(dataObject);
