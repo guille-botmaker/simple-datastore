@@ -163,8 +163,16 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         result.mergeWith(source);
 
         for (final Map.Entry<String, PropertyMeta> entry : getPropertiesMetadata().entrySet()) {
-            if (!entry.getValue().hasToSendToClient()) {
+            final PropertyMeta propertyMeta = entry.getValue();
+
+            if (!propertyMeta.hasToSendToClient()) {
                 result.remove(entry.getKey());
+            } else {
+                final Object initialValue = propertyMeta.getOptions().initialValue;
+
+                if (Objects.equals(initialValue, propertyMeta.get())) {
+                    result.put(propertyMeta.getPropertyName(), initialValue);
+                }
             }
         }
         return result;

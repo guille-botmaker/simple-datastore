@@ -21,7 +21,7 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     public boolean stringIsOnlyLowerCase;
     protected boolean indexable;
     protected boolean auditable;
-    protected T initialValue;
+    public T initialValue;
 
 
     protected AbstractPropertyBuilder(final P propertyMeta, final T initialValue) {
