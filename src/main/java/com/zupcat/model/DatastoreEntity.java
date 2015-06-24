@@ -41,6 +41,8 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         this.cacheStrategy = CacheStrategy.NO_CACHE;
 
         setNewId();
+
+        config();
     }
 
     protected DatastoreEntity(final CacheStrategy cacheStrategy) {
@@ -49,8 +51,6 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         this.cacheStrategy = cacheStrategy;
         GROUP_ID = new INT(this).indexable().build();
         LAST_MODIFICATION = new LONG(this).sendToClient().mandatory().indexable().build();
-
-        config();
 
         for (final Field field : getClass().getFields()) {
             if (PropertyMeta.class.isAssignableFrom(field.getType())) {
