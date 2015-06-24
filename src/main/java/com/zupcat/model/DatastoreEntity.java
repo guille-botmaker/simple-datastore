@@ -167,12 +167,6 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
 
             if (!propertyMeta.hasToSendToClient()) {
                 result.remove(entry.getKey());
-            } else {
-                final Object initialValue = propertyMeta.getOptions().initialValue;
-
-                if (Objects.equals(initialValue, propertyMeta.get())) {
-                    result.put(propertyMeta.getPropertyName(), initialValue);
-                }
             }
         }
         return result;
