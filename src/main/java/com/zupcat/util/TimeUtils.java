@@ -131,15 +131,44 @@ public final class TimeUtils {
         }
     }
 
+    public static Date getDateFromStandardToday(final int standardToday) {
+
+        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        final Calendar calendar = getCalendar();
+        try {
+            calendar.setTime(simpleDateFormat.parse(standardToday + ""));
+        } catch (final ParseException _parseException) {
+            throw new RuntimeException("Problems parsing date from [" + standardToday + "]: " + _parseException.getMessage(), _parseException);
+        }
+        return calendar.getTime();
+    }
+
+    // 0 is monday...6 is sunday
+    public static int getDayOfWeek(final Date date) {
+
+        final Calendar calendar = TimeUtils.getCalendar();
+        calendar.setTime(date);
+        return calendar.get(Calendar.DAY_OF_WEEK) - 2;
+    }
 
     /**
      * @return YYYYMMDD
      */
     public static int buildStandardToday() {
+
+        return buildStandardToday(getCalendar().getTime());
+    }
+
+    /**
+     * @return YYYYMMDD
+     */
+    public static int buildStandardToday(final Date time) {
         final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
-        return Integer.parseInt(simpleDateFormat.format(getCalendar().getTime()));
+        return Integer.parseInt(simpleDateFormat.format(time));
     }
 
     public static long buildStandardModificationTimeForFirstTimeOfDay() {
