@@ -19,9 +19,9 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     public int stringMaxLength;
     public boolean stringWithoutSpaces;
     public boolean stringIsOnlyLowerCase;
+    public T initialValue;
     protected boolean indexable;
     protected boolean auditable;
-    public T initialValue;
 
 
     protected AbstractPropertyBuilder(final P propertyMeta, final T initialValue) {
