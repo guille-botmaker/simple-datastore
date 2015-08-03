@@ -154,7 +154,7 @@ public final class TimeUtils {
     }
 
     /**
-     * @return YYYYMMDD
+     * returns YYYYMMDD
      */
     public static int buildStandardToday() {
 
@@ -162,7 +162,7 @@ public final class TimeUtils {
     }
 
     /**
-     * @return YYYYMMDD
+     * returns YYYYMMDD
      */
     public static int buildStandardToday(final Date time) {
         final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
