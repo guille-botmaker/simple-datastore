@@ -132,7 +132,7 @@ public final class MassiveDownload implements Serializable {
     }
 
     public void setResult(final QueryResultList<Entity> result, final Cursor cursor, final boolean noMore) {
-        final ArrayList<Entity> list = new ArrayList<Entity>(result);
+        final ArrayList<Entity> list = new ArrayList<>(result);
 
         if (bshFilter != null) {
             filterList(list);

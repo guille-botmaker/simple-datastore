@@ -10,7 +10,7 @@ import java.util.concurrent.*;
 public abstract class CommonsParallel<T> {
 
     private final List<Future<Result<T>>> resultsList = Collections.synchronizedList(new ArrayList<Future<Result<T>>>(5000));
-    private final List<Result<T>> problemsList = new ArrayList<Result<T>>(500);
+    private final List<Result<T>> problemsList = new ArrayList<>(500);
 
     private final ExecutorService executorService;
 
@@ -36,7 +36,7 @@ public abstract class CommonsParallel<T> {
         final Future<Result<T>> future = executorService.submit(new Callable<Result<T>>() {
 
             public Result<T> call() throws Exception {
-                final Result<T> result = new Result<T>(inputObject);
+                final Result<T> result = new Result<>(inputObject);
 
                 try {
                     doWorkConcurrently(inputObject);

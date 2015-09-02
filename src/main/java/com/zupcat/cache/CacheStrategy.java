@@ -15,7 +15,7 @@ public enum CacheStrategy implements Serializable {
 
     private final MemCache strategy;
 
-    private CacheStrategy(final MemCache strategy) {
+    CacheStrategy(final MemCache strategy) {
         this.strategy = strategy;
     }
 
