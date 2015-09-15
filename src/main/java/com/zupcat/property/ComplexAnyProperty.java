@@ -33,6 +33,11 @@ public final class ComplexAnyProperty<T> extends PropertyMeta<T> implements Seri
     }
 
     @Override
+    public void setFromStringValue(final String stringValue, final boolean forceAudit) {
+        throw new UnsupportedOperationException("ComplexAnyProperty does not implement this method");
+    }
+
+    @Override
     protected void setValueImpl(final T value, final DataObject dataObject) {
         if (value == null) {
             dataObject.remove(name);

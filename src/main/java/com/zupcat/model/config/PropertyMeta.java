@@ -93,6 +93,12 @@ public abstract class PropertyMeta<E> implements Serializable {
 
     protected abstract void setValueImpl(final E value, final DataObject dataObject);
 
+    public void setFromStringValue(final String stringValue) {
+        setFromStringValue(stringValue, options.auditable);
+    }
+
+    public abstract void setFromStringValue(final String stringValue, final boolean forceAudit);
+
     @Override
     public String toString() {
         return "[" + StringUtils.replace(getClass().getName(), "com.zupcat.property.", "") + "|" + name + "->" + get() + "]";

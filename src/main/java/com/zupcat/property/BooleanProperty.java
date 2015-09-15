@@ -19,6 +19,11 @@ public final class BooleanProperty extends PropertyMeta<Boolean> implements Seri
         return dataObject.has(name) ? dataObject.getBoolean(name) : null;
     }
 
+    @Override
+    public void setFromStringValue(final String stringValue, final boolean forceAudit) {
+        set(stringValue == null || stringValue.trim().length() == 0 ? null : Boolean.parseBoolean(stringValue), forceAudit);
+    }
+
     protected void setValueImpl(final Boolean value, final DataObject dataObject) {
         dataObject.put(name, value);
     }

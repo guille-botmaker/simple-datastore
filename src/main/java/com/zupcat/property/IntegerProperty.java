@@ -23,6 +23,11 @@ public final class IntegerProperty extends PropertyMeta<Integer> implements Seri
         dataObject.put(name, value);
     }
 
+    @Override
+    public void setFromStringValue(final String stringValue, final boolean forceAudit) {
+        set(stringValue == null || stringValue.trim().length() == 0 ? null : Integer.parseInt(stringValue), forceAudit);
+    }
+
     public void add(final int value) {
         final Integer current = get();
         this.set(current == null ? value : (current + value));

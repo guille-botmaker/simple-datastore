@@ -26,6 +26,11 @@ public final class ByteArrayProperty extends PropertyMeta<byte[]> implements Ser
         return s == null ? null : Base64.decodeBase64(s);
     }
 
+    @Override
+    public void setFromStringValue(final String stringValue, final boolean forceAudit) {
+        throw new UnsupportedOperationException("ByteArrayProperty does not implement this method");
+    }
+
     protected void setValueImpl(final byte[] value, final DataObject dataObject) {
         if (value == null) {
             dataObject.remove(name);

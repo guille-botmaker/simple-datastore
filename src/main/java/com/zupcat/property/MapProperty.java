@@ -63,6 +63,11 @@ public final class MapProperty<V> extends PropertyMeta<Map<String, V>> implement
     }
 
     @Override
+    public void setFromStringValue(final String stringValue, final boolean forceAudit) {
+        throw new UnsupportedOperationException("MapProperty does not implement this method");
+    }
+
+    @Override
     protected void setValueImpl(final Map<String, V> value, final DataObject dataObject) {
         if (value == null || value.isEmpty()) {
             dataObject.remove(name);

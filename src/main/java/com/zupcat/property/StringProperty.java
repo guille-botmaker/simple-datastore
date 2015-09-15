@@ -22,6 +22,11 @@ public final class StringProperty extends PropertyMeta<String> implements Serial
         dataObject.put(name, (value == null ? null : (options.stringIsOnlyLowerCase ? value.toLowerCase() : value)));
     }
 
+    @Override
+    public void setFromStringValue(final String stringValue, final boolean forceAudit) {
+        set(stringValue, forceAudit);
+    }
+
     public boolean hasData() {
         final String s = this.get();
 

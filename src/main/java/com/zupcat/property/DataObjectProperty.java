@@ -47,6 +47,21 @@ public final class DataObjectProperty<T extends DataObject> extends PropertyMeta
     }
 
     @Override
+    public void setFromStringValue(final String stringValue, final boolean forceAudit) {
+        if (stringValue == null || stringValue.trim().length() == 0) {
+            set(null, forceAudit);
+        } else {
+            try {
+                final T result = itemClass.newInstance();
+                result.mergeWith(new DataObject(stringValue));
+                set(result, forceAudit);
+            } catch (final Exception _exception) {
+                throw new RuntimeException("Could not instantiate object of class [" + itemClass.getName() + "]. Maybe missing empty constructor?: " + _exception.getMessage(), _exception);
+            }
+        }
+    }
+
+    @Override
     protected void setValueImpl(final T value, final DataObject dataObject) {
         dataObject.put(name, value);
     }

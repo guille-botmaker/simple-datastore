@@ -28,6 +28,11 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
     }
 
     @Override
+    public void setFromStringValue(final String stringValue, final boolean forceAudit) {
+        throw new UnsupportedOperationException("ListProperty does not implement this method");
+    }
+
+    @Override
     protected List<V> getValueImpl(final DataObject dataObject) {
         final List result = getJSONArrayFrom(dataObject);
 

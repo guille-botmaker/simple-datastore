@@ -324,4 +324,15 @@ public class DAO<P extends DatastoreEntity> implements Serializable, IDAO<P> {
             throw new RuntimeException("Problems instantiating class [" + sample.getClass().getName() + "]: " + _exception.getMessage(), _exception);
         }
     }
+
+    public List<P> findByProperty(final String propertyName, final String id) {
+        if (id == null || id.trim().length() == 0) {
+            return Collections.emptyList();
+        }
+        return findByQuery(new Query.FilterPredicate(propertyName, Query.FilterOperator.EQUAL, id));
+    }
+
+    public P getReadonlySample() {
+        return sample;
+    }
 }

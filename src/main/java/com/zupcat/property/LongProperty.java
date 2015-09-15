@@ -28,6 +28,11 @@ public final class LongProperty extends PropertyMeta<Long> implements Serializab
         this.set(current == null ? value : (current + value));
     }
 
+    @Override
+    public void setFromStringValue(final String stringValue, final boolean forceAudit) {
+        set(stringValue == null || stringValue.trim().length() == 0 ? null : Long.parseLong(stringValue), forceAudit);
+    }
+
     public void substract(final int value) {
         this.add(-value);
     }
