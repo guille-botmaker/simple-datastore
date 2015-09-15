@@ -5,7 +5,7 @@
 
     <groupId>com.zupcat</groupId>
     <artifactId>simpledatastore</artifactId>
-    <version>1.1.29</version>
+    <version>1.1.30</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -87,7 +87,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20140107</version>
+            <version>20141113</version>
         </dependency>
 
         <dependency>
