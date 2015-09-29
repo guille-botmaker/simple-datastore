@@ -7,10 +7,7 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Work as Map<String, Object>
@@ -64,7 +61,17 @@ public final class MapProperty<V> extends PropertyMeta<Map<String, V>> implement
 
     @Override
     public void setFromStringValue(final String stringValue, final boolean forceAudit) {
-        throw new UnsupportedOperationException("MapProperty does not implement this method");
+        try {
+            final StringTokenizer stringTokenizer = new StringTokenizer(stringValue, ";");
+            final Map map = new HashMap<>(stringTokenizer.countTokens());
+            while (stringTokenizer.hasMoreElements()) {
+                final String[] entry = stringTokenizer.nextElement().toString().split(",");
+                map.put(entry[0].trim(), entry[1].trim());
+            }
+            set(map, forceAudit);
+        } catch (final Exception e) {
+            throw new UnsupportedOperationException("MapProperty only support set from string for string's key & value", e);
+        }
     }
 
     @Override

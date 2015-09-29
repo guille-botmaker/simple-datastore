@@ -29,7 +29,17 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
 
     @Override
     public void setFromStringValue(final String stringValue, final boolean forceAudit) {
-        throw new UnsupportedOperationException("ListProperty does not implement this method");
+
+        try {
+            final StringTokenizer stringTokenizer = new StringTokenizer(stringValue, ",");
+            final List list = new ArrayList<>(stringTokenizer.countTokens());
+            while (stringTokenizer.hasMoreElements()) {
+                list.add(stringTokenizer.nextElement().toString().trim());
+            }
+            set(list, forceAudit);
+        } catch (final Exception e) {
+            throw new UnsupportedOperationException("ListProperty only support set from string for string list", e);
+        }
     }
 
     @Override
