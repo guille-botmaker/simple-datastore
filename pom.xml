@@ -85,6 +85,12 @@
         <!-- =============== App Engine Dependencies END =============== -->
 
         <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-datastore-protobuf</artifactId>
+            <version>v1beta2-rev1-4.0.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20140107</version>

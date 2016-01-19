@@ -10,6 +10,8 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     private final Map<Class, DAO> daoMap = new HashMap<>();
     private final Map<String, DAO> daoByEntityNameMap = new HashMap<>();
     private boolean loggingDatastoreCalls = false;
+    private String datastoreServiceAccountEmail;
+    private String datastorePrivateKeyP12FileLocation;
 
     @Override
     public void setDatastoreCallsLogging(final boolean activate) {
@@ -19,6 +21,33 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     @Override
     public boolean isDatastoreCallsLoggingActivated() {
         return loggingDatastoreCalls;
+    }
+
+    public void configProtoBuf(final String datastoreServiceAccountEmail, final String datastorePrivateKeyP12FileLocation) {
+        this.datastoreServiceAccountEmail = datastoreServiceAccountEmail;
+        this.datastorePrivateKeyP12FileLocation = datastorePrivateKeyP12FileLocation;
+    }
+
+    public boolean isProtoBufMode() {
+        return this.datastoreServiceAccountEmail != null;
+    }
+
+    public String getDatastoreServiceAccountEmail() {
+        return datastoreServiceAccountEmail;
+    }
+
+    public String getDatastorePrivateKeyP12FileLocation() {
+        return datastorePrivateKeyP12FileLocation;
+    }
+
+    public String getDataSetId() {
+        if ( this.datastoreServiceAccountEmail == null ) {
+            return null;
+        }
+//        datastore-from-compute@zcat-infra.iam.gserviceaccount.com
+        String tmp = datastoreServiceAccountEmail.substring(datastoreServiceAccountEmail.indexOf("@") + 0);
+        tmp = tmp.substring(0, tmp.indexOf(".") + 0);
+        return tmp;
     }
 
     @Override

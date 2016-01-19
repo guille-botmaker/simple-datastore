@@ -16,4 +16,15 @@ public interface SimpleDatastoreService {
     <T> T getDAO(final Class<T> daoClass);
 
     DAO getDAO(final String entityName);
+
+    // protobuf methods
+    void configProtoBuf(final String datastoreServiceAccountEmail, final String datastorePrivateKeyP12FileLocation);
+
+    boolean isProtoBufMode();
+
+    String getDatastoreServiceAccountEmail();
+
+    String getDatastorePrivateKeyP12FileLocation();
+
+    String getDataSetId();
 }
