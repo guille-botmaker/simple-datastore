@@ -94,36 +94,19 @@ public final class RetryingHandler implements Serializable {
                 }
 
                 if (remoteDatastore != null) {
-                    try {
-                        final List<DatastoreV1.Key> theKeys = new ArrayList<>(entityKeys.size());
-
-                        for (final Key entityKey : entityKeys) {
-                            theKeys.add(buildRemoteKey(entityKey));
-                        }
-
-
-                        // Execute the RPC synchronously.
-                        final DatastoreV1.BeginTransactionResponse beginTransactionResponse =
-                                remoteDatastore.beginTransaction(DatastoreV1.BeginTransactionRequest.newBuilder().build());
-
-                        // Create an RPC request to commit the transaction.
-                        final DatastoreV1.CommitRequest.Builder commitRequestBuilder =
-                                DatastoreV1.CommitRequest.newBuilder()
-                                        .setTransaction(beginTransactionResponse.getTransaction());
-
-                        // Insert the entity in the commit request mutation.
-                        final DatastoreV1.Mutation.Builder mutationBuilder = commitRequestBuilder.getMutationBuilder();
-                        for (final DatastoreV1.Key theKey : theKeys) {
-                            mutationBuilder.addDelete(theKey);
-                        }
-
-                        // Execute the Commit RPC synchronously and ignore the response.
-                        // Apply the insert mutation if the entity was not found and close
-                        // the transaction.
-                        remoteDatastore.commit(commitRequestBuilder.build());
-                    } catch (final DatastoreException datastoreException) {
-                        throw new RuntimeException(datastoreException.getMessage(), datastoreException);
+                    final List<DatastoreV1.Key> theKeys = new ArrayList<>(entityKeys.size());
+                    for (final Key entityKey : entityKeys) {
+                        theKeys.add(buildRemoteKey(entityKey));
                     }
+
+                    executeRemoteTx(new RemoteTxClosure() {
+                        @Override
+                        public void execute(final DatastoreV1.Mutation.Builder mutationBuilder) {
+                            for (final DatastoreV1.Key theKey : theKeys) {
+                                mutationBuilder.addDelete(theKey);
+                            }
+                        }
+                    });
                 } else {
                     datastore.delete(entityKeys);
                 }
@@ -193,26 +176,12 @@ public final class RetryingHandler implements Serializable {
                 }
 
                 if (remoteDatastore != null) {
-                    try {
-                        // Execute the RPC synchronously.
-                        final DatastoreV1.BeginTransactionResponse beginTransactionResponse =
-                                remoteDatastore.beginTransaction(DatastoreV1.BeginTransactionRequest.newBuilder().build());
-
-                        // Create an RPC request to commit the transaction.
-                        final DatastoreV1.CommitRequest.Builder commitRequestBuilder =
-                                DatastoreV1.CommitRequest.newBuilder()
-                                        .setTransaction(beginTransactionResponse.getTransaction());
-
-                        // Insert the entity in the commit request mutation.
-                        commitRequestBuilder.getMutationBuilder().addDelete(buildRemoteKey(entityKey));
-
-                        // Execute the Commit RPC synchronously and ignore the response.
-                        // Apply the insert mutation if the entity was not found and close
-                        // the transaction.
-                        remoteDatastore.commit(commitRequestBuilder.build());
-                    } catch (final DatastoreException datastoreException) {
-                        throw new RuntimeException(datastoreException.getMessage(), datastoreException);
-                    }
+                    executeRemoteTx(new RemoteTxClosure() {
+                        @Override
+                        public void execute(final DatastoreV1.Mutation.Builder mutationBuilder) {
+                            mutationBuilder.addDelete(buildRemoteKey(entityKey));
+                        }
+                    });
                 } else {
                     datastore.delete(entityKey);
                 }
@@ -302,28 +271,14 @@ public final class RetryingHandler implements Serializable {
                 }
 
                 if (remoteDatastore != null) {
-                    try {
-                        final DatastoreV1.Entity remoteEntity = buildRemoteEntity(entity);
+                    final DatastoreV1.Entity remoteEntity = buildRemoteEntity(entity);
 
-                        // Execute the RPC synchronously.
-                        final DatastoreV1.BeginTransactionResponse beginTransactionResponse =
-                                remoteDatastore.beginTransaction(DatastoreV1.BeginTransactionRequest.newBuilder().build());
-
-                        // Create an RPC request to commit the transaction.
-                        final DatastoreV1.CommitRequest.Builder commitRequestBuilder =
-                                DatastoreV1.CommitRequest.newBuilder()
-                                        .setTransaction(beginTransactionResponse.getTransaction());
-
-                        // Insert the entity in the commit request mutation.
-                        commitRequestBuilder.getMutationBuilder().addInsert(remoteEntity);
-
-                        // Execute the Commit RPC synchronously and ignore the response.
-                        // Apply the insert mutation if the entity was not found and close
-                        // the transaction.
-                        remoteDatastore.commit(commitRequestBuilder.build());
-                    } catch (final DatastoreException datastoreException) {
-                        throw new RuntimeException(datastoreException.getMessage(), datastoreException);
-                    }
+                    executeRemoteTx(new RemoteTxClosure() {
+                        @Override
+                        public void execute(final DatastoreV1.Mutation.Builder mutationBuilder) {
+                            mutationBuilder.addInsert(remoteEntity);
+                        }
+                    });
                 } else {
                     datastore.put(entity);
                 }
@@ -504,10 +459,38 @@ public final class RetryingHandler implements Serializable {
         return entityBuilder.build();
     }
 
+    private void executeRemoteTx(final RemoteTxClosure remoteTxClosure) {
+        try {
+            // Execute the RPC synchronously.
+            final DatastoreV1.BeginTransactionResponse beginTransactionResponse =
+                    remoteDatastore.beginTransaction(DatastoreV1.BeginTransactionRequest.newBuilder().build());
+
+            // Create an RPC request to commit the transaction.
+            final DatastoreV1.CommitRequest.Builder commitRequestBuilder =
+                    DatastoreV1.CommitRequest.newBuilder()
+                            .setTransaction(beginTransactionResponse.getTransaction());
+
+            remoteTxClosure.execute(commitRequestBuilder.getMutationBuilder());
+
+            // Execute the Commit RPC synchronously and ignore the response.
+            // Apply the insert mutation if the entity was not found and close
+            // the transaction.
+            remoteDatastore.commit(commitRequestBuilder.build());
+
+        } catch (final DatastoreException datastoreException) {
+            throw new RuntimeException(datastoreException.getMessage(), datastoreException);
+        }
+    }
+
 
     private interface Closure {
 
         void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated);
+    }
+
+    private interface RemoteTxClosure {
+
+        void execute(final DatastoreV1.Mutation.Builder mutationBuilder);
     }
 
 
