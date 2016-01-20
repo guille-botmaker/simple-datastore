@@ -173,7 +173,12 @@ public final class RetryingHandler implements Serializable {
                 if (loggingActivated) {
                     log.log(Level.SEVERE, "PERF - tryDSGetAsync", new Exception());
                 }
-                return datastore.get(entityKey);
+
+                if (remoteDatastore != null) {
+                    return new NoFuture<>(tryDSGet(entityKey));
+                } else {
+                    return datastore.get(entityKey);
+                }
             }
         });
     }
@@ -211,6 +216,10 @@ public final class RetryingHandler implements Serializable {
                     log.log(Level.SEVERE, "PERF - tryDSPutMultipleAsync", new Exception());
                 }
 
+                if (remoteDatastore != null) {
+                    throw new UnsupportedOperationException("tryDSPutMultipleAsync is not currently supported on remote Datastore");
+                }
+
                 final Future<List<Key>> listFuture = datastore.put(entities);
 
                 listFuture.get();
@@ -243,6 +252,11 @@ public final class RetryingHandler implements Serializable {
                     if (loggingActivated) {
                         log.log(Level.SEVERE, "PERF - tryDSGetMultiple", new Exception());
                     }
+
+                    if (remoteDatastore != null) {
+                        throw new UnsupportedOperationException("tryDSGetMultiple is not currently supported on remote DataStore");
+                    }
+
                     result.putAll(datastore.get(keys));
                 }
             }, null);
@@ -259,19 +273,6 @@ public final class RetryingHandler implements Serializable {
 
                 if (remoteDatastore != null) {
                     try {
-                        // Execute the RPC synchronously.
-                        final DatastoreV1.BeginTransactionResponse beginTransactionResponse =
-                                remoteDatastore.beginTransaction(DatastoreV1.BeginTransactionRequest.newBuilder().build());
-
-                        // Get the transaction handle from the response.
-                        final ByteString transaction = beginTransactionResponse.getTransaction();
-
-                        // Create an RPC request to commit the transaction.
-                        final DatastoreV1.CommitRequest.Builder commitRequestBuilder = DatastoreV1.CommitRequest.newBuilder();
-
-                        // Set the transaction to commit.
-                        commitRequestBuilder.setTransaction(transaction);
-
                         final DatastoreV1.Entity.Builder entityBuilder = DatastoreV1.Entity.newBuilder();
 
                         // Set the entity key.
@@ -317,6 +318,15 @@ public final class RetryingHandler implements Serializable {
                         // Build the entity.
                         final DatastoreV1.Entity remoteEntity = entityBuilder.build();
 
+                        // Execute the RPC synchronously.
+                        final DatastoreV1.BeginTransactionResponse beginTransactionResponse =
+                                remoteDatastore.beginTransaction(DatastoreV1.BeginTransactionRequest.newBuilder().build());
+
+                        // Create an RPC request to commit the transaction.
+                        final DatastoreV1.CommitRequest.Builder commitRequestBuilder =
+                                DatastoreV1.CommitRequest.newBuilder()
+                                        .setTransaction(beginTransactionResponse.getTransaction());
+
                         // Insert the entity in the commit request mutation.
                         commitRequestBuilder.getMutationBuilder().addInsert(remoteEntity);
 
@@ -343,7 +353,7 @@ public final class RetryingHandler implements Serializable {
 
                 if (remoteDatastore != null) {
                     tryDSPut(entity);
-                    return new NoFuture<Key>(entity.getKey());
+                    return new NoFuture<>(entity.getKey());
                 } else {
                     return datastore.put(entity);
                 }
