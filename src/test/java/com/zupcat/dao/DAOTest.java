@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class DAOTest extends AbstractTest {
 
-    private UserDAO userDAO;
+    protected UserDAO userDAO;
 
     @Parameterized.Parameters
     public static java.util.List<Object[]> data() {

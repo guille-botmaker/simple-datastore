@@ -58,8 +58,21 @@ public final class RetryingHandler implements Serializable {
                     log.log(Level.SEVERE, "PERF - tryExecuteQueryWithSingleResult", new Exception());
                 }
 
-                final PreparedQuery preparedQuery = datastore.prepare(query);
-                result[0] = preparedQuery.asSingleEntity();
+                if (remoteDatastore != null) {
+                    final QueryResultList<Entity> queryResult = tryExecuteQuery(query);
+                    final int size = queryResult.size();
+
+                    if (size > 1 || queryResult.getCursor() != null) {
+                        throw new RuntimeException("tryExecuteQueryWithSingleResult failed because query results in more than one entity");
+                    } else if (size == 0) {
+                        result[0] = null;
+                    } else {
+                        result[0] = queryResult.get(0);
+                    }
+                } else {
+                    final PreparedQuery preparedQuery = datastore.prepare(query);
+                    result[0] = preparedQuery.asSingleEntity();
+                }
             }
         }, result);
 
@@ -84,15 +97,8 @@ public final class RetryingHandler implements Serializable {
                     try {
                         final EntityListWithCursor<Entity> resultList = new EntityListWithCursor<>();
 
-                        final DatastoreV1.Query.Builder remoteQuery = DatastoreV1.Query.newBuilder();
-                        remoteQuery.addKindBuilder().setName(query.getKind());
-                        remoteQuery.setStartCursor(buildRemoteCursor(fetchOptions.getEndCursor()));
-//                    query.setFilter(makeFilter(KEY_PROPERTY, PropertyFilter.Operator.HAS_ANCESTOR,
-//                            makeValue(makeKey(GUESTBOOK_KIND, guestbookName))));
-//                    query.addOrder(makeOrder(DATE_PROPERTY, PropertyOrder.Direction.DESCENDING));
-//                    query.setStartCursor()
-
-                        final DatastoreV1.RunQueryResponse runQueryResponse = remoteDatastore.runQuery(DatastoreV1.RunQueryRequest.newBuilder().setQuery(remoteQuery).build());
+                        final DatastoreV1.RunQueryResponse runQueryResponse = remoteDatastore.runQuery(DatastoreV1.RunQueryRequest.newBuilder()
+                                .setQuery(buildRemoteQuery(query, fetchOptions)).build());
                         final DatastoreV1.QueryResultBatch batch = runQueryResponse.getBatch();
 
                         resultList.setEndCursor(batch.getEndCursor());
@@ -482,6 +488,65 @@ public final class RetryingHandler implements Serializable {
         return resultEntity;
     }
 
+    private DatastoreV1.Query.Builder buildRemoteQuery(final Query query, final FetchOptions fetchOptions) {
+        final DatastoreV1.Query.Builder remoteQuery = DatastoreV1.Query.newBuilder();
+        remoteQuery.addKindBuilder().setName(query.getKind());
+        remoteQuery.setStartCursor(buildRemoteCursor(fetchOptions.getEndCursor()));
+        remoteQuery.setFilter(buildRemoteFilter(query.getFilter()));
+//        remoteQuery.addOrder(DatastoreHelper.makeOrder(query.getso));
+
+        return remoteQuery;
+    }
+
+    private DatastoreV1.Filter buildRemoteFilter(final com.google.appengine.api.datastore.Query.Filter filter) {
+        final List<DatastoreV1.Filter> filters = new ArrayList<>();
+        final Query.FilterPredicate filterPredicate = (Query.FilterPredicate) filter;
+
+        // TODO implement CompositeFilter if needed
+
+        filters.add(DatastoreHelper.makeFilter(filterPredicate.getPropertyName(), buildRemoteOperator(filterPredicate.getOperator()), buildRemoteValue(filterPredicate.getValue()).build()).build());
+
+        return DatastoreHelper.makeFilter(filters).build();
+    }
+
+    private DatastoreV1.PropertyFilter.Operator buildRemoteOperator(final Query.FilterOperator operator) {
+        switch (operator) {
+            case LESS_THAN:
+                return DatastoreV1.PropertyFilter.Operator.LESS_THAN;
+            case LESS_THAN_OR_EQUAL:
+                return DatastoreV1.PropertyFilter.Operator.LESS_THAN_OR_EQUAL;
+            case GREATER_THAN:
+                return DatastoreV1.PropertyFilter.Operator.GREATER_THAN;
+            case GREATER_THAN_OR_EQUAL:
+                return DatastoreV1.PropertyFilter.Operator.GREATER_THAN_OR_EQUAL;
+            case EQUAL:
+                return DatastoreV1.PropertyFilter.Operator.EQUAL;
+
+            case IN:
+            case NOT_EQUAL:
+        }
+        throw new UnsupportedOperationException("Operator not supported: " + operator);
+    }
+
+    private DatastoreV1.Value.Builder buildRemoteValue(final Object propertyValue) {
+        final DatastoreV1.Value.Builder valueBuilder = DatastoreV1.Value.newBuilder();
+
+        if (propertyValue instanceof Long) {
+            valueBuilder.setIntegerValue((long) propertyValue);
+        } else if (propertyValue instanceof Integer) {
+            valueBuilder.setIntegerValue((int) propertyValue);
+        } else if (propertyValue instanceof String) {
+            valueBuilder.setStringValue(propertyValue.toString());
+        } else if (propertyValue instanceof Boolean) {
+            valueBuilder.setBooleanValue((boolean) propertyValue);
+        } else if (propertyValue instanceof Blob) {
+            valueBuilder.setBlobValue(ByteString.copyFrom(((Blob) propertyValue).getBytes()));
+        } else {
+            throw new UnsupportedOperationException("Unsupported value: " + propertyValue);
+        }
+        return valueBuilder;
+    }
+
     private ByteString buildRemoteCursor(final Cursor cursor) {
         if (cursor == null) {
             return null;
@@ -507,25 +572,10 @@ public final class RetryingHandler implements Serializable {
 
         // properties
         for (final Map.Entry<String, Object> entry : entity.getProperties().entrySet()) {
-            final DatastoreV1.Value.Builder valueBuilder = DatastoreV1.Value.newBuilder();
             final String propertyName = entry.getKey();
-            final Object propertyValue = entry.getValue();
 
+            final DatastoreV1.Value.Builder valueBuilder = buildRemoteValue(entry.getValue());
             valueBuilder.setIndexed(!entity.isUnindexedProperty(propertyName));
-
-            if (propertyValue instanceof Long) {
-                valueBuilder.setIntegerValue((long) propertyValue);
-            } else if (propertyValue instanceof Integer) {
-                valueBuilder.setIntegerValue((int) propertyValue);
-            } else if (propertyValue instanceof String) {
-                valueBuilder.setStringValue(propertyValue.toString());
-            } else if (propertyValue instanceof Boolean) {
-                valueBuilder.setBooleanValue((boolean) propertyValue);
-            } else if (propertyValue instanceof Blob) {
-                valueBuilder.setBlobValue(ByteString.copyFrom(((Blob) propertyValue).getBytes()));
-            } else {
-                throw new UnsupportedOperationException("Unsupported value: " + propertyValue);
-            }
 
             entityBuilder.addProperty(
                     DatastoreV1.Property.newBuilder()
