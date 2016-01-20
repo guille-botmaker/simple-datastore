@@ -499,7 +499,10 @@ public final class RetryingHandler implements Serializable {
         if (startCursor != null)
             remoteQuery.setStartCursor(startCursor);
 
-        remoteQuery.setFilter(buildRemoteFilter(query.getFilter()));
+        if (query.getFilter() != null) {
+            remoteQuery.setFilter(buildRemoteFilter(query.getFilter()));
+        }
+
 //        remoteQuery.addOrder(DatastoreHelper.makeOrder(query.getso));
 
         return remoteQuery;
