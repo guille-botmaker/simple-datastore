@@ -10,6 +10,7 @@ import com.google.protobuf.ByteString;
 import com.zupcat.exception.NoMoreRetriesException;
 import com.zupcat.service.SimpleDatastoreService;
 import com.zupcat.service.SimpleDatastoreServiceFactory;
+import com.zupcat.util.NoFuture;
 
 import java.io.File;
 import java.io.Serializable;
@@ -115,16 +116,6 @@ public final class RetryingHandler implements Serializable {
 
                 try {
                     if (remoteDatastore != null) {
-                        // Create an RPC request to begin a new transaction.
-//                        DatastoreV1.BeginTransactionRequest.Builder treq = DatastoreV1.BeginTransactionRequest.newBuilder();
-                        // Execute the RPC synchronously.
-//                        DatastoreV1.BeginTransactionResponse tres = datastore.beginTransaction(treq.build());
-                        // Get the transaction handle from the response.
-//                        ByteString tx = tres.getTransaction();
-
-                        // Create an RPC request to get entities by key.
-                        final DatastoreV1.LookupRequest.Builder lookupRequestBuilder = DatastoreV1.LookupRequest.newBuilder();
-
                         // Set the entity key with only one `path_element`: no parent.
                         final DatastoreV1.Key.Builder key = DatastoreV1.Key.newBuilder()
                                 .addPathElement(
@@ -133,15 +124,10 @@ public final class RetryingHandler implements Serializable {
                                                 .setName(entityKey.getName())
                                 );
 
-                        // Add one key to the lookup request.
-                        lookupRequestBuilder.addKey(key);
-
-                        // Set the transaction, so we get a consistent snapshot of the
-                        // entity at the time the transaction started.
-//                        lookupRequestBuilder.getReadOptionsBuilder().setTransaction(tx);
-
                         // Execute the RPC and get the response.
-                        final DatastoreV1.LookupResponse lookupResponse = remoteDatastore.lookup(lookupRequestBuilder.build());
+                        final DatastoreV1.LookupResponse lookupResponse = remoteDatastore.lookup(
+                                DatastoreV1.LookupRequest.newBuilder().addKey(key).build()
+                        );
 
                         if (lookupResponse.getFoundCount() > 0) {
                             final Map<String, DatastoreV1.Value> properties = DatastoreHelper.getPropertyMap(lookupResponse.getFound(0).getEntity());
@@ -307,14 +293,16 @@ public final class RetryingHandler implements Serializable {
 
                             valueBuilder.setIndexed(!entity.isUnindexedProperty(propertyName));
 
-                            if (propertyValue instanceof Integer || propertyValue instanceof Long) {
+                            if (propertyValue instanceof Long) {
                                 valueBuilder.setIntegerValue((long) propertyValue);
+                            } else if (propertyValue instanceof Integer) {
+                                valueBuilder.setIntegerValue((int) propertyValue);
                             } else if (propertyValue instanceof String) {
                                 valueBuilder.setStringValue(propertyValue.toString());
                             } else if (propertyValue instanceof Boolean) {
                                 valueBuilder.setBooleanValue((boolean) propertyValue);
                             } else if (propertyValue instanceof Blob) {
-                                valueBuilder.setBlobValue(((Blob) propertyValue).getBytes());
+                                valueBuilder.setBlobValue(ByteString.copyFrom(((Blob) propertyValue).getBytes()));
                             } else {
                                 throw new UnsupportedOperationException("Unsupported value: " + propertyValue);
                             }
@@ -352,7 +340,13 @@ public final class RetryingHandler implements Serializable {
                 if (loggingActivated) {
                     log.log(Level.SEVERE, "PERF - tryDSPutAsync", new Exception());
                 }
-                return datastore.put(entity);
+
+                if (remoteDatastore != null) {
+                    tryDSPut(entity);
+                    return new NoFuture<Key>(entity.getKey());
+                } else {
+                    return datastore.put(entity);
+                }
             }
         });
     }
