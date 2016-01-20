@@ -510,12 +510,16 @@ public final class RetryingHandler implements Serializable {
 
     private DatastoreV1.Filter buildRemoteFilter(final com.google.appengine.api.datastore.Query.Filter filter) {
         final List<DatastoreV1.Filter> filters = new ArrayList<>();
-        final Query.FilterPredicate filterPredicate = (Query.FilterPredicate) filter;
 
-        // TODO implement CompositeFilter if needed
+        if (filter instanceof Query.CompositeFilter) {
+            final Query.CompositeFilter compositeFilter = (Query.CompositeFilter) filter;
 
-        filters.add(DatastoreHelper.makeFilter(filterPredicate.getPropertyName(), buildRemoteOperator(filterPredicate.getOperator()), buildRemoteValue(filterPredicate.getValue()).build()).build());
-
+        } else if (filter instanceof Query.FilterPredicate) {
+            final Query.FilterPredicate filterPredicate = (Query.FilterPredicate) filter;
+            filters.add(DatastoreHelper.makeFilter(filterPredicate.getPropertyName(), buildRemoteOperator(filterPredicate.getOperator()), buildRemoteValue(filterPredicate.getValue()).build()).build());
+        } else {
+            throw new UnsupportedOperationException("Unsupported query filter type: [" + filter + "], [" + filter.getClass().getName() + "]");
+        }
         return DatastoreHelper.makeFilter(filters).build();
     }
 

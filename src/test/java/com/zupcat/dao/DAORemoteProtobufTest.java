@@ -23,7 +23,7 @@ public class DAORemoteProtobufTest extends DAOTest {
 
         service.configProtoBuf("datastore-from-compute@zcat-infra.iam.gserviceaccount.com", "C:/Users/hernan/Desktop/zcat-infra-9f0082e80adc.p12");
 
-        for (final User user : buildUsers()) {
+        for (final User user : buildUsers(lastNameUniqueId)) {
             userDAO.updateOrPersist(user);
         }
     }

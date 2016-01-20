@@ -24,7 +24,7 @@ public abstract class AbstractTest {
     protected SimpleDatastoreService service;
     protected TestClass testClass;
 
-    protected static List<User> buildUsers() {
+    protected static List<User> buildUsers(final String uniqueId) {
         final int samples = 10;
         final List<User> result = new ArrayList<>(samples);
         final RandomUtils randomUtils = RandomUtils.getInstance();
@@ -75,9 +75,9 @@ public abstract class AbstractTest {
 
         final User sample = new User();
         sample.FIRSTNAME.set("hernan");
-        sample.LASTNAME.set("liendo");
+        sample.LASTNAME.set("liendo" + uniqueId);
         sample.AGE.set(18);
-        sample.LONG_VALUE.set(23123213l);
+        sample.LONG_VALUE.set(23123213L);
         sample.IS_FAKE.set(false);
 
         result.add(sample);

@@ -19,6 +19,7 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class DAOTest extends AbstractTest {
 
+    protected final String lastNameUniqueId = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
     protected UserDAO userDAO;
 
     @Parameterized.Parameters
@@ -31,7 +32,7 @@ public class DAOTest extends AbstractTest {
         super.setUp();
         userDAO = service.getDAO(UserDAO.class);
 
-        for (final User user : buildUsers()) {
+        for (final User user : buildUsers(lastNameUniqueId)) {
             userDAO.updateOrPersist(user);
         }
     }
@@ -50,7 +51,7 @@ public class DAOTest extends AbstractTest {
 
         assertTrue(userDAO.getAll().isEmpty());
 
-        final List<User> source = buildUsers();
+        final List<User> source = buildUsers(lastNameUniqueId);
 
         userDAO.massiveUpload(source);
 
@@ -75,7 +76,7 @@ public class DAOTest extends AbstractTest {
 
     @Test
     public void testGetForMassiveUpdate() {
-        final List<User> prev = buildUsers();
+        final List<User> prev = buildUsers(lastNameUniqueId);
 
         final int prevSize = prev.size();
         userDAO.massiveUpload(prev);
@@ -110,7 +111,7 @@ public class DAOTest extends AbstractTest {
             totalEntities += results.size();
 
             for (final PersistentObject user : results) {
-                if (((User) user).LASTNAME.get().equals("liendo")) {
+                if (((User) user).LASTNAME.get().equals("liendo" + lastNameUniqueId)) {
                     specificFound = true;
                 }
             }
@@ -160,17 +161,17 @@ public class DAOTest extends AbstractTest {
 
     @Test
     public void testRemove() {
-        final List<User> allUsers = userDAO.getByLastName("liendo");
+        final List<User> allUsers = userDAO.getByLastName("liendo" + lastNameUniqueId);
         assertTrue(allUsers.size() == 1);
 
         userDAO.remove(allUsers.iterator().next().getId());
 
-        assertTrue(userDAO.getByLastName("liendo").size() == 0);
+        assertTrue(userDAO.getByLastName("liendo" + lastNameUniqueId).size() == 0);
     }
 
     @Test
     public void testRemoveMultiple() {
-        final List<User> allUsers = userDAO.getByLastName("liendo");
+        final List<User> allUsers = userDAO.getByLastName("liendo" + lastNameUniqueId);
         assertTrue(allUsers.size() == 1);
 
         final List<String> ids = new ArrayList<>();
@@ -178,29 +179,29 @@ public class DAOTest extends AbstractTest {
 
         userDAO.remove(ids);
 
-        assertTrue(userDAO.getByLastName("liendo").size() == 0);
+        assertTrue(userDAO.getByLastName("liendo" + lastNameUniqueId).size() == 0);
     }
 
     @Test
     public void testRemoveAsync() {
-        final List<User> allUsers = userDAO.getByLastName("liendo");
+        final List<User> allUsers = userDAO.getByLastName("liendo" + lastNameUniqueId);
         assertTrue(allUsers.size() == 1);
 
         userDAO.removeAsync(allUsers.iterator().next().getId());
 
         RetryingHandler.sleep(5000);
 
-        assertTrue(userDAO.getByLastName("liendo").size() == 0);
+        assertTrue(userDAO.getByLastName("liendo" + lastNameUniqueId).size() == 0);
     }
 
     @Test
     public void testFindUnique() {
         final Query query = new Query(userDAO.getEntityName());
         final User sample = new User();
-        query.setFilter(new Query.FilterPredicate(sample.LASTNAME.getPropertyName(), Query.FilterOperator.EQUAL, "liendo"));
+        query.setFilter(new Query.FilterPredicate(sample.LASTNAME.getPropertyName(), Query.FilterOperator.EQUAL, "liendo" + lastNameUniqueId));
 
         final User result = userDAO.findUnique(query);
-        assertEquals(result.LASTNAME.get(), "liendo");
+        assertEquals(result.LASTNAME.get(), "liendo" + lastNameUniqueId);
     }
 
     @Test
@@ -212,7 +213,7 @@ public class DAOTest extends AbstractTest {
 
     @Test
     public void testQuerySpecific() {
-        final List<User> allUsers = userDAO.getByLastName("liendo");
+        final List<User> allUsers = userDAO.getByLastName("liendo" + lastNameUniqueId);
 
         assertTrue(allUsers.size() == 1);
         checkSpecificUser(allUsers.get(0));
@@ -222,7 +223,7 @@ public class DAOTest extends AbstractTest {
 
     private void checkSpecificUser(final User user) {
         assertEquals(user.FIRSTNAME.get(), "hernan");
-        assertEquals(user.LASTNAME.get(), "liendo");
+        assertEquals(user.LASTNAME.get(), "liendo" + lastNameUniqueId);
         assertEquals(user.AGE.get(), Integer.valueOf(18));
         assertEquals(user.IS_FAKE.get(), Boolean.FALSE);
     }
