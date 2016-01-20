@@ -41,12 +41,12 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     }
 
     public String getDataSetId() {
-        if ( this.datastoreServiceAccountEmail == null ) {
+        if (this.datastoreServiceAccountEmail == null) {
             return null;
         }
-//        datastore-from-compute@zcat-infra.iam.gserviceaccount.com
-        String tmp = datastoreServiceAccountEmail.substring(datastoreServiceAccountEmail.indexOf("@") + 0);
-        tmp = tmp.substring(0, tmp.indexOf(".") + 0);
+
+        String tmp = datastoreServiceAccountEmail.substring(datastoreServiceAccountEmail.indexOf("@") + 1);
+        tmp = tmp.substring(0, tmp.indexOf("."));
         return tmp;
     }
 

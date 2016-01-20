@@ -1,9 +1,17 @@
 package com.zupcat.dao;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.json.jackson.JacksonFactory;
+import com.google.api.services.datastore.DatastoreV1;
+import com.google.api.services.datastore.client.*;
 import com.google.appengine.api.datastore.*;
+import com.google.protobuf.ByteString;
 import com.zupcat.exception.NoMoreRetriesException;
+import com.zupcat.service.SimpleDatastoreService;
 import com.zupcat.service.SimpleDatastoreServiceFactory;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,6 +35,9 @@ public final class RetryingHandler implements Serializable {
 
     private static final int MAX_RETRIES = 6;
     private static final int WAIT_MS = 800;
+
+    private Datastore remoteDatastore;
+
 
     public static void sleep(final int millis) {
         try {
@@ -96,7 +107,6 @@ public final class RetryingHandler implements Serializable {
 
         tryClosure(new Closure() {
             public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
-
                 if (loggingActivated) {
                     log.log(Level.SEVERE, "PERF - tryDSGet", new Exception());
                 }
@@ -104,9 +114,64 @@ public final class RetryingHandler implements Serializable {
                 Entity resultEntity = null;
 
                 try {
-                    resultEntity = datastore.get(entityKey);
+                    if (remoteDatastore != null) {
+                        // Create an RPC request to begin a new transaction.
+//                        DatastoreV1.BeginTransactionRequest.Builder treq = DatastoreV1.BeginTransactionRequest.newBuilder();
+                        // Execute the RPC synchronously.
+//                        DatastoreV1.BeginTransactionResponse tres = datastore.beginTransaction(treq.build());
+                        // Get the transaction handle from the response.
+//                        ByteString tx = tres.getTransaction();
+
+                        // Create an RPC request to get entities by key.
+                        final DatastoreV1.LookupRequest.Builder lookupRequestBuilder = DatastoreV1.LookupRequest.newBuilder();
+
+                        // Set the entity key with only one `path_element`: no parent.
+                        final DatastoreV1.Key.Builder key = DatastoreV1.Key.newBuilder()
+                                .addPathElement(
+                                        DatastoreV1.Key.PathElement.newBuilder()
+                                                .setKind(entityKey.getKind())
+                                                .setName(entityKey.getName())
+                                );
+
+                        // Add one key to the lookup request.
+                        lookupRequestBuilder.addKey(key);
+
+                        // Set the transaction, so we get a consistent snapshot of the
+                        // entity at the time the transaction started.
+//                        lookupRequestBuilder.getReadOptionsBuilder().setTransaction(tx);
+
+                        // Execute the RPC and get the response.
+                        final DatastoreV1.LookupResponse lookupResponse = remoteDatastore.lookup(lookupRequestBuilder.build());
+
+                        if (lookupResponse.getFoundCount() > 0) {
+                            final Map<String, DatastoreV1.Value> properties = DatastoreHelper.getPropertyMap(lookupResponse.getFound(0).getEntity());
+                            resultEntity = new Entity(entityKey);
+
+                            for (final Map.Entry<String, DatastoreV1.Value> entry : properties.entrySet()) {
+                                final DatastoreV1.Value value = entry.getValue();
+                                Object propertyValue;
+
+                                if (value.hasIntegerValue()) {
+                                    propertyValue = value.getIntegerValue();
+                                } else if (value.hasStringValue()) {
+                                    propertyValue = value.getStringValue();
+                                } else if (value.hasBooleanValue()) {
+                                    propertyValue = value.getBooleanValue();
+                                } else if (value.hasBlobValue()) {
+                                    propertyValue = value.getBlobValue();
+                                } else {
+                                    throw new UnsupportedOperationException("Unsupported value: " + value);
+                                }
+                                resultEntity.setProperty(entry.getKey(), propertyValue);
+                            }
+                        }
+                    } else {
+                        resultEntity = datastore.get(entityKey);
+                    }
                 } catch (final EntityNotFoundException _entityNotFoundException) {
                     // nothing to do
+                } catch (final DatastoreException _datastoreException) {
+                    throw new RuntimeException(_datastoreException.getMessage(), _datastoreException);
                 }
 
                 results[0] = resultEntity;
@@ -202,12 +267,81 @@ public final class RetryingHandler implements Serializable {
     public void tryDSPut(final Entity entity) {
         tryClosure(new Closure() {
             public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
-
                 if (loggingActivated) {
                     log.log(Level.SEVERE, "PERF - tryDSPut", new Exception());
                 }
 
-                datastore.put(entity);
+                if (remoteDatastore != null) {
+                    try {
+                        // Execute the RPC synchronously.
+                        final DatastoreV1.BeginTransactionResponse beginTransactionResponse =
+                                remoteDatastore.beginTransaction(DatastoreV1.BeginTransactionRequest.newBuilder().build());
+
+                        // Get the transaction handle from the response.
+                        final ByteString transaction = beginTransactionResponse.getTransaction();
+
+                        // Create an RPC request to commit the transaction.
+                        final DatastoreV1.CommitRequest.Builder commitRequestBuilder = DatastoreV1.CommitRequest.newBuilder();
+
+                        // Set the transaction to commit.
+                        commitRequestBuilder.setTransaction(transaction);
+
+                        final DatastoreV1.Entity.Builder entityBuilder = DatastoreV1.Entity.newBuilder();
+
+                        // Set the entity key.
+                        final Key entityKey = entity.getKey();
+                        final DatastoreV1.Key.Builder key = DatastoreV1.Key.newBuilder()
+                                .addPathElement(
+                                        DatastoreV1.Key.PathElement.newBuilder()
+                                                .setKind(entityKey.getKind())
+                                                .setName(entityKey.getName())
+                                );
+
+                        entityBuilder.setKey(key);
+
+                        // properties
+                        for (final Map.Entry<String, Object> entry : entity.getProperties().entrySet()) {
+                            final DatastoreV1.Value.Builder valueBuilder = DatastoreV1.Value.newBuilder();
+                            final String propertyName = entry.getKey();
+                            final Object propertyValue = entry.getValue();
+
+                            valueBuilder.setIndexed(!entity.isUnindexedProperty(propertyName));
+
+                            if (propertyValue instanceof Integer || propertyValue instanceof Long) {
+                                valueBuilder.setIntegerValue((long) propertyValue);
+                            } else if (propertyValue instanceof String) {
+                                valueBuilder.setStringValue(propertyValue.toString());
+                            } else if (propertyValue instanceof Boolean) {
+                                valueBuilder.setBooleanValue((boolean) propertyValue);
+                            } else if (propertyValue instanceof Blob) {
+                                valueBuilder.setBlobValue(((Blob) propertyValue).getBytes());
+                            } else {
+                                throw new UnsupportedOperationException("Unsupported value: " + propertyValue);
+                            }
+
+                            entityBuilder.addProperty(
+                                    DatastoreV1.Property.newBuilder()
+                                            .setName(propertyName)
+                                            .setValue(valueBuilder.build())
+                            );
+                        }
+
+                        // Build the entity.
+                        final DatastoreV1.Entity remoteEntity = entityBuilder.build();
+
+                        // Insert the entity in the commit request mutation.
+                        commitRequestBuilder.getMutationBuilder().addInsert(remoteEntity);
+
+                        // Execute the Commit RPC synchronously and ignore the response.
+                        // Apply the insert mutation if the entity was not found and close
+                        // the transaction.
+                        remoteDatastore.commit(commitRequestBuilder.build());
+                    } catch (final DatastoreException datastoreException) {
+                        throw new RuntimeException(datastoreException.getMessage(), datastoreException);
+                    }
+                } else {
+                    datastore.put(entity);
+                }
             }
         }, null);
     }
@@ -226,7 +360,10 @@ public final class RetryingHandler implements Serializable {
     private void tryClosure(final Closure closure, final Object[] results) {
         final ValuesContainer values = new ValuesContainer();
         final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        final boolean loggingActivated = SimpleDatastoreServiceFactory.getSimpleDatastoreService().isDatastoreCallsLoggingActivated();
+        final SimpleDatastoreService simpleDatastoreService = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
+        final boolean loggingActivated = simpleDatastoreService.isDatastoreCallsLoggingActivated();
+
+        checkConfigProtoBuf(simpleDatastoreService);
 
         while (true) {
             try {
@@ -240,11 +377,41 @@ public final class RetryingHandler implements Serializable {
         }
     }
 
+    private void checkConfigProtoBuf(final SimpleDatastoreService simpleDatastoreService) {
+        if (simpleDatastoreService.isProtoBufMode() && remoteDatastore == null) {
+            try {
+                final GoogleCredential.Builder credentialBuilder = new GoogleCredential.Builder();
+                credentialBuilder.setTransport(GoogleNetHttpTransport.newTrustedTransport());
+                credentialBuilder.setJsonFactory(new JacksonFactory());
+                credentialBuilder.setServiceAccountId(simpleDatastoreService.getDatastoreServiceAccountEmail());
+                credentialBuilder.setServiceAccountScopes(DatastoreOptions.SCOPES);
+                credentialBuilder.setServiceAccountPrivateKeyFromP12File(new File(simpleDatastoreService.getDatastorePrivateKeyP12FileLocation()));
+
+                final DatastoreOptions.Builder datastoreBuilder = new DatastoreOptions.Builder();
+                datastoreBuilder.dataset(simpleDatastoreService.getDataSetId());
+                datastoreBuilder.credential(credentialBuilder.build());
+
+                remoteDatastore = DatastoreFactory.get().create(datastoreBuilder.build());
+
+            } catch (final Exception e) {
+                log.log(Level.SEVERE, "Problems trying to getting a connection to remote DataStore using protobuf mode. DataSetId [" + simpleDatastoreService.getDataSetId() +
+                        "], ServiceAccountEmail [" + simpleDatastoreService.getDatastoreServiceAccountEmail() +
+                        "], PrivateKeyP12FileLocation [" + simpleDatastoreService.getDatastorePrivateKeyP12FileLocation() +
+                        "]: " + e.getMessage(), e);
+
+            }
+        }
+    }
+
+
     private <T> Future<T> tryClosureAsync(final AsyncClosure<T> closure) {
         final ValuesContainer values = new ValuesContainer();
         final AsyncDatastoreService datastore = DatastoreServiceFactory.getAsyncDatastoreService();
         Future<T> result;
-        final boolean loggingActivated = SimpleDatastoreServiceFactory.getSimpleDatastoreService().isDatastoreCallsLoggingActivated();
+        final SimpleDatastoreService simpleDatastoreService = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
+
+        final boolean loggingActivated = simpleDatastoreService.isDatastoreCallsLoggingActivated();
+        checkConfigProtoBuf(simpleDatastoreService);
 
         while (true) {
             try {
