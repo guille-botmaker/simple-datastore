@@ -1,5 +1,6 @@
 package com.zupcat.dao;
 
+import com.zupcat.sample.User;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,9 +23,9 @@ public class DAORemoteProtobufTest extends DAOTest {
 
         service.configProtoBuf("datastore-from-compute@zcat-infra.iam.gserviceaccount.com", "C:/Users/hernan/Desktop/zcat-infra-9f0082e80adc.p12");
 
-//        for (final User user : buildUsers()) {
-//            userDAO.updateOrPersist(user);
-//        }
+        for (final User user : buildUsers()) {
+            userDAO.updateOrPersist(user);
+        }
     }
 
     @Test
