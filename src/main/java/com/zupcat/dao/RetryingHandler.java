@@ -14,10 +14,7 @@ import com.zupcat.util.NoFuture;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
@@ -92,12 +89,51 @@ public final class RetryingHandler implements Serializable {
     public void tryDSRemove(final Collection<Key> entityKeys) {
         tryClosure(new Closure() {
             public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
-
                 if (loggingActivated) {
                     log.log(Level.SEVERE, "PERF - tryDSRemoveMultiple", new Exception());
                 }
 
-                datastore.delete(entityKeys);
+                if (remoteDatastore != null) {
+                    try {
+                        final List<DatastoreV1.Key> theKeys = new ArrayList<>(entityKeys.size());
+
+                        for (final Key entityKey : entityKeys) {
+                            final DatastoreV1.Key.Builder key = DatastoreV1.Key.newBuilder()
+                                    .addPathElement(
+                                            DatastoreV1.Key.PathElement.newBuilder()
+                                                    .setKind(entityKey.getKind())
+                                                    .setName(entityKey.getName())
+                                    );
+
+                            theKeys.add(key.build());
+                        }
+
+
+                        // Execute the RPC synchronously.
+                        final DatastoreV1.BeginTransactionResponse beginTransactionResponse =
+                                remoteDatastore.beginTransaction(DatastoreV1.BeginTransactionRequest.newBuilder().build());
+
+                        // Create an RPC request to commit the transaction.
+                        final DatastoreV1.CommitRequest.Builder commitRequestBuilder =
+                                DatastoreV1.CommitRequest.newBuilder()
+                                        .setTransaction(beginTransactionResponse.getTransaction());
+
+                        // Insert the entity in the commit request mutation.
+                        final DatastoreV1.Mutation.Builder mutationBuilder = commitRequestBuilder.getMutationBuilder();
+                        for (final DatastoreV1.Key theKey : theKeys) {
+                            mutationBuilder.addDelete(theKey);
+                        }
+
+                        // Execute the Commit RPC synchronously and ignore the response.
+                        // Apply the insert mutation if the entity was not found and close
+                        // the transaction.
+                        remoteDatastore.commit(commitRequestBuilder.build());
+                    } catch (final DatastoreException datastoreException) {
+                        throw new RuntimeException(datastoreException.getMessage(), datastoreException);
+                    }
+                } else {
+                    datastore.delete(entityKeys);
+                }
             }
         }, null);
     }
@@ -190,7 +226,37 @@ public final class RetryingHandler implements Serializable {
                     log.log(Level.SEVERE, "PERF - tryDSRemove", new Exception());
                 }
 
-                datastore.delete(entityKey);
+                if (remoteDatastore != null) {
+                    try {
+                        final DatastoreV1.Key.Builder key = DatastoreV1.Key.newBuilder()
+                                .addPathElement(
+                                        DatastoreV1.Key.PathElement.newBuilder()
+                                                .setKind(entityKey.getKind())
+                                                .setName(entityKey.getName())
+                                );
+
+                        // Execute the RPC synchronously.
+                        final DatastoreV1.BeginTransactionResponse beginTransactionResponse =
+                                remoteDatastore.beginTransaction(DatastoreV1.BeginTransactionRequest.newBuilder().build());
+
+                        // Create an RPC request to commit the transaction.
+                        final DatastoreV1.CommitRequest.Builder commitRequestBuilder =
+                                DatastoreV1.CommitRequest.newBuilder()
+                                        .setTransaction(beginTransactionResponse.getTransaction());
+
+                        // Insert the entity in the commit request mutation.
+                        commitRequestBuilder.getMutationBuilder().addDelete(key);
+
+                        // Execute the Commit RPC synchronously and ignore the response.
+                        // Apply the insert mutation if the entity was not found and close
+                        // the transaction.
+                        remoteDatastore.commit(commitRequestBuilder.build());
+                    } catch (final DatastoreException datastoreException) {
+                        throw new RuntimeException(datastoreException.getMessage(), datastoreException);
+                    }
+                } else {
+                    datastore.delete(entityKey);
+                }
             }
         }, null);
     }
@@ -203,7 +269,12 @@ public final class RetryingHandler implements Serializable {
                     log.log(Level.SEVERE, "PERF - tryDSRemoveAsync", new Exception());
                 }
 
-                return datastore.delete(key);
+                if (remoteDatastore != null) {
+                    tryDSRemove(key);
+                    return new NoFuture<>(null);
+                } else {
+                    return datastore.delete(key);
+                }
             }
         });
     }
