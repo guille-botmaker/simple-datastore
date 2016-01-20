@@ -134,7 +134,7 @@ public final class RetryingHandler implements Serializable {
                         );
 
                         if (lookupResponse.getFoundCount() > 0) {
-                            resultEntity = buildEntityFrom(lookupResponse.getFound(0).getEntity(), entityKey);
+                            resultEntity = buildEntityFrom(lookupResponse.getFound(0).getEntity());
                         }
                     } else {
                         resultEntity = datastore.get(entityKey);
@@ -216,14 +216,31 @@ public final class RetryingHandler implements Serializable {
                 }
 
                 if (remoteDatastore != null) {
-                    throw new UnsupportedOperationException("tryDSPutMultipleAsync is not currently supported on remote Datastore");
+                    final List<DatastoreV1.Entity> remoteEntities = new ArrayList<>(100);
+                    final List<Key> entitiesKeys = new ArrayList<>(100);
+
+                    for (final Entity entity : entities) {
+                        remoteEntities.add(buildRemoteEntity(entity));
+                        entitiesKeys.add(entity.getKey());
+                    }
+
+                    executeRemoteTx(new RemoteTxClosure() {
+                        @Override
+                        public void execute(final DatastoreV1.Mutation.Builder mutationBuilder) {
+                            for (final DatastoreV1.Entity remoteEntity : remoteEntities) {
+                                mutationBuilder.addInsert(remoteEntity);
+                            }
+                        }
+                    });
+
+                    return new NoFuture<>(entitiesKeys);
+                } else {
+                    final Future<List<Key>> listFuture = datastore.put(entities);
+
+                    listFuture.get();
+
+                    return listFuture;
                 }
-
-                final Future<List<Key>> listFuture = datastore.put(entities);
-
-                listFuture.get();
-
-                return listFuture;
             }
         });
     }
@@ -253,10 +270,26 @@ public final class RetryingHandler implements Serializable {
                     }
 
                     if (remoteDatastore != null) {
-                        throw new UnsupportedOperationException("tryDSGetMultiple is not currently supported on remote DataStore");
-                    }
+                        try {
+                            final DatastoreV1.LookupRequest.Builder lookupRequestBuilder = DatastoreV1.LookupRequest.newBuilder();
+                            for (final Key key : keys) {
+                                lookupRequestBuilder.addKey(buildRemoteKey(key));
+                            }
 
-                    result.putAll(datastore.get(keys));
+                            final DatastoreV1.LookupResponse lookupResponse = remoteDatastore.lookup(lookupRequestBuilder.build());
+
+                            for (int i = 0; i < lookupResponse.getFoundCount(); i++) {
+                                final DatastoreV1.Entity remoteEntity = lookupResponse.getFound(i).getEntity();
+                                final Entity entity = buildEntityFrom(remoteEntity);
+
+                                result.put(entity.getKey(), entity);
+                            }
+                        } catch (final DatastoreException _datastoreException) {
+                            throw new RuntimeException(_datastoreException.getMessage(), _datastoreException);
+                        }
+                    } else {
+                        result.putAll(datastore.get(keys));
+                    }
                 }
             }, null);
         }
@@ -395,11 +428,11 @@ public final class RetryingHandler implements Serializable {
                 ).build();
     }
 
-    private Entity buildEntityFrom(final DatastoreV1.Entity remoteEntity, final Key entityKey) {
-        final Map<String, DatastoreV1.Value> properties = DatastoreHelper.getPropertyMap(remoteEntity);
-        final Entity resultEntity = new Entity(entityKey);
+    private Entity buildEntityFrom(final DatastoreV1.Entity remoteEntity) {
+        final DatastoreV1.Key.PathElement keyPathElement = remoteEntity.getKey().getPathElement(0);
+        final Entity resultEntity = new Entity(keyPathElement.getKind(), keyPathElement.getName());
 
-        for (final Map.Entry<String, DatastoreV1.Value> entry : properties.entrySet()) {
+        for (final Map.Entry<String, DatastoreV1.Value> entry : DatastoreHelper.getPropertyMap(remoteEntity).entrySet()) {
             final DatastoreV1.Value value = entry.getValue();
             Object propertyValue;
 
