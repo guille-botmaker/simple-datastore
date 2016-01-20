@@ -10,10 +10,12 @@ import com.google.protobuf.ByteString;
 import com.zupcat.exception.NoMoreRetriesException;
 import com.zupcat.service.SimpleDatastoreService;
 import com.zupcat.service.SimpleDatastoreServiceFactory;
+import com.zupcat.util.EntityListWithCursor;
 import com.zupcat.util.NoFuture;
 
 import java.io.File;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -78,8 +80,36 @@ public final class RetryingHandler implements Serializable {
                     log.log(Level.SEVERE, "PERF - tryExecuteQuery", new Exception());
                 }
 
-                final PreparedQuery preparedQuery = datastore.prepare(query);
-                result[0] = preparedQuery.asQueryResultList(fetchOptions);
+                if (remoteDatastore != null) {
+                    try {
+                        final EntityListWithCursor<Entity> resultList = new EntityListWithCursor<>();
+
+                        final DatastoreV1.Query.Builder remoteQuery = DatastoreV1.Query.newBuilder();
+                        remoteQuery.addKindBuilder().setName(query.getKind());
+                        remoteQuery.setStartCursor(buildRemoteCursor(fetchOptions.getEndCursor()));
+//                    query.setFilter(makeFilter(KEY_PROPERTY, PropertyFilter.Operator.HAS_ANCESTOR,
+//                            makeValue(makeKey(GUESTBOOK_KIND, guestbookName))));
+//                    query.addOrder(makeOrder(DATE_PROPERTY, PropertyOrder.Direction.DESCENDING));
+//                    query.setStartCursor()
+
+                        final DatastoreV1.RunQueryResponse runQueryResponse = remoteDatastore.runQuery(DatastoreV1.RunQueryRequest.newBuilder().setQuery(remoteQuery).build());
+                        final DatastoreV1.QueryResultBatch batch = runQueryResponse.getBatch();
+
+                        resultList.setEndCursor(batch.getEndCursor());
+
+                        for (final DatastoreV1.EntityResult remoteResult : batch.getEntityResultList()) {
+                            resultList.add(buildEntityFrom(remoteResult.getEntity()));
+                        }
+
+                        result[0] = resultList;
+
+                    } catch (final DatastoreException _datastoreException) {
+                        throw new RuntimeException(_datastoreException.getMessage(), _datastoreException);
+                    }
+                } else {
+                    final PreparedQuery preparedQuery = datastore.prepare(query);
+                    result[0] = preparedQuery.asQueryResultList(fetchOptions);
+                }
             }
         }, result);
 
@@ -450,6 +480,22 @@ public final class RetryingHandler implements Serializable {
             resultEntity.setProperty(entry.getKey(), propertyValue);
         }
         return resultEntity;
+    }
+
+    private ByteString buildRemoteCursor(final Cursor cursor) {
+        if (cursor == null) {
+            return null;
+        }
+
+        try {
+            final Field bytesField = cursor.getClass().getDeclaredField("cursorBytes");
+            bytesField.setAccessible(true);
+
+            final byte[] bytes = ((com.google.appengine.repackaged.com.google.protobuf.ByteString) bytesField.get(cursor)).toByteArray();
+            return ByteString.copyFrom(bytes);
+        } catch (final Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 
     private DatastoreV1.Entity buildRemoteEntity(final Entity entity) {
