@@ -1,6 +1,7 @@
 package com.zupcat.dao;
 
 import com.zupcat.sample.User;
+import com.zupcat.util.RandomUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,31 +56,50 @@ public class DAORemoteProtobufTest extends DAOTest {
 
     @Test
     public void testRemove() {
+        fixUniqueUser();
         super.testRemove();
     }
 
     @Test
     public void testRemoveMultiple() {
+        fixUniqueUser();
         super.testRemoveMultiple();
     }
 
     @Test
     public void testRemoveAsync() {
+        fixUniqueUser();
         super.testRemoveAsync();
     }
 
     @Test
     public void testFindUnique() {
+        fixUniqueUser();
         super.testFindUnique();
     }
 
     @Test
     public void testQueryAllObjects() {
+        fixUniqueUser();
         super.testQueryAllObjects();
     }
 
     @Test
     public void testQuerySpecific() {
+        fixUniqueUser();
         super.testQuerySpecific();
+    }
+
+    private void fixUniqueUser() {
+        lastNameUniqueId = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
+
+        final User sample = new User();
+        sample.FIRSTNAME.set("hernan");
+        sample.LASTNAME.set("liendo" + lastNameUniqueId);
+        sample.AGE.set(18);
+        sample.LONG_VALUE.set(23123213L);
+        sample.IS_FAKE.set(false);
+
+        userDAO.updateOrPersist(sample);
     }
 }

@@ -25,7 +25,7 @@ public abstract class AbstractTest {
     protected TestClass testClass;
 
     protected static List<User> buildUsers(final String uniqueId) {
-        final int samples = 10;
+        final int samples = 5;
         final List<User> result = new ArrayList<>(samples);
         final RandomUtils randomUtils = RandomUtils.getInstance();
 

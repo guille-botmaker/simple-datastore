@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class DAOTest extends AbstractTest {
 
-    protected final String lastNameUniqueId = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
+    protected String lastNameUniqueId = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
     protected UserDAO userDAO;
 
     @Parameterized.Parameters
