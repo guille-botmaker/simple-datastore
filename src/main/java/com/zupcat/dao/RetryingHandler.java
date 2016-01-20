@@ -509,22 +509,32 @@ public final class RetryingHandler implements Serializable {
     }
 
     private DatastoreV1.Filter buildRemoteFilter(final com.google.appengine.api.datastore.Query.Filter filter) {
-        final List<DatastoreV1.Filter> filters = new ArrayList<>();
+        DatastoreV1.Filter resultFilter;
 
         if (filter instanceof Query.CompositeFilter) {
             final Query.CompositeFilter compositeFilter = (Query.CompositeFilter) filter;
+            final DatastoreV1.CompositeFilter.Builder compositeFilterBuilder = DatastoreV1.CompositeFilter.newBuilder();
+
+            final DatastoreV1.PropertyFilter.Builder propertyFilterBuilder = DatastoreV1.PropertyFilter.newBuilder();
 
             for (final Query.Filter subFilter : compositeFilter.getSubFilters()) {
                 final Query.FilterPredicate filterPredicate = (Query.FilterPredicate) subFilter;
-                filters.add(DatastoreHelper.makeFilter(filterPredicate.getPropertyName(), buildRemoteOperator(filterPredicate.getOperator()), buildRemoteValue(filterPredicate.getValue()).build()).build());
+                compositeFilterBuilder.addFilter(buildRemoteFilterPredicate(filterPredicate));
             }
+
+            resultFilter = compositeFilterBuilder.build();
+
         } else if (filter instanceof Query.FilterPredicate) {
             final Query.FilterPredicate filterPredicate = (Query.FilterPredicate) filter;
-            filters.add(DatastoreHelper.makeFilter(filterPredicate.getPropertyName(), buildRemoteOperator(filterPredicate.getOperator()), buildRemoteValue(filterPredicate.getValue()).build()).build());
+            resultFilter = buildRemoteFilterPredicate(filterPredicate);
         } else {
             throw new UnsupportedOperationException("Unsupported query filter type: [" + filter + "], [" + filter.getClass().getName() + "]");
         }
-        return DatastoreHelper.makeFilter(filters).build();
+        return resultFilter;
+    }
+
+    private DatastoreV1.Filter buildRemoteFilterPredicate(final Query.FilterPredicate filterPredicate) {
+        return DatastoreHelper.makeFilter(filterPredicate.getPropertyName(), buildRemoteOperator(filterPredicate.getOperator()), buildRemoteValue(filterPredicate.getValue()).build()).build();
     }
 
     private DatastoreV1.PropertyFilter.Operator buildRemoteOperator(final Query.FilterOperator operator) {
