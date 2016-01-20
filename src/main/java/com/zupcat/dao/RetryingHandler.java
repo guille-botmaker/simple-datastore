@@ -511,18 +511,17 @@ public final class RetryingHandler implements Serializable {
     private DatastoreV1.Filter buildRemoteFilter(final com.google.appengine.api.datastore.Query.Filter filter) {
         DatastoreV1.Filter resultFilter;
 
+        // TODO implement CompositeFilter when this sdk gets more documented! :(
         if (filter instanceof Query.CompositeFilter) {
             final Query.CompositeFilter compositeFilter = (Query.CompositeFilter) filter;
             final DatastoreV1.CompositeFilter.Builder compositeFilterBuilder = DatastoreV1.CompositeFilter.newBuilder();
-
-            final DatastoreV1.PropertyFilter.Builder propertyFilterBuilder = DatastoreV1.PropertyFilter.newBuilder();
 
             for (final Query.Filter subFilter : compositeFilter.getSubFilters()) {
                 final Query.FilterPredicate filterPredicate = (Query.FilterPredicate) subFilter;
                 compositeFilterBuilder.addFilter(buildRemoteFilterPredicate(filterPredicate));
             }
 
-            resultFilter = compositeFilterBuilder.build();
+            resultFilter = DatastoreHelper.makeFilter().mergeCompositeFilter(compositeFilterBuilder.build()).build();
 
         } else if (filter instanceof Query.FilterPredicate) {
             final Query.FilterPredicate filterPredicate = (Query.FilterPredicate) filter;
