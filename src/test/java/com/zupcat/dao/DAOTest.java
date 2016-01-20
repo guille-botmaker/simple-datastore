@@ -87,7 +87,7 @@ public class DAOTest extends AbstractTest {
 
         final int postSize = all.size();
 
-        assertTrue(postSize >= prevSize + 100);
+        assertTrue(postSize >= prevSize + 5);
 
         assertTrue(all.iterator().next().ADDRESS.get().getStreet().startsWith("Sesamo"));
         assertTrue(all.iterator().next().ADDRESSES.iterator().next().getStreet().startsWith("Sesamo"));
