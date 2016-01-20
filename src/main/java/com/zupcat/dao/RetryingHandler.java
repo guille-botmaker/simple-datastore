@@ -514,6 +514,10 @@ public final class RetryingHandler implements Serializable {
         if (filter instanceof Query.CompositeFilter) {
             final Query.CompositeFilter compositeFilter = (Query.CompositeFilter) filter;
 
+            for (final Query.Filter subFilter : compositeFilter.getSubFilters()) {
+                final Query.FilterPredicate filterPredicate = (Query.FilterPredicate) subFilter;
+                filters.add(DatastoreHelper.makeFilter(filterPredicate.getPropertyName(), buildRemoteOperator(filterPredicate.getOperator()), buildRemoteValue(filterPredicate.getValue()).build()).build());
+            }
         } else if (filter instanceof Query.FilterPredicate) {
             final Query.FilterPredicate filterPredicate = (Query.FilterPredicate) filter;
             filters.add(DatastoreHelper.makeFilter(filterPredicate.getPropertyName(), buildRemoteOperator(filterPredicate.getOperator()), buildRemoteValue(filterPredicate.getValue()).build()).build());

@@ -119,7 +119,7 @@ public class DAOTest extends AbstractTest {
 
         final int allSize = userDAO.getAll().size();
         assertTrue(specificFound);
-        assertTrue(totalEntities >= 100 && totalEntities == allSize);
+        assertTrue(totalEntities >= 5 && totalEntities == allSize);
     }
 
     @Test
