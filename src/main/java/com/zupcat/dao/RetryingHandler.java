@@ -98,14 +98,7 @@ public final class RetryingHandler implements Serializable {
                         final List<DatastoreV1.Key> theKeys = new ArrayList<>(entityKeys.size());
 
                         for (final Key entityKey : entityKeys) {
-                            final DatastoreV1.Key.Builder key = DatastoreV1.Key.newBuilder()
-                                    .addPathElement(
-                                            DatastoreV1.Key.PathElement.newBuilder()
-                                                    .setKind(entityKey.getKind())
-                                                    .setName(entityKey.getName())
-                                    );
-
-                            theKeys.add(key.build());
+                            theKeys.add(buildRemoteKey(entityKey));
                         }
 
 
@@ -152,40 +145,13 @@ public final class RetryingHandler implements Serializable {
 
                 try {
                     if (remoteDatastore != null) {
-                        // Set the entity key with only one `path_element`: no parent.
-                        final DatastoreV1.Key.Builder key = DatastoreV1.Key.newBuilder()
-                                .addPathElement(
-                                        DatastoreV1.Key.PathElement.newBuilder()
-                                                .setKind(entityKey.getKind())
-                                                .setName(entityKey.getName())
-                                );
-
                         // Execute the RPC and get the response.
                         final DatastoreV1.LookupResponse lookupResponse = remoteDatastore.lookup(
-                                DatastoreV1.LookupRequest.newBuilder().addKey(key).build()
+                                DatastoreV1.LookupRequest.newBuilder().addKey(buildRemoteKey(entityKey)).build()
                         );
 
                         if (lookupResponse.getFoundCount() > 0) {
-                            final Map<String, DatastoreV1.Value> properties = DatastoreHelper.getPropertyMap(lookupResponse.getFound(0).getEntity());
-                            resultEntity = new Entity(entityKey);
-
-                            for (final Map.Entry<String, DatastoreV1.Value> entry : properties.entrySet()) {
-                                final DatastoreV1.Value value = entry.getValue();
-                                Object propertyValue;
-
-                                if (value.hasIntegerValue()) {
-                                    propertyValue = value.getIntegerValue();
-                                } else if (value.hasStringValue()) {
-                                    propertyValue = value.getStringValue();
-                                } else if (value.hasBooleanValue()) {
-                                    propertyValue = value.getBooleanValue();
-                                } else if (value.hasBlobValue()) {
-                                    propertyValue = value.getBlobValue();
-                                } else {
-                                    throw new UnsupportedOperationException("Unsupported value: " + value);
-                                }
-                                resultEntity.setProperty(entry.getKey(), propertyValue);
-                            }
+                            resultEntity = buildEntityFrom(lookupResponse.getFound(0).getEntity(), entityKey);
                         }
                     } else {
                         resultEntity = datastore.get(entityKey);
@@ -228,13 +194,6 @@ public final class RetryingHandler implements Serializable {
 
                 if (remoteDatastore != null) {
                     try {
-                        final DatastoreV1.Key.Builder key = DatastoreV1.Key.newBuilder()
-                                .addPathElement(
-                                        DatastoreV1.Key.PathElement.newBuilder()
-                                                .setKind(entityKey.getKind())
-                                                .setName(entityKey.getName())
-                                );
-
                         // Execute the RPC synchronously.
                         final DatastoreV1.BeginTransactionResponse beginTransactionResponse =
                                 remoteDatastore.beginTransaction(DatastoreV1.BeginTransactionRequest.newBuilder().build());
@@ -245,7 +204,7 @@ public final class RetryingHandler implements Serializable {
                                         .setTransaction(beginTransactionResponse.getTransaction());
 
                         // Insert the entity in the commit request mutation.
-                        commitRequestBuilder.getMutationBuilder().addDelete(key);
+                        commitRequestBuilder.getMutationBuilder().addDelete(buildRemoteKey(entityKey));
 
                         // Execute the Commit RPC synchronously and ignore the response.
                         // Apply the insert mutation if the entity was not found and close
@@ -344,50 +303,7 @@ public final class RetryingHandler implements Serializable {
 
                 if (remoteDatastore != null) {
                     try {
-                        final DatastoreV1.Entity.Builder entityBuilder = DatastoreV1.Entity.newBuilder();
-
-                        // Set the entity key.
-                        final Key entityKey = entity.getKey();
-                        final DatastoreV1.Key.Builder key = DatastoreV1.Key.newBuilder()
-                                .addPathElement(
-                                        DatastoreV1.Key.PathElement.newBuilder()
-                                                .setKind(entityKey.getKind())
-                                                .setName(entityKey.getName())
-                                );
-
-                        entityBuilder.setKey(key);
-
-                        // properties
-                        for (final Map.Entry<String, Object> entry : entity.getProperties().entrySet()) {
-                            final DatastoreV1.Value.Builder valueBuilder = DatastoreV1.Value.newBuilder();
-                            final String propertyName = entry.getKey();
-                            final Object propertyValue = entry.getValue();
-
-                            valueBuilder.setIndexed(!entity.isUnindexedProperty(propertyName));
-
-                            if (propertyValue instanceof Long) {
-                                valueBuilder.setIntegerValue((long) propertyValue);
-                            } else if (propertyValue instanceof Integer) {
-                                valueBuilder.setIntegerValue((int) propertyValue);
-                            } else if (propertyValue instanceof String) {
-                                valueBuilder.setStringValue(propertyValue.toString());
-                            } else if (propertyValue instanceof Boolean) {
-                                valueBuilder.setBooleanValue((boolean) propertyValue);
-                            } else if (propertyValue instanceof Blob) {
-                                valueBuilder.setBlobValue(ByteString.copyFrom(((Blob) propertyValue).getBytes()));
-                            } else {
-                                throw new UnsupportedOperationException("Unsupported value: " + propertyValue);
-                            }
-
-                            entityBuilder.addProperty(
-                                    DatastoreV1.Property.newBuilder()
-                                            .setName(propertyName)
-                                            .setValue(valueBuilder.build())
-                            );
-                        }
-
-                        // Build the entity.
-                        final DatastoreV1.Entity remoteEntity = entityBuilder.build();
+                        final DatastoreV1.Entity remoteEntity = buildRemoteEntity(entity);
 
                         // Execute the RPC synchronously.
                         final DatastoreV1.BeginTransactionResponse beginTransactionResponse =
@@ -452,33 +368,6 @@ public final class RetryingHandler implements Serializable {
         }
     }
 
-    private void checkConfigProtoBuf(final SimpleDatastoreService simpleDatastoreService) {
-        if (simpleDatastoreService.isProtoBufMode() && remoteDatastore == null) {
-            try {
-                final GoogleCredential.Builder credentialBuilder = new GoogleCredential.Builder();
-                credentialBuilder.setTransport(GoogleNetHttpTransport.newTrustedTransport());
-                credentialBuilder.setJsonFactory(new JacksonFactory());
-                credentialBuilder.setServiceAccountId(simpleDatastoreService.getDatastoreServiceAccountEmail());
-                credentialBuilder.setServiceAccountScopes(DatastoreOptions.SCOPES);
-                credentialBuilder.setServiceAccountPrivateKeyFromP12File(new File(simpleDatastoreService.getDatastorePrivateKeyP12FileLocation()));
-
-                final DatastoreOptions.Builder datastoreBuilder = new DatastoreOptions.Builder();
-                datastoreBuilder.dataset(simpleDatastoreService.getDataSetId());
-                datastoreBuilder.credential(credentialBuilder.build());
-
-                remoteDatastore = DatastoreFactory.get().create(datastoreBuilder.build());
-
-            } catch (final Exception e) {
-                log.log(Level.SEVERE, "Problems trying to getting a connection to remote DataStore using protobuf mode. DataSetId [" + simpleDatastoreService.getDataSetId() +
-                        "], ServiceAccountEmail [" + simpleDatastoreService.getDatastoreServiceAccountEmail() +
-                        "], PrivateKeyP12FileLocation [" + simpleDatastoreService.getDatastorePrivateKeyP12FileLocation() +
-                        "]: " + e.getMessage(), e);
-
-            }
-        }
-    }
-
-
     private <T> Future<T> tryClosureAsync(final AsyncClosure<T> closure) {
         final ValuesContainer values = new ValuesContainer();
         final AsyncDatastoreService datastore = DatastoreServiceFactory.getAsyncDatastoreService();
@@ -514,6 +403,105 @@ public final class RetryingHandler implements Serializable {
         if (isTimeoutException) {
             values.retryWait = values.retryWait * 3;
         }
+    }
+
+    private void checkConfigProtoBuf(final SimpleDatastoreService simpleDatastoreService) {
+        if (simpleDatastoreService.isProtoBufMode() && remoteDatastore == null) {
+            try {
+                final GoogleCredential.Builder credentialBuilder = new GoogleCredential.Builder();
+                credentialBuilder.setTransport(GoogleNetHttpTransport.newTrustedTransport());
+                credentialBuilder.setJsonFactory(new JacksonFactory());
+                credentialBuilder.setServiceAccountId(simpleDatastoreService.getDatastoreServiceAccountEmail());
+                credentialBuilder.setServiceAccountScopes(DatastoreOptions.SCOPES);
+                credentialBuilder.setServiceAccountPrivateKeyFromP12File(new File(simpleDatastoreService.getDatastorePrivateKeyP12FileLocation()));
+
+                final DatastoreOptions.Builder datastoreBuilder = new DatastoreOptions.Builder();
+                datastoreBuilder.dataset(simpleDatastoreService.getDataSetId());
+                datastoreBuilder.credential(credentialBuilder.build());
+
+                remoteDatastore = DatastoreFactory.get().create(datastoreBuilder.build());
+
+            } catch (final Exception e) {
+                log.log(Level.SEVERE, "Problems trying to getting a connection to remote DataStore using protobuf mode. DataSetId [" + simpleDatastoreService.getDataSetId() +
+                        "], ServiceAccountEmail [" + simpleDatastoreService.getDatastoreServiceAccountEmail() +
+                        "], PrivateKeyP12FileLocation [" + simpleDatastoreService.getDatastorePrivateKeyP12FileLocation() +
+                        "]: " + e.getMessage(), e);
+
+            }
+        }
+    }
+
+    private DatastoreV1.Key buildRemoteKey(final Key key) {
+        return DatastoreV1.Key.newBuilder()
+                .addPathElement(
+                        DatastoreV1.Key.PathElement.newBuilder()
+                                .setKind(key.getKind())
+                                .setName(key.getName())
+                ).build();
+    }
+
+    private Entity buildEntityFrom(final DatastoreV1.Entity remoteEntity, final Key entityKey) {
+        final Map<String, DatastoreV1.Value> properties = DatastoreHelper.getPropertyMap(remoteEntity);
+        final Entity resultEntity = new Entity(entityKey);
+
+        for (final Map.Entry<String, DatastoreV1.Value> entry : properties.entrySet()) {
+            final DatastoreV1.Value value = entry.getValue();
+            Object propertyValue;
+
+            if (value.hasIntegerValue()) {
+                propertyValue = value.getIntegerValue();
+            } else if (value.hasStringValue()) {
+                propertyValue = value.getStringValue();
+            } else if (value.hasBooleanValue()) {
+                propertyValue = value.getBooleanValue();
+            } else if (value.hasBlobValue()) {
+                propertyValue = value.getBlobValue();
+            } else {
+                throw new UnsupportedOperationException("Unsupported value: " + value);
+            }
+            resultEntity.setProperty(entry.getKey(), propertyValue);
+        }
+        return resultEntity;
+    }
+
+    private DatastoreV1.Entity buildRemoteEntity(final Entity entity) {
+        final DatastoreV1.Entity.Builder entityBuilder = DatastoreV1.Entity.newBuilder();
+
+        // Set the entity key.
+        final Key entityKey = entity.getKey();
+        entityBuilder.setKey(buildRemoteKey(entityKey));
+
+        // properties
+        for (final Map.Entry<String, Object> entry : entity.getProperties().entrySet()) {
+            final DatastoreV1.Value.Builder valueBuilder = DatastoreV1.Value.newBuilder();
+            final String propertyName = entry.getKey();
+            final Object propertyValue = entry.getValue();
+
+            valueBuilder.setIndexed(!entity.isUnindexedProperty(propertyName));
+
+            if (propertyValue instanceof Long) {
+                valueBuilder.setIntegerValue((long) propertyValue);
+            } else if (propertyValue instanceof Integer) {
+                valueBuilder.setIntegerValue((int) propertyValue);
+            } else if (propertyValue instanceof String) {
+                valueBuilder.setStringValue(propertyValue.toString());
+            } else if (propertyValue instanceof Boolean) {
+                valueBuilder.setBooleanValue((boolean) propertyValue);
+            } else if (propertyValue instanceof Blob) {
+                valueBuilder.setBlobValue(ByteString.copyFrom(((Blob) propertyValue).getBytes()));
+            } else {
+                throw new UnsupportedOperationException("Unsupported value: " + propertyValue);
+            }
+
+            entityBuilder.addProperty(
+                    DatastoreV1.Property.newBuilder()
+                            .setName(propertyName)
+                            .setValue(valueBuilder.build())
+            );
+        }
+
+        // Build the entity.
+        return entityBuilder.build();
     }
 
 
