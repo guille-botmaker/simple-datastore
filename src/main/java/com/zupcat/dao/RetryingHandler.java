@@ -101,7 +101,10 @@ public final class RetryingHandler implements Serializable {
                                 .setQuery(buildRemoteQuery(query, fetchOptions)).build());
                         final DatastoreV1.QueryResultBatch batch = runQueryResponse.getBatch();
 
-                        resultList.setEndCursor(batch.getEndCursor());
+                        // TODO paging seems to be broken
+//                        if (false && batch.hasMoreResults()) {
+//                            resultList.setEndCursor(batch.getEndCursor());
+//                        }
 
                         for (final DatastoreV1.EntityResult remoteResult : batch.getEntityResultList()) {
                             resultList.add(buildEntityFrom(remoteResult.getEntity()));
@@ -479,7 +482,7 @@ public final class RetryingHandler implements Serializable {
             } else if (value.hasBooleanValue()) {
                 propertyValue = value.getBooleanValue();
             } else if (value.hasBlobValue()) {
-                propertyValue = value.getBlobValue();
+                propertyValue = new Blob(value.getBlobValue().toByteArray());
             } else {
                 throw new UnsupportedOperationException("Unsupported value: " + value);
             }
@@ -491,7 +494,11 @@ public final class RetryingHandler implements Serializable {
     private DatastoreV1.Query.Builder buildRemoteQuery(final Query query, final FetchOptions fetchOptions) {
         final DatastoreV1.Query.Builder remoteQuery = DatastoreV1.Query.newBuilder();
         remoteQuery.addKindBuilder().setName(query.getKind());
-        remoteQuery.setStartCursor(buildRemoteCursor(fetchOptions.getEndCursor()));
+
+        final ByteString startCursor = buildRemoteCursor(fetchOptions.getEndCursor());
+        if (startCursor != null)
+            remoteQuery.setStartCursor(startCursor);
+
         remoteQuery.setFilter(buildRemoteFilter(query.getFilter()));
 //        remoteQuery.addOrder(DatastoreHelper.makeOrder(query.getso));
 

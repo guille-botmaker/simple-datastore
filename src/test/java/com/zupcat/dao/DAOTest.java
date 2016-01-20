@@ -145,15 +145,17 @@ public class DAOTest extends AbstractTest {
 
     @Test
     public void testUpdateOrPersistAsync() {
-        assertTrue(userDAO.getByLastName("NewLastName").size() == 0);
+        final String id = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
+
+        assertTrue(userDAO.getByLastName("NewLastName" + id).size() == 0);
 
         final User user = new User();
-        user.LASTNAME.set("NewLastName");
+        user.LASTNAME.set("NewLastName" + id);
         userDAO.updateOrPersistAsync(user);
 
         RetryingHandler.sleep(5000);
 
-        assertTrue(userDAO.getByLastName("NewLastName").size() == 1);
+        assertTrue(userDAO.getByLastName("NewLastName" + id).size() == 1);
     }
 
     @Test

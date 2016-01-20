@@ -1,7 +1,7 @@
 package com.zupcat.dao;
 
-import com.zupcat.sample.User;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -22,52 +22,63 @@ public class DAORemoteProtobufTest extends DAOTest {
 
         service.configProtoBuf("datastore-from-compute@zcat-infra.iam.gserviceaccount.com", "C:/Users/hernan/Desktop/zcat-infra-9f0082e80adc.p12");
 
-        for (final User user : buildUsers()) {
-            userDAO.updateOrPersist(user);
-        }
+//        for (final User user : buildUsers()) {
+//            userDAO.updateOrPersist(user);
+//        }
     }
 
-//    @Test
-//    public void testPersistenceFullyEquals() {
-//    }
-//
-//    @Test
-//    public void testGetForMassiveUpdate() {
-//    }
-//
-//    @Test
-//    public void testGetForMassiveDownload() {
-//    }
-//
-//    @Test
-//    public void testUpdateOrPersistAndQueries() {
-//    }
-//
-//    @Test
-//    public void testUpdateOrPersistAsync() {
-//    }
-//
-//    @Test
-//    public void testRemove() {
-//    }
-//
-//    @Test
-//    public void testRemoveMultiple() {
-//    }
-//
-//    @Test
-//    public void testRemoveAsync() {
-//    }
-//
-//    @Test
-//    public void testFindUnique() {
-//    }
-//
-//    @Test
-//    public void testQueryAllObjects() {
-//    }
-//
-//    @Test
-//    public void testQuerySpecific() {
-//    }
+    @Test
+    public void testPersistenceFullyEquals() {
+        super.testPersistenceFullyEquals();
+    }
+
+    @Test
+    public void testGetForMassiveUpdate() {
+        super.testGetForMassiveUpdate();
+    }
+
+    @Test
+    public void testGetForMassiveDownload() {
+        super.testGetForMassiveDownload();
+    }
+
+    @Test
+    public void testUpdateOrPersistAndQueries() {
+        super.testUpdateOrPersistAndQueries();
+    }
+
+    @Test
+    public void testUpdateOrPersistAsync() {
+        super.testUpdateOrPersistAsync();
+    }
+
+    @Test
+    public void testRemove() {
+        super.testRemove();
+    }
+
+    @Test
+    public void testRemoveMultiple() {
+        super.testRemoveMultiple();
+    }
+
+    @Test
+    public void testRemoveAsync() {
+        super.testRemoveAsync();
+    }
+
+    @Test
+    public void testFindUnique() {
+        super.testFindUnique();
+    }
+
+    @Test
+    public void testQueryAllObjects() {
+        super.testQueryAllObjects();
+    }
+
+    @Test
+    public void testQuerySpecific() {
+        super.testQuerySpecific();
+    }
 }
