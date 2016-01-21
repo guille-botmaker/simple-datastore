@@ -29,6 +29,10 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
         this.datastoreServiceAccountEmail = datastoreServiceAccountEmail;
         this.datastorePrivateKeyP12FileLocation = datastorePrivateKeyP12FileLocation;
 
+        fixProtobufConfigOnCurrentThread();
+    }
+
+    public void fixProtobufConfigOnCurrentThread() {
         final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
         helper.setUp();
     }
