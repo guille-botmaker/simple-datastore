@@ -1,5 +1,7 @@
 package com.zupcat.model;
 
+import com.google.api.server.spi.config.AnnotationBoolean;
+import com.google.api.server.spi.config.ApiResourceProperty;
 import com.zupcat.cache.CacheStrategy;
 import com.zupcat.model.config.INT;
 import com.zupcat.model.config.LONG;
@@ -29,7 +31,9 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     private final String entityName;
     private final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();
     // entity usefull properties
+    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public IntegerProperty GROUP_ID;
+    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public LongProperty LAST_MODIFICATION;
     private CacheStrategy cacheStrategy;
 
