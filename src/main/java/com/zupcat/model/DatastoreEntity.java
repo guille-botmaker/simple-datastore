@@ -29,12 +29,16 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     private final DataObject dataObject = new DataObject();
 
     private final String entityName;
+
     private final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();
     // entity usefull properties
+
     @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public IntegerProperty GROUP_ID;
+
     @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public LongProperty LAST_MODIFICATION;
+
     private CacheStrategy cacheStrategy;
 
 
@@ -93,10 +97,12 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         LAST_MODIFICATION.set(TimeUtils.buildStandardModificationTime());
     }
 
+    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public String getEntityName() {
         return entityName;
     }
 
+    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public boolean isFullyEquals(final DatastoreEntity other) {
         if (
                 other == null ||
@@ -160,6 +166,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return true;
     }
 
+    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public DataObject getDataObjectForClient() {
         final DataObject result = new DataObject();
         final DataObject source = getDataObject();
@@ -186,6 +193,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         getDataObject().put(WithIdDataObject.ID_KEY, id);
     }
 
+    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public Map<String, PropertyMeta> getPropertiesMetadata() {
         return propertiesMetadata;
     }
@@ -197,10 +205,12 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         propertiesMetadata.put(name, propertyMeta);
     }
 
+    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public DataObject getDataObject() {
         return dataObject;
     }
 
+    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public CacheStrategy getCacheStrategy() {
         return cacheStrategy;
     }
@@ -212,10 +222,12 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
 
     protected abstract void config();
 
+    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public int getDaysSinceLastModification() {
         return getMinutesSinceLastModification() / (60 * 24);
     }
 
+    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public int getMinutesSinceLastModification() {
         final long lm = LAST_MODIFICATION.get();
 
@@ -245,6 +257,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         getDataObject().put("_t", type);
     }
 
+    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public Date getLastModificationAsDate() {
         try {
             return new SimpleDateFormat(DATE_FORMAT).parse(Long.toString(LAST_MODIFICATION.get()));
@@ -253,6 +266,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         }
     }
 
+    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public boolean hasAccessedToday() {
         final String lastAccessDate = Long.toString(LAST_MODIFICATION.get()).substring(0, 6);
         final String today = Long.toString(TimeUtils.buildStandardModificationTime()).substring(0, 6);
