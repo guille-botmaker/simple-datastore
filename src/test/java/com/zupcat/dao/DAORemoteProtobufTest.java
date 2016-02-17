@@ -24,7 +24,7 @@ public class DAORemoteProtobufTest extends DAOTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        service.configProtoBuf("datastore-from-compute@zcat-infra.iam.gserviceaccount.com", "C:/Users/hernan/Desktop/zcat-infra-9f0082e80adc.p12");
+        service.configProtoBuf("datastore-from-compute@zcat-infra.iam.gserviceaccount.com", "C:/Users/hernan/Desktop/zcat-infra-9f0082e80adc.p12", "m-infra");
 
         for (final User user : buildUsers(lastNameUniqueId)) {
             userDAO.updateOrPersist(user);
