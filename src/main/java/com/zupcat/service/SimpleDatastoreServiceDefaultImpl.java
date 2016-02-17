@@ -14,6 +14,7 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     private boolean loggingDatastoreCalls = false;
     private String datastoreServiceAccountEmail;
     private String datastorePrivateKeyP12FileLocation;
+    private String dataSetId;
 
     @Override
     public void setDatastoreCallsLogging(final boolean activate) {
@@ -25,9 +26,10 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
         return loggingDatastoreCalls;
     }
 
-    public void configProtoBuf(final String datastoreServiceAccountEmail, final String datastorePrivateKeyP12FileLocation) {
+    public void configProtoBuf(final String datastoreServiceAccountEmail, final String datastorePrivateKeyP12FileLocation, final String dataSetId) {
         this.datastoreServiceAccountEmail = datastoreServiceAccountEmail;
         this.datastorePrivateKeyP12FileLocation = datastorePrivateKeyP12FileLocation;
+        this.dataSetId = dataSetId;
 
         fixProtobufConfigOnCurrentThread();
     }
@@ -50,13 +52,7 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     }
 
     public String getDataSetId() {
-        if (this.datastoreServiceAccountEmail == null) {
-            return null;
-        }
-
-        String tmp = datastoreServiceAccountEmail.substring(datastoreServiceAccountEmail.indexOf("@") + 1);
-        tmp = tmp.substring(0, tmp.indexOf("."));
-        return tmp;
+        return dataSetId;
     }
 
     @Override

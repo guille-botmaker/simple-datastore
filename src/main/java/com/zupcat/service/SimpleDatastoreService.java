@@ -18,7 +18,7 @@ public interface SimpleDatastoreService {
     DAO getDAO(final String entityName);
 
     // protobuf methods
-    void configProtoBuf(final String datastoreServiceAccountEmail, final String datastorePrivateKeyP12FileLocation);
+    void configProtoBuf(final String datastoreServiceAccountEmail, final String datastorePrivateKeyP12FileLocation, final String dataSetId);
 
     boolean isProtoBufMode();
 
