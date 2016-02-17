@@ -9,6 +9,7 @@ import com.zupcat.service.SimpleDatastoreServiceFactory;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
+import java.nio.charset.Charset;
 
 /**
  * Helper that converts Datastore Entities to Java Objects
@@ -130,7 +131,8 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
 
         final Entity anEntity = new Entity(dao.getEntityName(), persistentObject.getId());
 
-        final byte[] binaryData = objectHolderSerializer.serialize(persistentObject.getDataObject(), true);
+        final byte[] binaryData = persistentObject.getDataObject().toString().getBytes(Charset.forName("UTF-8"));
+//        final byte[] binaryData = objectHolderSerializer.serialize(persistentObject.getDataObject(), true);
 
         if (binaryData.length > 1000000) {
             throw new RuntimeException("BinaryData length for object [" + persistentObject + "] is bigger than permitted: " + binaryData.length);
@@ -157,7 +159,11 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
             final Blob binaryData = (Blob) entity.getProperty(DATA_CONTAINER_PROPERTY);
 
             if (binaryData != null) {
-                objectHolderSerializer.deserialize(binaryData.getBytes(), result.getDataObject(), true);
+                final String stringData = new String(binaryData.getBytes(), Charset.forName("UTF-8"));
+                result.getDataObject().mergeWith(new DataObject(stringData));
+
+//                objectHolderSerializer.deserialize(binaryData.getBytes(), result.getDataObject(), true);
+//                objectHolderSerializer.deserialize(binaryData.getBytes(), result.getDataObject(), true);
             }
 
             for (final PropertyMeta propertyMeta : result.getPropertiesMetadata().values()) {
