@@ -22,8 +22,6 @@ public interface SimpleDatastoreService {
 
     boolean isProtoBufMode();
 
-    void fixProtobufConfigOnCurrentThread();
-
     String getDatastoreServiceAccountEmail();
 
     String getDatastorePrivateKeyP12FileLocation();

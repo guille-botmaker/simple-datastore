@@ -1,7 +1,5 @@
 package com.zupcat.service;
 
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.zupcat.dao.DAO;
 
 import java.util.HashMap;
@@ -30,13 +28,6 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
         this.datastoreServiceAccountEmail = datastoreServiceAccountEmail;
         this.datastorePrivateKeyP12FileLocation = datastorePrivateKeyP12FileLocation;
         this.dataSetId = dataSetId;
-
-        fixProtobufConfigOnCurrentThread();
-    }
-
-    public void fixProtobufConfigOnCurrentThread() {
-        final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
-        helper.setUp();
     }
 
     public boolean isProtoBufMode() {
