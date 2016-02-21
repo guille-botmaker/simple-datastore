@@ -76,6 +76,12 @@
 
         <dependency>
             <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-remote-api</artifactId>
+            <version>${appengine.target.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-labs</artifactId>
             <version>${appengine.target.version}</version>
             <scope>test</scope>
