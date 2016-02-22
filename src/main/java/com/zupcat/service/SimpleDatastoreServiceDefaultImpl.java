@@ -1,7 +1,10 @@
 package com.zupcat.service;
 
+import com.google.appengine.tools.remoteapi.RemoteApiInstaller;
+import com.google.appengine.tools.remoteapi.RemoteApiOptions;
 import com.zupcat.dao.DAO;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,9 +13,6 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     private final Map<Class, DAO> daoMap = new HashMap<>();
     private final Map<String, DAO> daoByEntityNameMap = new HashMap<>();
     private boolean loggingDatastoreCalls = false;
-    private String datastoreServiceAccountEmail;
-    private String datastorePrivateKeyP12FileLocation;
-    private String dataSetId;
 
     @Override
     public void setDatastoreCallsLogging(final boolean activate) {
@@ -24,26 +24,24 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
         return loggingDatastoreCalls;
     }
 
-    public void configProtoBuf(final String datastoreServiceAccountEmail, final String datastorePrivateKeyP12FileLocation, final String dataSetId) {
-        this.datastoreServiceAccountEmail = datastoreServiceAccountEmail;
-        this.datastorePrivateKeyP12FileLocation = datastorePrivateKeyP12FileLocation;
-        this.dataSetId = dataSetId;
-    }
+    public void configRemoteDatastore(final String remoteAppId, final String datastoreServiceAccountEmail, final String datastorePrivateKeyP12FileLocation, final boolean useLocalDevServer) {
+        final RemoteApiOptions options = new RemoteApiOptions();
 
-    public boolean isProtoBufMode() {
-        return this.datastoreServiceAccountEmail != null;
-    }
+        if (useLocalDevServer) {
+            options
+                    .server("localhost", 8888)
+                    .useDevelopmentServerCredential();
+        } else {
+            options
+                    .server(remoteAppId + ".appspot.com", 443)
+                    .useServiceAccountCredential(datastoreServiceAccountEmail, datastorePrivateKeyP12FileLocation);
+        }
 
-    public String getDatastoreServiceAccountEmail() {
-        return datastoreServiceAccountEmail;
-    }
-
-    public String getDatastorePrivateKeyP12FileLocation() {
-        return datastorePrivateKeyP12FileLocation;
-    }
-
-    public String getDataSetId() {
-        return dataSetId;
+        try {
+            new RemoteApiInstaller().install(options);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
