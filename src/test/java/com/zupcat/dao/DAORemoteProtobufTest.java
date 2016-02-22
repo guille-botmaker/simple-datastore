@@ -24,7 +24,7 @@ public class DAORemoteProtobufTest extends DAOTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        service.configRemoteDatastore("437766657115-compute@developer.gserviceaccount.com", "/Messengero-042bd9fe9f87.p12", "m-infra", false);
+        service.configRemoteDatastore("m-infra", "437766657115-compute@developer.gserviceaccount.com", "C:/dev/m/mjava/websockets-server/Messengero-042bd9fe9f87.p12", false);
 
         for (final User user : buildUsers(lastNameUniqueId)) {
             userDAO.updateOrPersist(user);
