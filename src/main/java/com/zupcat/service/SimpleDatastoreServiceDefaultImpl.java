@@ -13,6 +13,10 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     private final Map<Class, DAO> daoMap = new HashMap<>();
     private final Map<String, DAO> daoByEntityNameMap = new HashMap<>();
     private boolean loggingDatastoreCalls = false;
+    private String remoteAppId;
+    private String datastoreServiceAccountEmail;
+    private String datastorePrivateKeyP12FileLocation;
+    private boolean useLocalDevServer;
 
     @Override
     public void setDatastoreCallsLogging(final boolean activate) {
@@ -25,6 +29,18 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     }
 
     public void configRemoteDatastore(final String remoteAppId, final String datastoreServiceAccountEmail, final String datastorePrivateKeyP12FileLocation, final boolean useLocalDevServer) {
+        this.remoteAppId = remoteAppId;
+        this.datastoreServiceAccountEmail = datastoreServiceAccountEmail;
+        this.datastorePrivateKeyP12FileLocation = datastorePrivateKeyP12FileLocation;
+        this.useLocalDevServer = useLocalDevServer;
+
+        configRemoteDatastoreOnThisTread();
+    }
+
+    public void configRemoteDatastoreOnThisTread() {
+        if (remoteAppId == null) {
+            return;
+        }
         final RemoteApiOptions options = new RemoteApiOptions();
 
         if (useLocalDevServer) {

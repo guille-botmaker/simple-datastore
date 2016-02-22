@@ -19,4 +19,6 @@ public interface SimpleDatastoreService {
 
     // protobuf methods
     void configRemoteDatastore(final String remoteAppId, final String datastoreServiceAccountEmail, final String datastorePrivateKeyP12FileLocation, final boolean useLocalDevServer);
+
+    void configRemoteDatastoreOnThisTread();
 }
