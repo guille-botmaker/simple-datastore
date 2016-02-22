@@ -2,8 +2,6 @@ package com.zupcat.dao;
 
 import com.google.appengine.api.datastore.Query;
 import com.zupcat.AbstractTest;
-import com.zupcat.model.DatastoreEntity;
-import com.zupcat.model.PersistentObject;
 import com.zupcat.sample.User;
 import com.zupcat.sample.UserDAO;
 import com.zupcat.util.RandomUtils;
@@ -95,33 +93,33 @@ public class DAOTest extends AbstractTest {
         assertTrue(all.iterator().next().ADDRESSES_MAP.get(all.iterator().next().ADDRESSES.iterator().next().getStreet()).getStreet().startsWith("Sesamo"));
     }
 
-    @Test
-    public void testGetForMassiveDownload() {
-        int totalEntities = 0;
-        boolean specificFound = false;
-
-        for (int i = 0; i < DatastoreEntity.MAX_GROUPS; i++) {
-            final MassiveDownload massiveDownload = new MassiveDownload();
-            massiveDownload.setGroupId(i);
-            massiveDownload.setKind(userDAO.getEntityName());
-
-            userDAO.getForMassiveDownload(massiveDownload);
-
-            final Collection<PersistentObject> results = massiveDownload.getResults();
-
-            totalEntities += results.size();
-
-            for (final PersistentObject user : results) {
-                if (((User) user).LASTNAME.get().equals("liendo" + lastNameUniqueId)) {
-                    specificFound = true;
-                }
-            }
-        }
-
-        final int allSize = userDAO.getAll().size();
-        assertTrue(specificFound);
-        assertTrue(totalEntities >= 5 && totalEntities == allSize);
-    }
+//    @Test
+//    public void testGetForMassiveDownload() {
+//        int totalEntities = 0;
+//        boolean specificFound = false;
+//
+//        for (int i = 0; i < DatastoreEntity.MAX_GROUPS; i++) {
+//            final MassiveDownload massiveDownload = new MassiveDownload();
+//            massiveDownload.setGroupId(i);
+//            massiveDownload.setKind(userDAO.getEntityName());
+//
+//            userDAO.getForMassiveDownload(massiveDownload);
+//
+//            final Collection<PersistentObject> results = massiveDownload.getResults();
+//
+//            totalEntities += results.size();
+//
+//            for (final PersistentObject user : results) {
+//                if (((User) user).LASTNAME.get().equals("liendo" + lastNameUniqueId)) {
+//                    specificFound = true;
+//                }
+//            }
+//        }
+//
+//        final int allSize = userDAO.getAll().size();
+//        assertTrue(specificFound);
+//        assertTrue(totalEntities >= 5 && totalEntities == allSize);
+//    }
 
     @Test
     public void testUpdateOrPersistAndQueries() {
