@@ -29,7 +29,7 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
 
         if (useLocalDevServer) {
             options
-                    .server("localhost", 8888)
+                    .server("localhost", 8080)
                     .useDevelopmentServerCredential();
         } else {
             options
