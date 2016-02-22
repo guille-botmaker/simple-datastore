@@ -1,7 +1,7 @@
 package com.zupcat.model;
 
-import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Text;
 import com.zupcat.dao.DAO;
 import com.zupcat.model.config.PropertyMeta;
 import com.zupcat.property.IntegerProperty;
@@ -17,6 +17,7 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
 
     public static final String DATA_CONTAINER_PROPERTY = "bdata";
     private static final Object LOCK_OBJECT = new Object();
+    private static final int ENTITY_PROPERTY_MAX_SIZE = (int) ((1024 * 1024) * 0.98f);
     private static EntityPersistentObjectConverter _instance;
     private final DataObjectSerializer<DataObject> objectHolderSerializer;
 
@@ -131,13 +132,14 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
         final Entity anEntity = new Entity(dao.getEntityName(), persistentObject.getId());
 
 //        final byte[] binaryData = persistentObject.getDataObject().toString().getBytes(Charset.forName("UTF-8"));
-        final byte[] binaryData = objectHolderSerializer.serialize(persistentObject.getDataObject(), true);
+//        final byte[] binaryData = objectHolderSerializer.serialize(persistentObject.getDataObject(), true);
+        final String stringData = persistentObject.getDataObject().toString();
 
-        if (binaryData.length > 1000000) {
-            throw new RuntimeException("BinaryData length for object [" + persistentObject + "] is bigger than permitted: " + binaryData.length);
+        if (stringData.length() > ENTITY_PROPERTY_MAX_SIZE) {
+            throw new RuntimeException("StringData length for object [" + persistentObject + "] is bigger than permitted: " + ENTITY_PROPERTY_MAX_SIZE);
         }
 
-        anEntity.setUnindexedProperty(DATA_CONTAINER_PROPERTY, new Blob(binaryData));
+        anEntity.setUnindexedProperty(DATA_CONTAINER_PROPERTY, new Text(stringData));
 
         for (final PropertyMeta propertyMeta : persistentObject.getPropertiesMetadata().values()) {
             if (propertyMeta.isIndexable()) {
@@ -155,13 +157,15 @@ public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
 
             result.setId(entity.getKey().getName());
 
-            final Blob binaryData = (Blob) entity.getProperty(DATA_CONTAINER_PROPERTY);
+            final Text stringData = (Text) entity.getProperty(DATA_CONTAINER_PROPERTY);
 
-            if (binaryData != null) {
+            if (stringData != null) {
 //                final String stringData = new String(binaryData.getBytes(), Charset.forName("UTF-8"));
 //                result.getDataObject().mergeWith(new DataObject(stringData));
 
-                objectHolderSerializer.deserialize(binaryData.getBytes(), result.getDataObject(), true);
+                result.getDataObject().mergeWith(new DataObject(stringData.getValue()));
+
+//                objectHolderSerializer.deserialize(binaryData.getBytes(), result.getDataObject(), true);
             }
 
             for (final PropertyMeta propertyMeta : result.getPropertiesMetadata().values()) {
