@@ -6,10 +6,13 @@ import com.zupcat.dao.DAO;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreService {
 
+    private static final Set<Thread> alreadyInstalledThreads = new HashSet<>();
     private final Map<Class, DAO> daoMap = new HashMap<>();
     private final Map<String, DAO> daoByEntityNameMap = new HashMap<>();
     private boolean loggingDatastoreCalls = false;
@@ -38,7 +41,7 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     }
 
     public void configRemoteDatastoreOnThisTread() {
-        if (remoteAppId == null) {
+        if (remoteAppId == null || alreadyInstalledThreads.contains(Thread.currentThread())) {
             return;
         }
         final RemoteApiOptions options = new RemoteApiOptions();
@@ -55,8 +58,9 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
 
         try {
             new RemoteApiInstaller().install(options);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
+            alreadyInstalledThreads.add(Thread.currentThread());
+        } catch (final IOException ioException) {
+            throw new RuntimeException(ioException);
         }
     }
 
