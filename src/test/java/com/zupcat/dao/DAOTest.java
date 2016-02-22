@@ -31,6 +31,7 @@ public class DAOTest extends AbstractTest {
     public void setUp() throws Exception {
         super.setUp();
         userDAO = service.getDAO(UserDAO.class);
+//        service.configRemoteDatastore("m-infra", "437766657115-compute@developer.gserviceaccount.com", "C:/dev/m/mjava/websockets-server/Messengero-042bd9fe9f87.p12", false);
 
         for (final User user : buildUsers(lastNameUniqueId)) {
             userDAO.updateOrPersist(user);
