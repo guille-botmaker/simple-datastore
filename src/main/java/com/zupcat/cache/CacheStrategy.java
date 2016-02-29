@@ -8,6 +8,7 @@ import java.io.Serializable;
 public enum CacheStrategy implements Serializable {
 
     NO_CACHE(new NoMemCache()), // NullObject pattern
+    REQUEST_CACHE(new MemCache(60 * 2)), // 2 minutes
     APPLICATION_CACHE(new MemCache(60 * 60 * 24)), // a day
     SESSION_CACHE(new MemCache(60 * 15)); // 15 minutes
 
