@@ -153,6 +153,13 @@ public final class TimeUtils {
         return calendar.get(Calendar.DAY_OF_WEEK) - 2;
     }
 
+    public static int getHour() {
+
+        final Calendar calendar = TimeUtils.getCalendar();
+        calendar.setTime(getDateFromStandardModificationTime(buildStandardModificationTime()));
+        return calendar.get(Calendar.HOUR_OF_DAY);
+    }
+
     /**
      * returns YYYYMMDD
      */
