@@ -30,7 +30,6 @@ public class DAOTest extends AbstractTest {
     public void setUp() throws Exception {
         super.setUp();
         userDAO = service.getDAO(UserDAO.class);
-//        service.configRemoteDatastore("m-infra", "437766657115-compute@developer.gserviceaccount.com", "C:/dev/m/mjava/websockets-server/Messengero-042bd9fe9f87.p12", false);
 
         for (final User user : buildUsers(lastNameUniqueId)) {
             userDAO.updateOrPersist(user);
@@ -94,34 +93,6 @@ public class DAOTest extends AbstractTest {
         assertTrue(all.iterator().next().ADDRESSES_MAP.get(all.iterator().next().ADDRESSES.iterator().next().getStreet()).getStreet().startsWith("Sesamo"));
     }
 
-//    @Test
-//    public void testGetForMassiveDownload() {
-//        int totalEntities = 0;
-//        boolean specificFound = false;
-//
-//        for (int i = 0; i < DatastoreEntity.MAX_GROUPS; i++) {
-//            final MassiveDownload massiveDownload = new MassiveDownload();
-//            massiveDownload.setGroupId(i);
-//            massiveDownload.setKind(userDAO.getEntityName());
-//
-//            userDAO.getForMassiveDownload(massiveDownload);
-//
-//            final Collection<PersistentObject> results = massiveDownload.getResults();
-//
-//            totalEntities += results.size();
-//
-//            for (final PersistentObject user : results) {
-//                if (((User) user).LASTNAME.get().equals("liendo" + lastNameUniqueId)) {
-//                    specificFound = true;
-//                }
-//            }
-//        }
-//
-//        final int allSize = userDAO.getAll().size();
-//        assertTrue(specificFound);
-//        assertTrue(totalEntities >= 5 && totalEntities == allSize);
-//    }
-
     @Test
     public void testUpdateOrPersistAndQueries() {
         final String id = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
@@ -162,18 +133,6 @@ public class DAOTest extends AbstractTest {
         ids.add(allUsers.iterator().next().getId());
 
         userDAO.remove(ids);
-
-        assertTrue(userDAO.getByLastName("liendo" + lastNameUniqueId).size() == 0);
-    }
-
-    @Test
-    public void testRemoveAsync() {
-        final List<User> allUsers = userDAO.getByLastName("liendo" + lastNameUniqueId);
-        assertTrue(allUsers.size() == 1);
-
-        userDAO.removeAsync(allUsers.iterator().next().getId());
-
-        RetryingHandler.sleep(5000);
 
         assertTrue(userDAO.getByLastName("liendo" + lastNameUniqueId).size() == 0);
     }
