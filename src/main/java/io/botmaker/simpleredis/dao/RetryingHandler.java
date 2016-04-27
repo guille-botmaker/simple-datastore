@@ -10,10 +10,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,12 +40,17 @@ public final class RetryingHandler implements Serializable {
     }
 
     private String buildKey(final RedisEntity entity, final RedisServer redisServer) {
-        return (entity.usesAppIdPrefix() ? (redisServer.getAppId() + ":") : "") + entity.getEntityName() + ":" + entity.getId();
+        return (entity.usesAppIdPrefix() ? redisServer.getAppId() : "default") +
+                ":" +
+                entity.getEntityName() +
+                ":" +
+                entity.getId();
     }
 
     private String buildIndexableKey(final PropertyMeta propertyMeta, final RedisEntity entity, final Object propertyValue, final RedisServer redisServer) {
         return
-                (entity.usesAppIdPrefix() ? (redisServer.getAppId() + ":") : "") +
+                (entity.usesAppIdPrefix() ? redisServer.getAppId() : "default") +
+                        ":" +
                         entity.getEntityName() +
                         ":index:" +
                         propertyMeta.getPropertyName() +
@@ -81,6 +83,41 @@ public final class RetryingHandler implements Serializable {
         }, result);
 
         return result[0];
+    }
+
+    public <T extends RedisEntity> List<T> tryDSGetAll(final DAO<T> dao) {
+        final List<T> result = new ArrayList<>();
+
+        tryClosure((redisServer, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - tryDSGetAll", new Exception());
+            }
+
+            final List<String> resultList;
+            final T sample = dao.buildPersistentObjectInstance();
+            sample.setId("*");
+            final String keyName = buildKey(sample, redisServer);
+            final String script =
+                    "local the_keys = redis.call('keys', KEYS[1])\n" +
+                            "if the_keys then\n" +
+                            "return redis.call('mget', the_keys)\n" +
+                            "else\n" +
+                            "return nil end";
+
+
+            try (final Jedis jedis = redisServer.getPool().getResource()) {
+                resultList =
+                        (List<String>) jedis.eval(script, 1, keyName);
+            }
+
+            if (resultList != null) {
+                result.addAll(resultList.stream()
+                        .map(dao::buildPersistentObjectInstanceFromPersistedStringData)
+                        .collect(Collectors.toList()));
+            }
+        }, null);
+
+        return result;
     }
 
     public <T extends RedisEntity> T tryDSGetByIndexableProperty(final String indexablePropertyName, final String key, final DAO<T> dao) {
@@ -156,8 +193,8 @@ public final class RetryingHandler implements Serializable {
         }
     }
 
-    public Map<String, RedisEntity> tryDSGetMultiple(final Collection<String> keys, final DAO dao) {
-        final Map<String, RedisEntity> result = new HashMap<>();
+    public <T extends RedisEntity> Map<String, T> tryDSGetMultiple(final Collection<String> keys, final DAO<T> dao) {
+        final Map<String, T> result = new HashMap<>();
 
         if (keys != null && !keys.isEmpty()) {
             tryClosure((redisServer, results, loggingActivated) -> {
@@ -177,7 +214,7 @@ public final class RetryingHandler implements Serializable {
                     result.putAll(
                             resultList.stream()
                                     .map((Function<String, RedisEntity>) dao::buildPersistentObjectInstanceFromPersistedStringData)
-                                    .collect(Collectors.toMap(RedisEntity::getId, i -> i))
+                                    .collect(Collectors.toMap(RedisEntity::getId, i -> (T) i))
                     );
                 }
 

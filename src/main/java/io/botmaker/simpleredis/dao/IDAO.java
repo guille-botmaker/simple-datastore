@@ -20,8 +20,6 @@ import java.util.Map;
  */
 public interface IDAO<P extends RedisEntity> extends Serializable {
 
-    P buildRedisEntityFromStringData(final String persistedData);
-
     P buildPersistentObjectInstance();
 
     P buildPersistentObjectInstanceFromPersistedStringData(final String persistedStringData);
@@ -32,8 +30,6 @@ public interface IDAO<P extends RedisEntity> extends Serializable {
     Map<String, P> findUniqueIdMultiple(final Collection<String> ids);
 
     List<P> getAll();
-
-    List<P> findByIndexableProperty(final String propertyName, final String id);
 
     P findUniqueByIndexableProperty(final String propertyName, final String id);
 
