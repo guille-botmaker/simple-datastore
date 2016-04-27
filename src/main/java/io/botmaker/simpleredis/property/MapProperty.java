@@ -1,7 +1,7 @@
 package io.botmaker.simpleredis.property;
 
 import io.botmaker.simpleredis.model.DataObject;
-import io.botmaker.simpleredis.model.DatastoreEntity;
+import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
 import org.json.JSONObject;
 
@@ -18,7 +18,7 @@ public final class MapProperty<V> extends PropertyMeta<Map<String, V>> implement
 
     private final Class<? extends DataObject> valueClass;
 
-    public MapProperty(final DatastoreEntity owner, final Class<? extends DataObject> _valueClass) {
+    public MapProperty(final RedisEntity owner, final Class<? extends DataObject> _valueClass) {
         super(owner);
         valueClass = _valueClass;
     }

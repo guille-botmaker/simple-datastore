@@ -1,7 +1,7 @@
 package io.botmaker.simpleredis.property;
 
 import io.botmaker.simpleredis.model.DataObject;
-import io.botmaker.simpleredis.model.DatastoreEntity;
+import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
 import org.apache.commons.collections4.list.SetUniqueList;
 import org.json.JSONArray;
@@ -17,7 +17,7 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
     private final Class<? extends DataObject> itemClass;
     private final boolean keepUniqueElements;
 
-    public ListProperty(final DatastoreEntity owner, final Class<? extends DataObject> _itemClass, final boolean _keepUniqueElements) {
+    public ListProperty(final RedisEntity owner, final Class<? extends DataObject> _itemClass, final boolean _keepUniqueElements) {
         super(owner);
         itemClass = _itemClass;
         keepUniqueElements = _keepUniqueElements;

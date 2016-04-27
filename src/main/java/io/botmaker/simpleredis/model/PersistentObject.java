@@ -18,7 +18,6 @@ public abstract class PersistentObject implements Serializable {
 
     public abstract void setModified();
 
-
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

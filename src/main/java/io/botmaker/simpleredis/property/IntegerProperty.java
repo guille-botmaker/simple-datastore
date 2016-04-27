@@ -1,7 +1,7 @@
 package io.botmaker.simpleredis.property;
 
 import io.botmaker.simpleredis.model.DataObject;
-import io.botmaker.simpleredis.model.DatastoreEntity;
+import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
 
 import java.io.Serializable;
@@ -11,7 +11,7 @@ public final class IntegerProperty extends PropertyMeta<Integer> implements Seri
     private static final long serialVersionUID = 6181606486836703354L;
 
 
-    public IntegerProperty(final DatastoreEntity owner) {
+    public IntegerProperty(final RedisEntity owner) {
         super(owner);
     }
 

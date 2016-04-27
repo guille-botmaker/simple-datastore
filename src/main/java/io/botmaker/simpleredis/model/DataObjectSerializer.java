@@ -118,7 +118,7 @@ public final class DataObjectSerializer<T extends DataObject> implements Seriali
         final List<DataObjectSerializedData> serializedData = (List<DataObjectSerializedData>) SerializationHelper.getObjectFromBytes(Base64.decodeBase64(objectInputStream.readUTF()), false);
 
         for (final DataObjectSerializedData data : serializedData) {
-            final Class<DatastoreEntity> recordClass = (Class<DatastoreEntity>) Class.forName(data.className);
+            final Class<RedisEntity> recordClass = (Class<RedisEntity>) Class.forName(data.className);
             final List<T> list = new ArrayList<>();
             result.put(recordClass, list);
 

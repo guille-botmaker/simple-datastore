@@ -2,7 +2,6 @@ package io.botmaker.simpleredis.model;
 
 import com.google.api.server.spi.config.AnnotationBoolean;
 import com.google.api.server.spi.config.ApiResourceProperty;
-import io.botmaker.simpleredis.cache.CacheStrategy;
 import io.botmaker.simpleredis.model.config.INT;
 import io.botmaker.simpleredis.model.config.LONG;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
@@ -21,7 +20,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public abstract class DatastoreEntity extends PersistentObject implements Serializable {
+public abstract class RedisEntity extends PersistentObject implements Serializable {
 
     public static final int MAX_GROUPS = 100;
     private static final long serialVersionUID = 6181606486836703354L;
@@ -39,22 +38,13 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public LongProperty LAST_MODIFICATION;
 
-    private CacheStrategy cacheStrategy;
-
-
-    protected DatastoreEntity() {
-        final Class<? extends DatastoreEntity> clazz = this.getClass();
+    protected RedisEntity() {
+        final Class<? extends RedisEntity> clazz = this.getClass();
         final String className = clazz.getName();
         entityName = className.substring(className.lastIndexOf(".") + 1);
-        this.cacheStrategy = CacheStrategy.NO_CACHE;
 
         setNewId();
-    }
 
-    protected DatastoreEntity(final CacheStrategy cacheStrategy) {
-        this();
-
-        this.cacheStrategy = cacheStrategy;
         GROUP_ID = new INT(this).indexable().build();
         LAST_MODIFICATION = new LONG(this).sendToClient().mandatory().indexable().build();
 
@@ -103,11 +93,10 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     }
 
     @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
-    public boolean isFullyEquals(final DatastoreEntity other) {
+    public boolean isFullyEquals(final RedisEntity other) {
         if (
                 other == null ||
                         !Objects.equals(this.getId(), other.getId()) ||
-                        !Objects.equals(this.cacheStrategy, other.cacheStrategy) ||
                         !Objects.equals(this.entityName, other.entityName) ||
                         !Objects.equals(this.GROUP_ID.get(), other.GROUP_ID.get()) ||
                         !Objects.equals(this.LAST_MODIFICATION.get(), other.LAST_MODIFICATION.get()) ||
@@ -125,12 +114,12 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return true;
     }
 
-    private boolean comparePropertiesWith(final DatastoreEntity anotherDatastoreEntity) {
-        if (anotherDatastoreEntity == null) {
+    private boolean comparePropertiesWith(final RedisEntity anotherRedisEntity) {
+        if (anotherRedisEntity == null) {
             return false;
         }
 
-        if (this.propertiesMetadata.size() != anotherDatastoreEntity.propertiesMetadata.size()) {
+        if (this.propertiesMetadata.size() != anotherRedisEntity.propertiesMetadata.size()) {
             return false;
         }
 
@@ -139,7 +128,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         }
 
         for (final Map.Entry<String, PropertyMeta> myEntries : this.propertiesMetadata.entrySet()) {
-            final PropertyMeta anotherPropertyMeta = anotherDatastoreEntity.propertiesMetadata.get(myEntries.getKey());
+            final PropertyMeta anotherPropertyMeta = anotherRedisEntity.propertiesMetadata.get(myEntries.getKey());
 
             if (anotherPropertyMeta == null) {
                 return false;
@@ -210,11 +199,6 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
         return dataObject;
     }
 
-    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
-    public CacheStrategy getCacheStrategy() {
-        return cacheStrategy;
-    }
-
     @Override
     public String toString() {
         return "[" + entityName + "|" + getId() + "|" + getDataObject().toString(5) + "]";
@@ -231,7 +215,7 @@ public abstract class DatastoreEntity extends PersistentObject implements Serial
     public int getMinutesSinceLastModification() {
         final long lm = LAST_MODIFICATION.get();
 
-        if (lm == 0l) {
+        if (lm == 0L) {
             return 0;
         }
 

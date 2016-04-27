@@ -2,7 +2,7 @@ package io.botmaker.simpleredis.model.config;
 
 import io.botmaker.simpleredis.audit.AuditHandlerServiceFactory;
 import io.botmaker.simpleredis.model.DataObject;
-import io.botmaker.simpleredis.model.DatastoreEntity;
+import io.botmaker.simpleredis.model.RedisEntity;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
@@ -14,12 +14,12 @@ import java.util.Objects;
 public abstract class PropertyMeta<E> implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
-    private final DatastoreEntity owner;
+    private final RedisEntity owner;
     protected String name;
     protected AbstractPropertyBuilder<? extends PropertyMeta<E>, E> options;
 
 
-    protected PropertyMeta(final DatastoreEntity owner) {
+    protected PropertyMeta(final RedisEntity owner) {
         this.owner = owner;
     }
 
@@ -35,7 +35,7 @@ public abstract class PropertyMeta<E> implements Serializable {
         this.name = propertyName;
     }
 
-    protected DatastoreEntity getOwner() {
+    protected RedisEntity getOwner() {
         return owner;
     }
 

@@ -2,13 +2,13 @@ package io.botmaker.simpleredis.dao;
 
 import com.google.appengine.api.ThreadManager;
 import com.google.appengine.api.datastore.Query;
-import io.botmaker.simpleredis.model.DatastoreEntity;
+import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
 import io.botmaker.simpleredis.util.CommonsParallel;
 
 import java.util.*;
 
-public final class LoadMultipleParallel<E extends DatastoreEntity> extends CommonsParallel<List<String>> {
+public final class LoadMultipleParallel<E extends RedisEntity> extends CommonsParallel<List<String>> {
 
     private static final int QUERY_PACK_SIZE = 100;
 

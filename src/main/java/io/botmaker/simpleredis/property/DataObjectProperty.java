@@ -1,7 +1,7 @@
 package io.botmaker.simpleredis.property;
 
 import io.botmaker.simpleredis.model.DataObject;
-import io.botmaker.simpleredis.model.DatastoreEntity;
+import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
 import org.json.JSONObject;
 
@@ -13,7 +13,7 @@ public final class DataObjectProperty<T extends DataObject> extends PropertyMeta
 
     private final Class<T> itemClass;
 
-    public DataObjectProperty(final DatastoreEntity owner, final Class<T> _itemClass) {
+    public DataObjectProperty(final RedisEntity owner, final Class<T> _itemClass) {
         super(owner);
         itemClass = _itemClass;
     }

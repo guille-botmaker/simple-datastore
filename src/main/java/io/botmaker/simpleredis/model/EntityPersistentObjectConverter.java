@@ -13,7 +13,7 @@ import java.io.*;
 /**
  * Helper that converts Datastore Entities to Java Objects
  */
-public final class EntityPersistentObjectConverter<P extends DatastoreEntity> {
+public final class EntityPersistentObjectConverter<P extends RedisEntity> {
 
     public static final String DATA_CONTAINER_PROPERTY = "bdata";
     private static final Object LOCK_OBJECT = new Object();

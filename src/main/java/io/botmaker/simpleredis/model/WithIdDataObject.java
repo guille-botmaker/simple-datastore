@@ -15,7 +15,6 @@ public class WithIdDataObject extends DataObject {
     public static final String ID_KEY = "_id_";
     private static final long serialVersionUID = 471847964351314234L;
 
-
     public WithIdDataObject() {
     }
 

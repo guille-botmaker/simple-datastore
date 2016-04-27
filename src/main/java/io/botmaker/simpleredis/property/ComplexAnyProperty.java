@@ -2,7 +2,7 @@ package io.botmaker.simpleredis.property;
 
 import io.botmaker.simpleredis.dao.SerializationHelper;
 import io.botmaker.simpleredis.model.DataObject;
-import io.botmaker.simpleredis.model.DatastoreEntity;
+import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
 import org.apache.commons.codec.binary.Base64;
 
@@ -13,7 +13,7 @@ public final class ComplexAnyProperty<T> extends PropertyMeta<T> implements Seri
     private static final long serialVersionUID = 6181606486836703354L;
 
 
-    public ComplexAnyProperty(final DatastoreEntity owner) {
+    public ComplexAnyProperty(final RedisEntity owner) {
         super(owner);
     }
 

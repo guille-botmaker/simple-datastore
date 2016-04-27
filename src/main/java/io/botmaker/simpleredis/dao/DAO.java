@@ -2,8 +2,8 @@ package io.botmaker.simpleredis.dao;
 
 import com.google.appengine.api.datastore.*;
 import io.botmaker.simpleredis.cache.MemCache;
-import io.botmaker.simpleredis.model.DatastoreEntity;
 import io.botmaker.simpleredis.model.EntityPersistentObjectConverter;
+import io.botmaker.simpleredis.model.RedisEntity;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
 
@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  * <p/>
  * Every X_DataStoreEntity should have its X_DAO implementation. See tests for examples
  */
-public class DAO<P extends DatastoreEntity> implements Serializable, IDAO<P> {
+public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
 
     protected static final Logger log = Logger.getLogger(DAO.class.getName());
     private static final long serialVersionUID = 471847964351314234L;

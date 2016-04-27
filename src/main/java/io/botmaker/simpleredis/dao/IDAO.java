@@ -1,6 +1,6 @@
 package io.botmaker.simpleredis.dao;
 
-import io.botmaker.simpleredis.model.DatastoreEntity;
+import io.botmaker.simpleredis.model.RedisEntity;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -18,7 +18,7 @@ import java.util.Map;
  * <p/>
  * Every X_DataStoreEntity should have its X_DAO implementation. See tests for examples
  */
-public interface IDAO<P extends DatastoreEntity> extends Serializable {
+public interface IDAO<P extends RedisEntity> extends Serializable {
 
     // Querying methods =====
     P findById(final String id);
