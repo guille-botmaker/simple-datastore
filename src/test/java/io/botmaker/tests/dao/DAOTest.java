@@ -1,6 +1,5 @@
 package io.botmaker.tests.dao;
 
-import com.google.appengine.api.datastore.Query;
 import io.botmaker.simpleredis.dao.RetryingHandler;
 import io.botmaker.simpleredis.util.RandomUtils;
 import io.botmaker.tests.AbstractTest;
@@ -12,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -40,9 +40,7 @@ public class DAOTest extends AbstractTest {
     public void testPersistenceFullyEquals() {
         //cleaning db
         final List<String> ids = new ArrayList<>(100);
-        for (final User user : userDAO.getAll()) {
-            ids.add(user.getId());
-        }
+        ids.addAll(userDAO.getAll().stream().map(User::getId).collect(Collectors.toList()));
 
         userDAO.remove(ids);
 
@@ -116,34 +114,34 @@ public class DAOTest extends AbstractTest {
 
     @Test
     public void testRemove() {
-        final List<User> allUsers = userDAO.getByLastName("liendo" + lastNameUniqueId);
-        assertTrue(allUsers.size() == 1);
+        User theuser = userDAO.getByLastName("liendo" + lastNameUniqueId);
+        assertNotNull(theuser);
 
-        userDAO.remove(allUsers.iterator().next().getId());
+        userDAO.remove(theuser.getId());
 
-        assertTrue(userDAO.getByLastName("liendo" + lastNameUniqueId).size() == 0);
+        theuser = userDAO.getByLastName("liendo" + lastNameUniqueId);
+        assertNull(theuser);
     }
 
     @Test
     public void testRemoveMultiple() {
-        final List<User> allUsers = userDAO.getByLastName("liendo" + lastNameUniqueId);
-        assertTrue(allUsers.size() == 1);
+        User theuser = userDAO.getByLastName("liendo" + lastNameUniqueId);
+        assertNotNull(theuser);
 
         final List<String> ids = new ArrayList<>();
-        ids.add(allUsers.iterator().next().getId());
+        ids.add(theuser.getId());
 
         userDAO.remove(ids);
 
-        assertTrue(userDAO.getByLastName("liendo" + lastNameUniqueId).size() == 0);
+        theuser = userDAO.getByLastName("liendo" + lastNameUniqueId);
+        assertNull(theuser);
     }
 
     @Test
     public void testFindUnique() {
-        final Query query = new Query(userDAO.getEntityName());
         final User sample = new User();
-        query.setFilter(new Query.FilterPredicate(sample.LASTNAME.getPropertyName(), Query.FilterOperator.EQUAL, "liendo" + lastNameUniqueId));
+        final User result = userDAO.findUniqueByIndexableProperty(sample.LASTNAME.getPropertyName(), "liendo" + lastNameUniqueId);
 
-        final User result = userDAO.findUnique(query);
         assertEquals(result.LASTNAME.get(), "liendo" + lastNameUniqueId);
     }
 
@@ -156,12 +154,10 @@ public class DAOTest extends AbstractTest {
 
     @Test
     public void testQuerySpecific() {
-        final List<User> allUsers = userDAO.getByLastName("liendo" + lastNameUniqueId);
+        final User theUser = userDAO.getByLastName("liendo" + lastNameUniqueId);
 
-        assertTrue(allUsers.size() == 1);
-        checkSpecificUser(allUsers.get(0));
-
-        checkSpecificUser(userDAO.findById(allUsers.get(0).getId()));
+        assertNotNull(theUser);
+        checkSpecificUser(theUser);
     }
 
     private void checkSpecificUser(final User user) {

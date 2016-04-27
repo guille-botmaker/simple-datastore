@@ -2,11 +2,13 @@ package io.botmaker.simpleredis.model;
 
 import com.google.api.server.spi.config.AnnotationBoolean;
 import com.google.api.server.spi.config.ApiResourceProperty;
-import io.botmaker.simpleredis.model.config.INT;
 import io.botmaker.simpleredis.model.config.LONG;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
 import io.botmaker.simpleredis.model.config.STRING;
-import io.botmaker.simpleredis.property.*;
+import io.botmaker.simpleredis.property.ByteArrayProperty;
+import io.botmaker.simpleredis.property.ListProperty;
+import io.botmaker.simpleredis.property.LongProperty;
+import io.botmaker.simpleredis.property.StringProperty;
 import io.botmaker.simpleredis.util.RandomUtils;
 import io.botmaker.simpleredis.util.TimeUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -43,8 +45,8 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
     private final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();
     // entity usefull properties
 
-    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
-    public IntegerProperty GROUP_ID;
+//    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
+//    public IntegerProperty GROUP_ID;
 
     @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public LongProperty LAST_MODIFICATION;
@@ -60,8 +62,8 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         this.secondsToExpire = secondsToExpire;
         this.usesAppIdPrefix = usesAppIdPrefix;
 
-        GROUP_ID = new INT(this).indexable().build();
-        LAST_MODIFICATION = new LONG(this).sendToClient().mandatory().indexable().build();
+//        GROUP_ID = new INT(this).indexable().build();
+        LAST_MODIFICATION = new LONG(this).sendToClient().mandatory().build();
         OBJECT_TYPE = new STRING(this).sendToClient().mandatory().build();
 
         config();
@@ -84,7 +86,7 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
 
         setModified();
 
-        GROUP_ID.set(Math.abs(getId().hashCode() % MAX_GROUPS));
+//        GROUP_ID.set(Math.abs(getId().hashCode() % MAX_GROUPS));
         OBJECT_TYPE.set(getEntityName());
     }
 
@@ -130,7 +132,7 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
                 other == null ||
                         !Objects.equals(this.getId(), other.getId()) ||
                         !Objects.equals(this.entityName, other.entityName) ||
-                        !Objects.equals(this.GROUP_ID.get(), other.GROUP_ID.get()) ||
+//                        !Objects.equals(this.GROUP_ID.get(), other.GROUP_ID.get()) ||
                         !Objects.equals(this.LAST_MODIFICATION.get(), other.LAST_MODIFICATION.get()) ||
                         this.propertiesMetadata.size() != other.propertiesMetadata.size() ||
                         !comparePropertiesWith(other)
