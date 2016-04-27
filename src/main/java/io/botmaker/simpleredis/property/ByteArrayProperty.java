@@ -11,7 +11,6 @@ public final class ByteArrayProperty extends PropertyMeta<byte[]> implements Ser
 
     private static final long serialVersionUID = 6181606486836703354L;
 
-
     public ByteArrayProperty(final DatastoreEntity owner) {
         super(owner);
     }

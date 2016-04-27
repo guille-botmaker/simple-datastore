@@ -13,10 +13,10 @@ public interface SimpleDatastoreService {
 
     void registerDAO(final DAO dao);
 
-    <T> T getDAO(final Class<T> daoClass);
+    <T extends DAO> T getDAO(final Class<T> daoClass);
 
     DAO getDAO(final String entityName);
 
     // Redis methods
-    void configRemoteDatastore(final String remoteAppId, final String datastoreServiceAccountEmail, final String datastorePrivateKeyP12FileLocation, final boolean useLocalDevServer);
+    void configRedisServer(final String appId, final String redisHost);
 }

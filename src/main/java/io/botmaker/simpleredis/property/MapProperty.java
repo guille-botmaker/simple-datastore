@@ -18,7 +18,6 @@ public final class MapProperty<V> extends PropertyMeta<Map<String, V>> implement
 
     private final Class<? extends DataObject> valueClass;
 
-
     public MapProperty(final DatastoreEntity owner, final Class<? extends DataObject> _valueClass) {
         super(owner);
         valueClass = _valueClass;

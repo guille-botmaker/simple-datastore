@@ -5,69 +5,28 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Protocol;
 
-import java.net.InetAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class RedisServer {
 
-    private static final String REDIS_MASTER_INTERNET_TEMP = "146.148.104.208";
-    private static final String REDIS_MASTER_LOCAL = "10.240.0.4";
     private static final Logger LOGGER = Logger.getLogger(RedisServer.class.getName());
-    private static final String APP_ID = DeploymentInformation.CONFIG_VERSION + ".m";
 
-    private static final Object LOCK_OBJECT = new Object();
-    private static RedisServer instance = null;
-
-    private final JedisPool pool;
+    private JedisPool pool;
     //    private final JedisSentinelPool pool;
     private String appId;
 
-    public RedisServer() {
-        String host;
-        try {
-//            String appEngineVersion = System.getProperty("com.google.appengine.runtime.version");
-            host =
-                    System.getProperty("com.google.appengine.runtime.version") == null
-                            && InetAddress.getByName(REDIS_MASTER_LOCAL).isReachable(5000)
-                            ? REDIS_MASTER_LOCAL : REDIS_MASTER_INTERNET_TEMP;
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
+    public void configure(final String redisHost, final String appId) {
+        this.appId = appId;
 
         final GenericObjectPoolConfig config = new GenericObjectPoolConfig();
-        config.setMaxTotal(8);
+        config.setMaxTotal(10);
         config.setMaxIdle(3);
         config.setTestWhileIdle(true);
-//        config.setTestWhileIdle(false);
-//        config.setTestOnCreate(false);
+        config.setTestOnCreate(false);
 
-        // for appengine
-//        config.setJmxEnabled(false);
-//        config.setTimeBetweenEvictionRunsMillis(0);
-
-//        if (SystemProperty.environment.value() == SystemProperty.Environment.Value.Production) {
-//            appId = SystemProperty.applicationId.get();
-//        } else {
-//            appId = SystemProperty.applicationId.get() + LOCAL_APP_ID_POSTFIX;
-//        }
-
-        appId = APP_ID;
-
-        pool = new JedisPool(config, host, Protocol.DEFAULT_PORT, 8000);
-
+        pool = new JedisPool(config, redisHost, Protocol.DEFAULT_PORT, 10000);
 //        pool = new JedisSentinelPool(MASTER_NAME, Collections.singleton(new HostAndPort(host, port).toString()), config, 2000);
-    }
-
-    public static RedisServer getInstance() {
-        if (instance == null) {
-            synchronized (LOCK_OBJECT) {
-                if (instance == null) {
-                    instance = new RedisServer();
-                }
-            }
-        }
-        return instance;
     }
 
     public JedisPool getPool() {
@@ -76,10 +35,6 @@ public final class RedisServer {
 
     public String getAppId() {
         return appId;
-    }
-
-    public void setAppId(final String testingAppId) {
-        appId = testingAppId;
     }
 
     public T call(final RedisClosure redisClosure) {

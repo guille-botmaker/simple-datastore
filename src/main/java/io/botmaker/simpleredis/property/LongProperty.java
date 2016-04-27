@@ -10,7 +10,6 @@ public final class LongProperty extends PropertyMeta<Long> implements Serializab
 
     private static final long serialVersionUID = 6181606486836703354L;
 
-
     public LongProperty(final DatastoreEntity owner) {
         super(owner);
     }
