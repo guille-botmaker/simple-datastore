@@ -19,4 +19,6 @@ public interface SimpleDatastoreService {
 
     // Redis methods
     void configRedisServer(final String appId, final String redisHost);
+
+    RedisServer getRedisServer();
 }

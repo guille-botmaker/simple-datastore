@@ -28,6 +28,11 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     }
 
     @Override
+    public RedisServer getRedisServer() {
+        return redisServer;
+    }
+
+    @Override
     public void registerDAO(final DAO dao) {
         daoMap.put(dao.getClass(), dao);
         daoByEntityNameMap.put(dao.getEntityName(), dao);

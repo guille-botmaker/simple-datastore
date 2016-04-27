@@ -55,11 +55,11 @@
 
     <dependencies>
         <!-- =============== App Engine Dependencies START =============== -->
-        <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api-1.0-sdk</artifactId>
-            <version>${appengine.target.version}</version>
-        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>com.google.appengine</groupId>-->
+        <!--<artifactId>appengine-api-1.0-sdk</artifactId>-->
+        <!--<version>${appengine.target.version}</version>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>com.google.appengine</groupId>
@@ -67,32 +67,32 @@
             <version>${appengine.target.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-testing</artifactId>
-            <version>${appengine.target.version}</version>
-            <scope>test</scope>
-        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>com.google.appengine</groupId>-->
+        <!--<artifactId>appengine-testing</artifactId>-->
+        <!--<version>${appengine.target.version}</version>-->
+        <!--<scope>test</scope>-->
+        <!--</dependency>-->
 
-        <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-remote-api</artifactId>
-            <version>${appengine.target.version}</version>
-        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>com.google.appengine</groupId>-->
+        <!--<artifactId>appengine-remote-api</artifactId>-->
+        <!--<version>${appengine.target.version}</version>-->
+        <!--</dependency>-->
 
-        <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api-labs</artifactId>
-            <version>${appengine.target.version}</version>
-            <scope>test</scope>
-        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>com.google.appengine</groupId>-->
+        <!--<artifactId>appengine-api-labs</artifactId>-->
+        <!--<version>${appengine.target.version}</version>-->
+        <!--<scope>test</scope>-->
+        <!--</dependency>-->
 
-        <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api-stubs</artifactId>
-            <version>${appengine.target.version}</version>
-            <scope>test</scope>
-        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>com.google.appengine</groupId>-->
+        <!--<artifactId>appengine-api-stubs</artifactId>-->
+        <!--<version>${appengine.target.version}</version>-->
+        <!--<scope>test</scope>-->
+        <!--</dependency>-->
 
         <!-- =============== App Engine Dependencies END =============== -->
 
@@ -108,18 +108,11 @@
             <version>1.10</version>
         </dependency>
 
-
         <!--<dependency>-->
-        <!--<groupId>commons-io</groupId>-->
-        <!--<artifactId>commons-io</artifactId>-->
-        <!--<version>2.4</version>-->
+        <!--<groupId>org.beanshell</groupId>-->
+        <!--<artifactId>bsh</artifactId>-->
+        <!--<version>2.0b5</version>-->
         <!--</dependency>-->
-
-        <dependency>
-            <groupId>org.beanshell</groupId>
-            <artifactId>bsh</artifactId>
-            <version>2.0b5</version>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.commons</groupId>
