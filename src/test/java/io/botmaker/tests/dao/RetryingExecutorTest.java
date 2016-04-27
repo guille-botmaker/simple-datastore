@@ -24,15 +24,12 @@ public class RetryingExecutorTest extends AbstractTest {
         final int[] executions = new int[1];
         executions[0] = 0;
 
-        final RetryingExecutor retryingExecutor = new RetryingExecutor(10, 200, new IClosure() {
-            @Override
-            public void execute(final Object params) throws Exception {
-                assertEquals(params, "hi");
+        final RetryingExecutor<String> retryingExecutor = new RetryingExecutor<>(10, 200, params -> {
+            assertEquals(params, "hi");
 
-                executions[0] = executions[0] + 1;
+            executions[0] = executions[0] + 1;
 
-                throw new RuntimeException("some kind of fake problems");
-            }
+            throw new RuntimeException("some kind of fake problems");
         }, "hi");
 
         long time = 0;
@@ -51,13 +48,6 @@ public class RetryingExecutorTest extends AbstractTest {
 
     @Test
     public void testOk() throws Exception {
-        final RetryingExecutor retryingExecutor = new RetryingExecutor(10, 200, new IClosure() {
-            @Override
-            public void execute(final Object params) throws Exception {
-                System.err.println("there");
-            }
-        }, "hi");
-
-        retryingExecutor.startExecution();
+        new RetryingExecutor<>(10, 200, params -> System.err.println("there"), "hi").startExecution();
     }
 }
