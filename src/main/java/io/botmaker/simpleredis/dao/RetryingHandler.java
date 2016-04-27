@@ -114,9 +114,6 @@ public final class RetryingHandler implements Serializable {
                 foundResult.getDataObject().mergeWith(new DataObject(data));
 
 
-
-
-
                 private final int secondsToExpire; // 0 means never
                 private final boolean usesAppIdPrefix;
 
@@ -130,8 +127,6 @@ public final class RetryingHandler implements Serializable {
                 public LongProperty LAST_MODIFICATION;
 
                 public StringProperty OBJECT_TYPE;
-
-
 
 
                 this.secondsToExpire = secondsToExpire;
@@ -156,18 +151,6 @@ public final class RetryingHandler implements Serializable {
                         }
                     }
                 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
                 result[0] = foundResult;
