@@ -17,8 +17,6 @@ public interface SimpleDatastoreService {
 
     DAO getDAO(final String entityName);
 
-    // protobuf methods
+    // Redis methods
     void configRemoteDatastore(final String remoteAppId, final String datastoreServiceAccountEmail, final String datastorePrivateKeyP12FileLocation, final boolean useLocalDevServer);
-
-    void configRemoteDatastoreOnThisTread();
 }

@@ -2,6 +2,7 @@ package io.botmaker.simpleredis.util;
 
 import io.botmaker.simpleredis.dao.RetryingHandler;
 import io.botmaker.simpleredis.exception.NoMoreRetriesException;
+import org.apache.commons.collections4.Closure;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,19 +10,19 @@ import java.util.logging.Logger;
 /**
  * Helper class that encapsulates a retrying algorithm. Usefull for AppEngine API calls
  */
-public final class RetryingExecutor {
+public final class RetryingExecutor<TPARAM> {
 
     private static final Logger log = Logger.getLogger(RetryingExecutor.class.getName());
     private final int timeBetweenRetries;
-    private final IClosure closure;
-    private final Object params;
+    private final Closure<TPARAM> closure;
+    private final TPARAM params;
     private int maxRetries;
 
-    public RetryingExecutor(final IClosure closure, final Object params) {
+    public RetryingExecutor(final Closure<TPARAM> closure, final TPARAM params) {
         this(4, 800, closure, params);
     }
 
-    public RetryingExecutor(final int maxRetries, final int timeBetweenRetries, final IClosure closure, final Object params) {
+    public RetryingExecutor(final int maxRetries, final int timeBetweenRetries, final Closure<TPARAM> closure, final TPARAM params) {
         this.maxRetries = maxRetries;
         this.timeBetweenRetries = timeBetweenRetries;
         this.closure = closure;

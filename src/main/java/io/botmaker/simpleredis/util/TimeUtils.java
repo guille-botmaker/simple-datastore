@@ -98,7 +98,7 @@ public final class TimeUtils {
     }
 
     public static int getMinutesSinceStandardModificationTime(final long l) {
-        if (l == 0l) {
+        if (l == 0L) {
             return 0;
         }
 
@@ -179,7 +179,7 @@ public final class TimeUtils {
     }
 
     public static long buildStandardModificationTimeForFirstTimeOfDay() {
-        final long _0s = 100000000000l;
+        final long _0s = 100000000000L;
         return (buildStandardModificationTime() / _0s) * _0s;
     }
 

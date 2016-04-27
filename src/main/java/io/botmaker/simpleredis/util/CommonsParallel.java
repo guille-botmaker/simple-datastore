@@ -9,7 +9,7 @@ import java.util.concurrent.*;
 
 public abstract class CommonsParallel<T> {
 
-    private final List<Future<Result<T>>> resultsList = Collections.synchronizedList(new ArrayList<Future<Result<T>>>(5000));
+    private final List<Future<Result<T>>> resultsList = Collections.synchronizedList(new ArrayList<>(5000));
     private final List<Result<T>> problemsList = new ArrayList<>(500);
 
     private final ExecutorService executorService;
@@ -33,19 +33,16 @@ public abstract class CommonsParallel<T> {
 
 
     protected void workOnThread(final T inputObject) {
-        final Future<Result<T>> future = executorService.submit(new Callable<Result<T>>() {
+        final Future<Result<T>> future = executorService.submit(() -> {
+            final Result<T> result = new Result<>(inputObject);
 
-            public Result<T> call() throws Exception {
-                final Result<T> result = new Result<>(inputObject);
-
-                try {
-                    doWorkConcurrently(inputObject);
-                } catch (final Throwable throwable) {
-                    throwable.printStackTrace();
-                    result.setProblems(throwable);
-                }
-                return result;
+            try {
+                doWorkConcurrently(inputObject);
+            } catch (final Throwable throwable) {
+                throwable.printStackTrace();
+                result.setProblems(throwable);
             }
+            return result;
         });
         resultsList.add(future);
     }
