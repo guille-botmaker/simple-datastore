@@ -5,10 +5,8 @@ import com.google.api.server.spi.config.ApiResourceProperty;
 import io.botmaker.simpleredis.model.config.INT;
 import io.botmaker.simpleredis.model.config.LONG;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
-import io.botmaker.simpleredis.property.ByteArrayProperty;
-import io.botmaker.simpleredis.property.IntegerProperty;
-import io.botmaker.simpleredis.property.ListProperty;
-import io.botmaker.simpleredis.property.LongProperty;
+import io.botmaker.simpleredis.model.config.STRING;
+import io.botmaker.simpleredis.property.*;
 import io.botmaker.simpleredis.util.RandomUtils;
 import io.botmaker.simpleredis.util.TimeUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -19,15 +17,28 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class RedisEntity extends PersistentObject implements Serializable {
 
     public static final int MAX_GROUPS = 100;
+
+    protected static final int EXPIRING_1_HOUR = 60 * 60;
+    protected static final int EXPIRING_1_DAY = EXPIRING_1_HOUR * 24;
+    protected static final int EXPIRING_1_WEEK = EXPIRING_1_DAY * 7;
+    protected static final int EXPIRING_1_MONTH = EXPIRING_1_WEEK * 4;
+    protected static final int EXPIRING_6_MONTHS = EXPIRING_1_MONTH * 6;
+    protected static final int EXPIRING_1_YEAR = EXPIRING_1_MONTH * 12;
+    protected static final int EXPIRING_3_YEARS = EXPIRING_1_YEAR * 3;
+    protected static final int EXPIRING_NEVER = 0;
+
     private static final long serialVersionUID = 6181606486836703354L;
     // persistent state
     private final DataObject dataObject = new DataObject();
 
     private final String entityName;
+    private final int secondsToExpire; // 0 means never
+    private final boolean usesAppIdPrefix;
 
     private final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();
     // entity usefull properties
@@ -38,15 +49,20 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
     @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public LongProperty LAST_MODIFICATION;
 
-    protected RedisEntity() {
-        final Class<? extends RedisEntity> clazz = this.getClass();
-        final String className = clazz.getName();
-        entityName = className.substring(className.lastIndexOf(".") + 1);
+    public StringProperty OBJECT_TYPE;
+
+
+    protected RedisEntity(final boolean usesAppIdPrefix, final int secondsToExpire) {
+        entityName = getEntityName(this.getClass());
 
         setNewId();
 
+        this.secondsToExpire = secondsToExpire;
+        this.usesAppIdPrefix = usesAppIdPrefix;
+
         GROUP_ID = new INT(this).indexable().build();
         LAST_MODIFICATION = new LONG(this).sendToClient().mandatory().indexable().build();
+        OBJECT_TYPE = new STRING(this).sendToClient().mandatory().build();
 
         config();
 
@@ -65,8 +81,20 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
                 }
             }
         }
-        GROUP_ID.set(Math.abs(getId().hashCode() % MAX_GROUPS));
+
         setModified();
+
+        GROUP_ID.set(Math.abs(getId().hashCode() % MAX_GROUPS));
+        OBJECT_TYPE.set(getEntityName());
+    }
+
+    public static String getEntityName(final Class<? extends RedisEntity> clazz) {
+        final String className = clazz.getName();
+        return className.substring(className.lastIndexOf(".") + 1);
+    }
+
+    public int getSecondsToExpire() {
+        return secondsToExpire;
     }
 
     public void setNewId() {
@@ -80,6 +108,10 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
             }
         }
         return false;
+    }
+
+    public boolean usesAppIdPrefix() {
+        return usesAppIdPrefix;
     }
 
     @Override
@@ -172,6 +204,13 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         return result;
     }
 
+    public List<PropertyMeta> getIndexableProperties() {
+        return propertiesMetadata
+                .values().stream()
+                .filter(PropertyMeta::isIndexable)
+                .collect(Collectors.toList());
+    }
+
     @Override
     public String getId() {
         return getDataObject().optString(WithIdDataObject.ID_KEY, null);
@@ -235,10 +274,6 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         }
 
         return ((int) (Math.abs((now.getTime().getTime() - modified.getTime().getTime())) / 60000));
-    }
-
-    protected void setDataObjectType(final String type) {
-        getDataObject().put("_t", type);
     }
 
     @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)

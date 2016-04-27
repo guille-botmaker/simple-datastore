@@ -20,23 +20,23 @@ import java.util.Map;
  */
 public interface IDAO<P extends RedisEntity> extends Serializable {
 
+    P buildRedisEntityFromStringData(final String persistedData);
+
     // Querying methods =====
     P findById(final String id);
-
-    FutureEntity<P> findByIdAsync(final String id);
 
     Map<String, P> findUniqueIdMultiple(final Collection<String> ids);
 
     List<P> getAll();
 
+    List<P> findByIndexableProperty(final String propertyName, final String id);
+
+    P findUniqueByIndexableProperty(final String propertyName, final String id);
+
     // Updating methods =====
     void updateOrPersist(final P persistentObject);
 
-    void updateOrPersistAsync(final P persistentObject);
-
     void remove(final String id);
-
-    void removeAsync(final String id);
 
     void remove(final Collection<String> ids);
 }
