@@ -1,10 +1,8 @@
 package io.botmaker.tests;
 
-import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
-import com.zupcat.service.SimpleDatastoreService;
-import com.zupcat.service.SimpleDatastoreServiceFactory;
-import com.zupcat.util.RandomUtils;
+import io.botmaker.simpleredis.service.SimpleDatastoreService;
+import io.botmaker.simpleredis.service.SimpleDatastoreServiceFactory;
+import io.botmaker.simpleredis.util.RandomUtils;
 import io.botmaker.tests.sample.Address;
 import io.botmaker.tests.sample.User;
 import io.botmaker.tests.sample.UserDAO;
@@ -20,7 +18,6 @@ import java.util.Map;
 public abstract class AbstractTest {
 
     private static final Object LOCK_OBJECT = new Object();
-    private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
     protected SimpleDatastoreService service;
     protected TestClass testClass;
 
@@ -88,9 +85,8 @@ public abstract class AbstractTest {
     @Before
     public void setUp() throws Exception {
         synchronized (LOCK_OBJECT) {
-            helper.setUp();
-
             service = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
+            service.configRedisServer("test", "146.148.104.208");
             service.registerDAO(new UserDAO());
 
             testClass = new TestClass();

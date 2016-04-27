@@ -1,6 +1,7 @@
 package io.botmaker.tests.dao;
 
 import com.google.appengine.api.datastore.Query;
+import io.botmaker.simpleredis.dao.RetryingHandler;
 import io.botmaker.simpleredis.util.RandomUtils;
 import io.botmaker.tests.AbstractTest;
 import io.botmaker.tests.sample.User;
@@ -134,28 +135,12 @@ public class DAOTest extends AbstractTest {
         userDAO.updateOrPersist(user);
 
         assertEquals(user, userDAO.findById(id));
-        assertEquals(user, userDAO.findByIdAsync(id).get());
 
         final List<String> ids = new ArrayList<>();
         ids.add(id);
 
         final User next = userDAO.findUniqueIdMultiple(ids).values().iterator().next();
         assertEquals(user, next);
-    }
-
-    @Test
-    public void testUpdateOrPersistAsync() {
-        final String id = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
-
-        assertTrue(userDAO.getByLastName("NewLastName" + id).size() == 0);
-
-        final User user = new User();
-        user.LASTNAME.set("NewLastName" + id);
-        userDAO.updateOrPersistAsync(user);
-
-        RetryingHandler.sleep(5000);
-
-        assertTrue(userDAO.getByLastName("NewLastName" + id).size() == 1);
     }
 
     @Test
