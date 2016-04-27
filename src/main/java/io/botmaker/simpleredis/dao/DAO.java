@@ -57,6 +57,13 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         return getRetryingHandler().tryDSGetMultiple(ids, this);
     }
 
+    public void massiveUpload(final Collection<P> list) {
+        if (list == null || list.isEmpty()) {
+            return;
+        }
+        getRetryingHandler().tryDSPutMultiple(list);
+    }
+
     public void remove(final String id) {
         getRetryingHandler().tryDSRemove(id, this);
     }

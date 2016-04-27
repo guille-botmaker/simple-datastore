@@ -255,6 +255,41 @@ public final class RetryingHandler implements Serializable {
         }, null);
     }
 
+
+    public <T extends RedisEntity> void tryDSPutMultiple(final Collection<T> entities) {
+        tryClosure((redisServer, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - tryDSPutMultiple", new Exception());
+            }
+
+            try (final Jedis jedis = redisServer.getPool().getResource()) {
+                final Pipeline pipeline = jedis.pipelined();
+
+                entities.stream().forEach(entity -> {
+                    final String key = buildKey(entity, redisServer);
+                    final String data = entity.getDataObject().toString();
+                    final int expiring = entity.getSecondsToExpire();
+                    final List<String> indexableProperties = buildIndexablePropertiesKeys(entity, redisServer);
+
+                    pipeline.set(key, data);
+
+                    if (expiring > 0) {
+                        pipeline.expire(key, expiring);
+                    }
+
+                    indexableProperties.stream().forEach(p -> {
+                        pipeline.set(p, key);
+
+                        if (expiring > 0) {
+                            pipeline.expire(p, expiring);
+                        }
+                    });
+                });
+                pipeline.sync();
+            }
+        }, null);
+    }
+
     private void tryClosure(final Closure closure, final Object[] results) {
         final ValuesContainer values = new ValuesContainer();
         final SimpleDatastoreService simpleDatastoreService = SimpleDatastoreServiceFactory.getSimpleDatastoreService();

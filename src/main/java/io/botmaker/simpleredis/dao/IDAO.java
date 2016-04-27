@@ -36,6 +36,8 @@ public interface IDAO<P extends RedisEntity> extends Serializable {
     // Updating methods =====
     void updateOrPersist(final P persistentObject);
 
+    void massiveUpload(final Collection<P> list);
+
     void remove(final String id);
 
     void remove(final Collection<String> ids);
