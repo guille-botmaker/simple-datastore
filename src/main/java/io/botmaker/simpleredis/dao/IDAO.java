@@ -4,7 +4,6 @@ import io.botmaker.simpleredis.model.RedisEntity;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,7 +28,7 @@ public interface IDAO<P extends RedisEntity> extends Serializable {
 
     Map<String, P> findUniqueIdMultiple(final Collection<String> ids);
 
-    List<P> getAll();
+//    List<P> getAll();
 
     P findUniqueByIndexableProperty(final String propertyName, final String id);
 

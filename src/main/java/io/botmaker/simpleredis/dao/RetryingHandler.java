@@ -10,7 +10,10 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,11 +43,15 @@ public final class RetryingHandler implements Serializable {
     }
 
     private String buildKey(final RedisEntity entity, final RedisServer redisServer) {
-        return (entity.usesAppIdPrefix() ? redisServer.getAppId() : "default") +
+        return buildKey(entity.getEntityName(), entity.getId(), entity.usesAppIdPrefix(), redisServer);
+    }
+
+    private String buildKey(final String entityName, final String entityKey, final boolean entityUsesAppIdPrefix, final RedisServer redisServer) {
+        return (entityUsesAppIdPrefix ? redisServer.getAppId() : "default") +
                 ":" +
-                entity.getEntityName() +
+                entityName +
                 ":" +
-                entity.getId();
+                entityKey;
     }
 
     private String buildIndexableKey(final PropertyMeta propertyMeta, final RedisEntity entity, final Object propertyValue, final RedisServer redisServer) {
@@ -68,14 +75,17 @@ public final class RetryingHandler implements Serializable {
     public <T extends RedisEntity> T tryDSGet(final String entityKey, final DAO<T> dao) {
         final T[] result = (T[]) new RedisEntity[1];
 
+        final T sample = dao.getSample();
+
         tryClosure((redisServer, results, loggingActivated) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSGet", new Exception());
             }
 
+            final String key = buildKey(sample.getEntityName(), entityKey, sample.usesAppIdPrefix(), redisServer);
             final String data;
             try (final Jedis jedis = redisServer.getPool().getResource()) {
-                data = jedis.get(entityKey);
+                data = jedis.get(key);
             }
 
             result[0] = data == null ? null : dao.buildPersistentObjectInstanceFromPersistedStringData(data);
@@ -85,40 +95,40 @@ public final class RetryingHandler implements Serializable {
         return result[0];
     }
 
-    public <T extends RedisEntity> List<T> tryDSGetAll(final DAO<T> dao) {
-        final List<T> result = new ArrayList<>();
-
-        tryClosure((redisServer, results, loggingActivated) -> {
-            if (loggingActivated) {
-                LOGGER.log(Level.SEVERE, "PERF - tryDSGetAll", new Exception());
-            }
-
-            final List<String> resultList;
-            final T sample = dao.buildPersistentObjectInstance();
-            sample.setId("*");
-            final String keyName = buildKey(sample, redisServer);
-            final String script =
-                    "local the_keys = redis.call('keys', KEYS[1])\n" +
-                            "if the_keys then\n" +
-                            "return redis.call('mget', the_keys)\n" +
-                            "else\n" +
-                            "return nil end";
-
-
-            try (final Jedis jedis = redisServer.getPool().getResource()) {
-                resultList =
-                        (List<String>) jedis.eval(script, 1, keyName);
-            }
-
-            if (resultList != null) {
-                result.addAll(resultList.stream()
-                        .map(dao::buildPersistentObjectInstanceFromPersistedStringData)
-                        .collect(Collectors.toList()));
-            }
-        }, null);
-
-        return result;
-    }
+//    public <T extends RedisEntity> List<T> tryDSGetAll(final DAO<T> dao) {
+//        final List<T> result = new ArrayList<>();
+//
+//        tryClosure((redisServer, results, loggingActivated) -> {
+//            if (loggingActivated) {
+//                LOGGER.log(Level.SEVERE, "PERF - tryDSGetAll", new Exception());
+//            }
+//
+//            final List<String> resultList;
+//            final T sample = dao.buildPersistentObjectInstance();
+//            sample.setId("*");
+//            final String keyName = buildKey(sample, redisServer);
+//            final String script =
+//                    "local the_keys = redis.call('keys', KEYS[1])\n" +
+//                            "if the_keys then\n" +
+//                            "return redis.call('mget', the_keys)\n" +
+//                            "else\n" +
+//                            "return nil end";
+//
+//
+//            try (final Jedis jedis = redisServer.getPool().getResource()) {
+//                resultList =
+//                        (List<String>) jedis.eval(script, 1, keyName);
+//            }
+//
+//            if (resultList != null) {
+//                result.addAll(resultList.stream()
+//                        .map(dao::buildPersistentObjectInstanceFromPersistedStringData)
+//                        .collect(Collectors.toList()));
+//            }
+//        }, null);
+//
+//        return result;
+//    }
 
     public <T extends RedisEntity> T tryDSGetByIndexableProperty(final String indexablePropertyName, final String key, final DAO<T> dao) {
         final T[] result = (T[]) new RedisEntity[1];
@@ -159,11 +169,12 @@ public final class RetryingHandler implements Serializable {
                 }
 
                 final List<String> indexableProperties = buildIndexablePropertiesKeys(redisEntity, redisServer);
+                final String theKey = buildKey(dao.getEntityName(), entityKey, dao.getSample().usesAppIdPrefix(), redisServer);
 
                 try (final Jedis jedis = redisServer.getPool().getResource()) {
                     final Pipeline pipeline = jedis.pipelined();
 
-                    pipeline.del(entityKey);
+                    pipeline.del(theKey);
                     indexableProperties.stream().forEach(pipeline::del);
 
                     pipeline.sync();
@@ -195,6 +206,9 @@ public final class RetryingHandler implements Serializable {
 
     public <T extends RedisEntity> Map<String, T> tryDSGetMultiple(final Collection<String> keys, final DAO<T> dao) {
         final Map<String, T> result = new HashMap<>();
+        final T sample = dao.getSample();
+        final String entityName = sample.getEntityName();
+        final boolean usesAppIdPrefix = sample.usesAppIdPrefix();
 
         if (keys != null && !keys.isEmpty()) {
             tryClosure((redisServer, results, loggingActivated) -> {
@@ -202,8 +216,9 @@ public final class RetryingHandler implements Serializable {
                     LOGGER.log(Level.SEVERE, "PERF - tryDSGetMultiple", new Exception());
                 }
 
-                final String[] keysArray = new String[keys.size()];
-                keys.toArray(keysArray);
+                final String[] keysArray = keys.stream()
+                        .map(id -> buildKey(entityName, id, usesAppIdPrefix, redisServer))
+                        .toArray(String[]::new);
 
                 final List<String> resultList;
                 try (final Jedis jedis = redisServer.getPool().getResource()) {

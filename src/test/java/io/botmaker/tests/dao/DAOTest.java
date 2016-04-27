@@ -1,6 +1,6 @@
 package io.botmaker.tests.dao;
 
-import io.botmaker.simpleredis.dao.RetryingHandler;
+import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.util.RandomUtils;
 import io.botmaker.tests.AbstractTest;
 import io.botmaker.tests.sample.User;
@@ -10,7 +10,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -38,57 +41,21 @@ public class DAOTest extends AbstractTest {
 
     @Test
     public void testPersistenceFullyEquals() {
-        //cleaning db
-        final List<String> ids = new ArrayList<>(100);
-        ids.addAll(userDAO.getAll().stream().map(User::getId).collect(Collectors.toList()));
-
-        userDAO.remove(ids);
-
-        RetryingHandler.sleep(2000);
-
-        assertTrue(userDAO.getAll().isEmpty());
+        final Comparator<User> comparator = (o1, o2) -> o1.getId().compareTo(o2.getId());
 
         final List<User> source = buildUsers(lastNameUniqueId);
-
+        source.sort(comparator);
         userDAO.massiveUpload(source);
 
-        RetryingHandler.sleep(2000);
-
-        final List<User> target = userDAO.getAll();
+        final List<User> target = new ArrayList<>(userDAO.findUniqueIdMultiple(source.stream().map(RedisEntity::getId).collect(Collectors.toList())).values());
+        target.sort(comparator);
 
         // checking both are completely equals
         assertEquals(target.size(), source.size());
 
-        final Map<String, User> targetMap = new HashMap<>();
-        for (final User user : target) {
-            targetMap.put(user.getId(), user);
+        for (int i = 0; i < source.size(); i++) {
+            assertTrue(source.get(i).isFullyEquals(target.get(i)));
         }
-
-        for (final User sourceUser : source) {
-            final User targetUser = targetMap.get(sourceUser.getId());
-
-            assertTrue(sourceUser.isFullyEquals(targetUser));
-        }
-    }
-
-    @Test
-    public void testGetForMassiveUpdate() {
-        final List<User> prev = buildUsers(lastNameUniqueId);
-
-        final int prevSize = prev.size();
-        userDAO.massiveUpload(prev);
-
-        RetryingHandler.sleep(5000);
-
-        final List<User> all = userDAO.getAll();
-
-        final int postSize = all.size();
-
-        assertTrue(postSize >= prevSize + 5);
-
-        assertTrue(all.iterator().next().ADDRESS.get().getStreet().startsWith("Sesamo"));
-        assertTrue(all.iterator().next().ADDRESSES.iterator().next().getStreet().startsWith("Sesamo"));
-        assertTrue(all.iterator().next().ADDRESSES_MAP.get(all.iterator().next().ADDRESSES.iterator().next().getStreet()).getStreet().startsWith("Sesamo"));
     }
 
     @Test
@@ -143,13 +110,6 @@ public class DAOTest extends AbstractTest {
         final User result = userDAO.findUniqueByIndexableProperty(sample.LASTNAME.getPropertyName(), "liendo" + lastNameUniqueId);
 
         assertEquals(result.LASTNAME.get(), "liendo" + lastNameUniqueId);
-    }
-
-    @Test
-    public void testQueryAllObjects() {
-        final List<User> allUsers = userDAO.getAll();
-
-        assertFalse(allUsers.isEmpty());
     }
 
     @Test
