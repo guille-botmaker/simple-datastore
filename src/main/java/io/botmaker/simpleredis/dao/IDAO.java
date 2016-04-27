@@ -22,6 +22,10 @@ public interface IDAO<P extends RedisEntity> extends Serializable {
 
     P buildRedisEntityFromStringData(final String persistedData);
 
+    P buildPersistentObjectInstance();
+
+    P buildPersistentObjectInstanceFromPersistedStringData(final String persistedStringData);
+
     // Querying methods =====
     P findById(final String id);
 

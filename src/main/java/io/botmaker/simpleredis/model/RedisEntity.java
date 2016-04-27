@@ -204,6 +204,12 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         return result;
     }
 
+    public PropertyMeta getIndexablePropertyByName(final String name) {
+        final Optional<PropertyMeta> result = getIndexableProperties().stream().filter(p -> p.getPropertyName().equals(name)).findFirst();
+
+        return result.isPresent() ? result.get() : null;
+    }
+
     public List<PropertyMeta> getIndexableProperties() {
         return propertiesMetadata
                 .values().stream()

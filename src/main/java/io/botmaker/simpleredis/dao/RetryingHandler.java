@@ -3,12 +3,8 @@ package io.botmaker.simpleredis.dao;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import io.botmaker.simpleredis.exception.NoMoreRetriesException;
-import io.botmaker.simpleredis.model.DataObject;
 import io.botmaker.simpleredis.model.RedisEntity;
-import io.botmaker.simpleredis.model.config.INT;
-import io.botmaker.simpleredis.model.config.LONG;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
-import io.botmaker.simpleredis.model.config.STRING;
 import io.botmaker.simpleredis.service.RedisServer;
 import io.botmaker.simpleredis.service.SimpleDatastoreService;
 import io.botmaker.simpleredis.service.SimpleDatastoreServiceFactory;
@@ -16,7 +12,6 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -52,11 +47,74 @@ public final class RetryingHandler implements Serializable {
         return (entity.usesAppIdPrefix() ? (redisServer.getAppId() + ":") : "") + entity.getEntityName() + ":" + entity.getId();
     }
 
-    public List<String> buildIndexablePropertiesKeys(final RedisEntity entity, final RedisServer redisServer) {
+    private String buildIndexableKey(final PropertyMeta propertyMeta, final RedisEntity entity, final RedisServer redisServer) {
+        return (entity.usesAppIdPrefix() ? (redisServer.getAppId() + ":") : "") + entity.getEntityName() + ":index:" + propertyMeta.getPropertyName();
+    }
+
+    private List<String> buildIndexablePropertiesKeys(final RedisEntity entity, final RedisServer redisServer) {
         return entity
                 .getIndexableProperties().stream()
-                .map(ip -> (entity.usesAppIdPrefix() ? (redisServer.getAppId() + ":") : "") + entity.getEntityName() + ":index:" + ip.getPropertyName())
+                .map(ip -> buildIndexableKey(ip, entity, redisServer))
                 .collect(Collectors.toList());
+    }
+
+    public <T extends RedisEntity> T tryDSGet(final String entityKey, final DAO<T> dao) {
+        final T[] result = (T[]) new RedisEntity[1];
+
+        tryClosure((redisServer, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - tryDSGet", new Exception());
+            }
+
+            final String data;
+            try (final Jedis jedis = redisServer.getPool().getResource()) {
+                data = jedis.get(entityKey);
+            }
+
+            result[0] = data == null ? null : dao.buildPersistentObjectInstanceFromPersistedStringData(data);
+
+        }, result);
+
+        return result[0];
+    }
+
+    public <T extends RedisEntity> T tryDSGetByIndexableProperty(final String indexablePropertyName, final String key, final DAO<T> dao) {
+        final T[] result = (T[]) new RedisEntity[1];
+
+        tryClosure((redisServer, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - tryDSGetByIndexableProperty", new Exception());
+            }
+
+            final T sample = dao.getSample();
+            final String keyName = buildIndexableKey(sample.getIndexablePropertyByName(indexablePropertyName), sample, redisServer);
+            final String data;
+            final String script =
+                    "local the_key = redis.call('get', KEYS[1])\n" +
+                            "if the_key then\n" +
+                            "return redis.call('get', the_key)\n" +
+                            "else\n" +
+                            "return nil end";
+
+            try (final Jedis jedis = redisServer.getPool().getResource()) {
+                data = (String) jedis.eval(script, 1, keyName);
+            }
+
+            result[0] = data == null ? null : dao.buildPersistentObjectInstanceFromPersistedStringData(data);
+
+        }, result);
+
+        return result[0];
+    }
+
+    public void tryDSRemove(final Key entityKey) {
+        tryClosure((datastore, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - tryDSRemove", new Exception());
+            }
+
+            datastore.delete(entityKey);
+        }, null);
     }
 
     public void tryDSRemove(final Collection<String> entityKeys) {
@@ -89,84 +147,6 @@ public final class RetryingHandler implements Serializable {
             }
 
             datastore.delete(entityKeys);
-        }, null);
-    }
-
-    public <T extends RedisEntity> T tryDSGet(final String entityKey, final DAO<T> dao) {
-        final T[] result = (T[]) new RedisEntity[1];
-
-        tryClosure((redisServer, results, loggingActivated) -> {
-            if (loggingActivated) {
-                LOGGER.log(Level.SEVERE, "PERF - tryDSGet", new Exception());
-            }
-
-            final String data;
-            try (final Jedis jedis = redisServer.getPool().getResource()) {
-                data = jedis.get(entityKey);
-            }
-
-            if (data == null) {
-                result[0] = null;
-            } else {
-                final T foundResult = dao.buildPersistentObjectInstance();
-
-                foundResult.setId(entityKey);
-                foundResult.getDataObject().mergeWith(new DataObject(data));
-
-
-                private final int secondsToExpire; // 0 means never
-                private final boolean usesAppIdPrefix;
-
-                private final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();
-                // entity usefull properties
-
-                @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
-                public IntegerProperty GROUP_ID;
-
-                @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
-                public LongProperty LAST_MODIFICATION;
-
-                public StringProperty OBJECT_TYPE;
-
-
-                this.secondsToExpire = secondsToExpire;
-                this.usesAppIdPrefix = usesAppIdPrefix;
-
-                GROUP_ID = new INT(this).indexable().build();
-                LAST_MODIFICATION = new LONG(this).sendToClient().mandatory().indexable().build();
-                OBJECT_TYPE = new STRING(this).sendToClient().mandatory().build();
-
-                for (final Field field : getClass().getFields()) {
-                    if (PropertyMeta.class.isAssignableFrom(field.getType())) {
-                        final String propertyName = field.getName();
-
-                        try {
-                            final PropertyMeta propertyMeta = (PropertyMeta) field.get(this);
-
-                            propertyMeta.setPropertyName(propertyName);
-                            addPropertyMeta(propertyName, propertyMeta);
-
-                        } catch (final IllegalAccessException _illegalAccessException) {
-                            throw new RuntimeException("Problems getting value for field [" + propertyName + "], of class [" + getClass() + "]. Possible private variable?: " + _illegalAccessException.getMessage(), _illegalAccessException);
-                        }
-                    }
-                }
-
-
-                result[0] = foundResult;
-            }
-        }, result);
-
-        return result[0];
-    }
-
-    public void tryDSRemove(final Key entityKey) {
-        tryClosure((datastore, results, loggingActivated) -> {
-            if (loggingActivated) {
-                LOGGER.log(Level.SEVERE, "PERF - tryDSRemove", new Exception());
-            }
-
-            datastore.delete(entityKey);
         }, null);
     }
 

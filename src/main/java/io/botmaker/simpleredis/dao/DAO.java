@@ -1,5 +1,6 @@
 package io.botmaker.simpleredis.dao;
 
+import io.botmaker.simpleredis.model.DataObject;
 import io.botmaker.simpleredis.model.RedisEntity;
 import org.apache.commons.collections4.Predicate;
 
@@ -24,10 +25,12 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     private static final RetryingHandler RETRYING_HANDLER = new RetryingHandler();
     //    protected final P sample;
     protected final Class<? extends P> beanClass;
+    protected final P sample;
 
 
     public DAO(final Class<? extends P> beanClass) {
         this.beanClass = beanClass;
+        this.sample = buildPersistentObjectInstance();
     }
 
     public void updateOrPersist(final P persistentObject) {
@@ -156,6 +159,27 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
             return Collections.emptyList();
         }
         return findByQuery(new Query.FilterPredicate(propertyName, Query.FilterOperator.EQUAL, id));
+    }
+
+    @Override
+    public P buildPersistentObjectInstanceFromPersistedStringData(final String persistedStringData) {
+        final P result = buildPersistentObjectInstance();
+        result.getDataObject().mergeWith(new DataObject(persistedStringData));
+
+        return result;
+    }
+
+    @Override
+    public P buildPersistentObjectInstance() {
+        try {
+            return (P) beanClass.newInstance();
+        } catch (final Exception _exception) {
+            throw new RuntimeException("Problems instantiating class [" + beanClass.getName() + "]. Maybe missing empty constructor?: " + _exception.getMessage(), _exception);
+        }
+    }
+
+    public P getSample() {
+        return sample;
     }
 
     @Override
