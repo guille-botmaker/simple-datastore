@@ -42,15 +42,13 @@ public final class RetryingHandler implements Serializable {
         final Entity[] result = new Entity[1];
         result[0] = null;
 
-        tryClosure(new Closure() {
-            public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
-                if (loggingActivated) {
-                    log.log(Level.SEVERE, "PERF - tryExecuteQueryWithSingleResult", new Exception());
-                }
-
-                final PreparedQuery preparedQuery = datastore.prepare(query);
-                result[0] = preparedQuery.asSingleEntity();
+        tryClosure((datastore, results, loggingActivated) -> {
+            if (loggingActivated) {
+                log.log(Level.SEVERE, "PERF - tryExecuteQueryWithSingleResult", new Exception());
             }
+
+            final PreparedQuery preparedQuery = datastore.prepare(query);
+            result[0] = preparedQuery.asSingleEntity();
         }, result);
 
         return result[0];
@@ -64,29 +62,25 @@ public final class RetryingHandler implements Serializable {
         final QueryResultList<Entity>[] result = new QueryResultList[1];
         result[0] = null;
 
-        tryClosure(new Closure() {
-            public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
-                if (loggingActivated) {
-                    log.log(Level.SEVERE, "PERF - tryExecuteQuery", new Exception());
-                }
-
-                final PreparedQuery preparedQuery = datastore.prepare(query);
-                result[0] = preparedQuery.asQueryResultList(fetchOptions);
+        tryClosure((datastore, results, loggingActivated) -> {
+            if (loggingActivated) {
+                log.log(Level.SEVERE, "PERF - tryExecuteQuery", new Exception());
             }
+
+            final PreparedQuery preparedQuery = datastore.prepare(query);
+            result[0] = preparedQuery.asQueryResultList(fetchOptions);
         }, result);
 
         return result[0];
     }
 
     public void tryDSRemove(final Collection<Key> entityKeys) {
-        tryClosure(new Closure() {
-            public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
-                if (loggingActivated) {
-                    log.log(Level.SEVERE, "PERF - tryDSRemoveMultiple", new Exception());
-                }
-
-                datastore.delete(entityKeys);
+        tryClosure((datastore, results, loggingActivated) -> {
+            if (loggingActivated) {
+                log.log(Level.SEVERE, "PERF - tryDSRemoveMultiple", new Exception());
             }
+
+            datastore.delete(entityKeys);
         }, null);
     }
 
@@ -94,77 +88,65 @@ public final class RetryingHandler implements Serializable {
         final Entity[] result = new Entity[1];
         result[0] = null;
 
-        tryClosure(new Closure() {
-            public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
-                if (loggingActivated) {
-                    log.log(Level.SEVERE, "PERF - tryDSGet", new Exception());
-                }
-
-                Entity resultEntity = null;
-
-                try {
-                    resultEntity = datastore.get(entityKey);
-                } catch (final EntityNotFoundException _entityNotFoundException) {
-                    // nothing to do
-                }
-                results[0] = resultEntity;
+        tryClosure((datastore, results, loggingActivated) -> {
+            if (loggingActivated) {
+                log.log(Level.SEVERE, "PERF - tryDSGet", new Exception());
             }
+
+            Entity resultEntity = null;
+
+            try {
+                resultEntity = datastore.get(entityKey);
+            } catch (final EntityNotFoundException _entityNotFoundException) {
+                // nothing to do
+            }
+            results[0] = resultEntity;
         }, result);
 
         return result[0];
     }
 
     public Future<Entity> tryDSGetAsync(final Key entityKey) {
-        return tryClosureAsync(new AsyncClosure<Entity>() {
-            public Future<Entity> execute(final AsyncDatastoreService datastore, final boolean loggingActivated) throws ExecutionException, InterruptedException {
-                if (loggingActivated) {
-                    log.log(Level.SEVERE, "PERF - tryDSGetAsync", new Exception());
-                }
-
-                return datastore.get(entityKey);
+        return tryClosureAsync((datastore, loggingActivated) -> {
+            if (loggingActivated) {
+                log.log(Level.SEVERE, "PERF - tryDSGetAsync", new Exception());
             }
+
+            return datastore.get(entityKey);
         });
     }
 
     public void tryDSRemove(final Key entityKey) {
-        tryClosure(new Closure() {
-            public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
-                if (loggingActivated) {
-                    log.log(Level.SEVERE, "PERF - tryDSRemove", new Exception());
-                }
-
-                datastore.delete(entityKey);
+        tryClosure((datastore, results, loggingActivated) -> {
+            if (loggingActivated) {
+                log.log(Level.SEVERE, "PERF - tryDSRemove", new Exception());
             }
+
+            datastore.delete(entityKey);
         }, null);
     }
 
     public void tryDSRemoveAsync(final Key key) {
-        tryClosureAsync(new AsyncClosure<Void>() {
-
-            public Future<Void> execute(final AsyncDatastoreService datastore, final boolean loggingActivated) throws ExecutionException, InterruptedException {
-                if (loggingActivated) {
-                    log.log(Level.SEVERE, "PERF - tryDSRemoveAsync", new Exception());
-                }
-
-                return datastore.delete(key);
+        tryClosureAsync((datastore, loggingActivated) -> {
+            if (loggingActivated) {
+                log.log(Level.SEVERE, "PERF - tryDSRemoveAsync", new Exception());
             }
+
+            return datastore.delete(key);
         });
     }
 
     public void tryDSPutMultipleAsync(final Iterable<Entity> entities) {
-        tryClosureAsync(new AsyncClosure<List<Key>>() {
-
-            public Future<List<Key>> execute(final AsyncDatastoreService datastore, final boolean loggingActivated) throws ExecutionException, InterruptedException {
-                if (loggingActivated) {
-                    log.log(Level.SEVERE, "PERF - tryDSPutMultipleAsync", new Exception());
-                }
-
-                final Future<List<Key>> listFuture = datastore.put(entities);
-
-                listFuture.get();
-
-                return listFuture;
+        tryClosureAsync((datastore, loggingActivated) -> {
+            if (loggingActivated) {
+                log.log(Level.SEVERE, "PERF - tryDSPutMultipleAsync", new Exception());
             }
+
+            final Future<List<Key>> listFuture = datastore.put(entities);
+
+            listFuture.get();
+
+            return listFuture;
         });
     }
 
@@ -184,42 +166,34 @@ public final class RetryingHandler implements Serializable {
         final Map<Key, Entity> result = new HashMap<>();
 
         if (keys != null && !keys.isEmpty()) {
-            tryClosure(new Closure() {
-
-                @Override
-                public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
-                    if (loggingActivated) {
-                        log.log(Level.SEVERE, "PERF - tryDSGetMultiple", new Exception());
-                    }
-
-                    result.putAll(datastore.get(keys));
+            tryClosure((datastore, results, loggingActivated) -> {
+                if (loggingActivated) {
+                    log.log(Level.SEVERE, "PERF - tryDSGetMultiple", new Exception());
                 }
+
+                result.putAll(datastore.get(keys));
             }, null);
         }
         return result;
     }
 
     public void tryDSPut(final Entity entity) {
-        tryClosure(new Closure() {
-            public void execute(final DatastoreService datastore, final Object[] results, final boolean loggingActivated) {
-                if (loggingActivated) {
-                    log.log(Level.SEVERE, "PERF - tryDSPut", new Exception());
-                }
-
-                datastore.put(entity);
+        tryClosure((datastore, results, loggingActivated) -> {
+            if (loggingActivated) {
+                log.log(Level.SEVERE, "PERF - tryDSPut", new Exception());
             }
+
+            datastore.put(entity);
         }, null);
     }
 
     public void tryDSPutAsync(final Entity entity) {
-        tryClosureAsync(new AsyncClosure<Key>() {
-            public Future<Key> execute(final AsyncDatastoreService datastore, final boolean loggingActivated) throws ExecutionException, InterruptedException {
-                if (loggingActivated) {
-                    log.log(Level.SEVERE, "PERF - tryDSPutAsync", new Exception());
-                }
-
-                return datastore.put(entity);
+        tryClosureAsync((datastore, loggingActivated) -> {
+            if (loggingActivated) {
+                log.log(Level.SEVERE, "PERF - tryDSPutAsync", new Exception());
             }
+
+            return datastore.put(entity);
         });
     }
 

@@ -8,7 +8,6 @@ public final class AuditHandlerServiceFactory {
 
     private static AuditHandlerService defaultImpl = new AuditHandlerDefaultImpl();
 
-
     public static void setDefaultImpl(final AuditHandlerService _defaultImpl) {
         defaultImpl = _defaultImpl;
     }

@@ -7,7 +7,6 @@ public final class COMPLEX_ANY<T> extends AbstractPropertyBuilder<ComplexAnyProp
 
     private static final long serialVersionUID = -2702019046191004750L;
 
-
     public COMPLEX_ANY(final DatastoreEntity owner) {
         super(new ComplexAnyProperty(owner), null);
     }

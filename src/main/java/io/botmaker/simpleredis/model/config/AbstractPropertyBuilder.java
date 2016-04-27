@@ -11,6 +11,7 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     public final List<String> stringSpecificValues = new ArrayList<>();
     private final P propertyMeta;
     public boolean sendToClient;
+
     // properties attributes
     public boolean mandatory;
     public long numberInclusiveMin;

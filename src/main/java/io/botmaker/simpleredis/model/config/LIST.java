@@ -8,7 +8,6 @@ public final class LIST<T> extends AbstractPropertyBuilder<ListProperty<T>, T> {
 
     private static final long serialVersionUID = -2702019046191004750L;
 
-
     public LIST(final DatastoreEntity owner) {
         this(owner, null);
     }
@@ -18,6 +17,6 @@ public final class LIST<T> extends AbstractPropertyBuilder<ListProperty<T>, T> {
     }
 
     public LIST(final DatastoreEntity owner, final Class<? extends DataObject> itemClass, final boolean keepUniqueElements) {
-        super(new ListProperty<T>(owner, itemClass, keepUniqueElements), null);
+        super(new ListProperty<>(owner, itemClass, keepUniqueElements), null);
     }
 }

@@ -101,6 +101,6 @@ public abstract class PropertyMeta<E> implements Serializable {
 
     @Override
     public String toString() {
-        return "[" + StringUtils.replace(getClass().getName(), "com.zupcat.property.", "") + "|" + name + "->" + get() + "]";
+        return "[" + StringUtils.replace(getClass().getName(), "io.botmaker.simpleredis.property.", "") + "|" + name + "->" + get() + "]";
     }
 }
