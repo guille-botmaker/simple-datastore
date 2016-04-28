@@ -95,12 +95,16 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         return className.substring(className.lastIndexOf(".") + 1);
     }
 
+    public static String createNewId() {
+        return RandomUtils.getInstance().getRandomSafeAlphaNumberString(20);
+    }
+
     public int getSecondsToExpire() {
         return secondsToExpire;
     }
 
     public void setNewId() {
-        setId(RandomUtils.getInstance().getRandomSafeAlphaNumberString(20));
+        setId(createNewId());
     }
 
     public boolean shouldBeSentToClient() {
