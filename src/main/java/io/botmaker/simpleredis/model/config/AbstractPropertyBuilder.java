@@ -1,5 +1,7 @@
 package io.botmaker.simpleredis.model.config;
 
+import org.apache.commons.collections4.Closure;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,9 +23,9 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     public boolean stringWithoutSpaces;
     public boolean stringIsOnlyLowerCase;
     public T initialValue;
+    public Closure<T> inlinePropertyChangeObserver;
     protected boolean indexable;
     protected boolean auditable;
-
 
     protected AbstractPropertyBuilder(final P propertyMeta, final T initialValue) {
         this.propertyMeta = propertyMeta;
@@ -50,6 +52,12 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
 
     public AbstractPropertyBuilder<P, T> sendToClient() {
         this.sendToClient = true;
+
+        return this;
+    }
+
+    public AbstractPropertyBuilder<P, T> inlinePropertyChangeObserver(final Closure<T> inlinePropertyChangeObserver) {
+        this.inlinePropertyChangeObserver = inlinePropertyChangeObserver;
 
         return this;
     }
