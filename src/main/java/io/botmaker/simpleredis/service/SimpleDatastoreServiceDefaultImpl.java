@@ -1,6 +1,7 @@
 package io.botmaker.simpleredis.service;
 
 import io.botmaker.simpleredis.dao.DAO;
+import io.botmaker.simpleredis.dao.ResourceDAO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +12,10 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     private final Map<String, DAO> daoByEntityNameMap = new HashMap<>();
     private final RedisServer redisServer = new RedisServer();
     private boolean loggingDatastoreCalls = false;
+
+    public SimpleDatastoreServiceDefaultImpl() {
+        registerDAO(new ResourceDAO());
+    }
 
     @Override
     public void setDatastoreCallsLogging(final boolean activate) {
