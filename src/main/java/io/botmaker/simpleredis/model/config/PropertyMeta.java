@@ -3,6 +3,7 @@ package io.botmaker.simpleredis.model.config;
 import io.botmaker.simpleredis.audit.AuditHandlerServiceFactory;
 import io.botmaker.simpleredis.model.DataObject;
 import io.botmaker.simpleredis.model.RedisEntity;
+import org.apache.commons.collections4.Closure;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
@@ -65,6 +66,11 @@ public abstract class PropertyMeta<E> implements Serializable {
         final E result = getValueImpl(owner.getDataObject());
 
         return result == null ? options.initialValue : result;
+    }
+
+    public void set(final E value, final Closure<E> inlineChangeObserver) {
+        inlineChangeObserver.execute(value);
+        this.set(value, options.auditable);
     }
 
     public void set(final E value) {
