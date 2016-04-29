@@ -16,6 +16,10 @@ public final class Resource extends RedisEntity {
     public StringProperty TYPE;
     public ByteArrayProperty RAW;
 
+    public Resource() {
+        super(false, EXPIRING_NEVER);
+    }
+
     public Resource(final boolean usesAppIdPrefix, final int secondsToExpire) {
         super(usesAppIdPrefix, secondsToExpire);
     }
