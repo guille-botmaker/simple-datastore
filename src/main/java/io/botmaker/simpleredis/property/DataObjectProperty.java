@@ -24,11 +24,15 @@ public final class DataObjectProperty<T extends DataObject> extends PropertyMeta
 
     @Override
     protected T getValueImpl(final DataObject dataObject) {
-        if (!dataObject.has(name)) {
-            return null;
+        final JSONObject jsonObject;
+
+        if (dataObject.has(name)) {
+            jsonObject = dataObject.getJSONObject(name);
+        } else {
+            jsonObject = new JSONObject();
+            dataObject.put(name, jsonObject);
         }
 
-        final JSONObject jsonObject = dataObject.getJSONObject(name);
         final T result;
 
         if (itemClass.isInstance(jsonObject)) {
