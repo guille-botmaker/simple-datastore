@@ -51,7 +51,7 @@ public class DataObject extends JSONObject implements Serializable {
 
     public Map getInternalMap() {
         try {
-            final Field field = this.getClass().getDeclaredField("map");
+            final Field field = JSONObject.class.getDeclaredField("map");
 
             field.setAccessible(true);
 
