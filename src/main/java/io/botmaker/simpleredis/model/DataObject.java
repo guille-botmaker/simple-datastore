@@ -45,6 +45,22 @@ public class DataObject extends JSONObject implements Serializable {
         }
     }
 
+    public void reset() {
+        getInternalMap().clear();
+    }
+
+    public Map getInternalMap() {
+        try {
+            final Field field = this.getClass().getDeclaredField("map");
+
+            field.setAccessible(true);
+
+            return (Map) field.get(this);
+        } catch (final Exception _exception) {
+            throw new RuntimeException("Problems when getting JSON internal map: " + _exception.getMessage(), _exception);
+        }
+    }
+
     public void addChild(final DataObject item) {
         final JSONArray array = getJsonArray(LIST_KEY);
 
