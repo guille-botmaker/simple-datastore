@@ -29,7 +29,6 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
 
     @Override
     public void setFromStringValue(final String stringValue, final boolean forceAudit) {
-
         try {
             final StringTokenizer stringTokenizer = new StringTokenizer(stringValue, ",");
             final List list = new ArrayList<>(stringTokenizer.countTokens());
