@@ -252,7 +252,7 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
 
     @Override
     public String toString() {
-        return "[" + entityName + "|" + getId() + "|" + getDataObject().toString(5) + "]";
+        return getDataObjectForClient().toString();
     }
 
     protected abstract void config();
