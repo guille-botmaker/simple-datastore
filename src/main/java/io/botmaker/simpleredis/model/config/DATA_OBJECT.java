@@ -10,14 +10,5 @@ public final class DATA_OBJECT<T extends DataObject> extends AbstractPropertyBui
 
     public DATA_OBJECT(final RedisEntity owner, final Class<T> itemClass) {
         super(new DataObjectProperty(owner, itemClass), null);
-        this.initialValue = instantiate(itemClass);
-    }
-
-    private T instantiate(final Class<T> itemClass) {
-        try {
-            return itemClass.newInstance();
-        } catch (final IllegalAccessException | InstantiationException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
