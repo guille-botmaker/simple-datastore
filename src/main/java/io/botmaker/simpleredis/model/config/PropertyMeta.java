@@ -62,9 +62,13 @@ public abstract class PropertyMeta<E> implements Serializable {
     }
 
     public E get() {
-        final E result = getValueImpl(owner.getDataObject());
+        E result = getValueImpl(owner.getDataObject());
 
-        return result == null ? options.initialValue : result;
+        if (result == null) {
+            result = options.initialValue;
+            set(result);
+        }
+        return result;
     }
 
     public void set(final E value) {
