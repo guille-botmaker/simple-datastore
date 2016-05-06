@@ -4,6 +4,7 @@ import io.botmaker.simpleredis.model.RedisEntity;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,6 +32,8 @@ public interface IDAO<P extends RedisEntity> extends Serializable {
 //    List<P> getAll();
 
     P findUniqueByIndexableProperty(final String propertyName, final String id);
+
+    List<P> getFromList(final String listName, final boolean isTail, final int qty);
 
     // Updating methods =====
     void saveAndAddToList(final P persistentObject, final String listName);

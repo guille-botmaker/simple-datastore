@@ -10,10 +10,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,6 +67,36 @@ public final class RetryingHandler implements Serializable {
                 .getIndexableProperties().stream()
                 .map(ip -> buildIndexableKey(ip, entity, ip.get(), redisServer))
                 .collect(Collectors.toList());
+    }
+
+    public <T extends RedisEntity> List<T> getFromList(final String listName, final boolean isTail, final int qty, final DAO<T> dao) {
+        final List<T> result = new ArrayList<>(qty);
+
+        tryClosure((redisServer, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - getFromList", new Exception());
+            }
+
+            final String listKey = buildKey(dao.sample.getEntityName(), "list:" + listName, dao.sample.usesAppIdPrefix(), redisServer);
+            List<String> resultString = null;
+
+            try (final Jedis jedis = redisServer.getPool().getResource()) {
+                final List<String> lrange = jedis.lrange(listKey, isTail ? -qty : 0, isTail ? -1 : (qty - 1));
+
+                if (!lrange.isEmpty()) {
+                    final String[] array = new String[lrange.size()];
+                    lrange.toArray(array);
+                    resultString = jedis.mget(array);
+                }
+
+                if (resultString != null) {
+                    resultString.stream().
+                            map((Function<String, RedisEntity>) dao::buildPersistentObjectInstanceFromPersistedStringData).
+                            forEach(i -> result.add((T) i));
+                }
+            }
+        }, null);
+        return result;
     }
 
     public <T extends RedisEntity> T tryDSGet(final String entityKey, final DAO<T> dao) {

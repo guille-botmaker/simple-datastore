@@ -6,6 +6,7 @@ import org.apache.commons.collections4.Predicate;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,6 +57,9 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         getRetryingHandler().tryRemoveFromList(persistentObject, listName);
     }
 
+    public List<P> getFromList(final String listName, final boolean isTail, final int qty) {
+        return RETRYING_HANDLER.getFromList(listName, isTail, qty, this);
+    }
 
     private void prepareForUpdateOrPersist(final P persistentObject) {
         persistentObject.setModified();

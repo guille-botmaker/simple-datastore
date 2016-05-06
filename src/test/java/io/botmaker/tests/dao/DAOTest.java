@@ -60,8 +60,22 @@ public class DAOTest extends AbstractTest {
 
     @Test
     public void testListOpts() {
+        final String id = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
+        final String listName = "testlistforuser" + id;
 
+        final User user = new User();
+        user.setId(id);
+        user.LASTNAME.set("Test" + id);
 
+        assertTrue(userDAO.getFromList(listName, true, 100).isEmpty());
+
+        userDAO.saveAndAddToList(user, listName);
+
+        assertFalse(userDAO.getFromList(listName, true, 100).isEmpty());
+        assertEquals(userDAO.getFromList(listName, true, 100).size(), 1);
+
+        userDAO.removeFromList(user, listName);
+        assertTrue(userDAO.getFromList(listName, true, 100).isEmpty());
     }
 
     @Test
