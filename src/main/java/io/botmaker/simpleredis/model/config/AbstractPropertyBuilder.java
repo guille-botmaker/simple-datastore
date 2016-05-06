@@ -23,7 +23,8 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     public boolean stringWithoutSpaces;
     public boolean stringIsOnlyLowerCase;
     public T initialValue;
-    public Closure<T> inlinePropertyChangeObserver;
+    public Closure<T> inlinePrePropertyChangeObserver;
+    public Closure<T> inlinePosPropertyChangeObserver;
     protected boolean indexable;
     protected boolean auditable;
 
@@ -56,8 +57,14 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
         return this;
     }
 
-    public AbstractPropertyBuilder<P, T> inlinePropertyChangeObserver(final Closure<T> inlinePropertyChangeObserver) {
-        this.inlinePropertyChangeObserver = inlinePropertyChangeObserver;
+    public AbstractPropertyBuilder<P, T> inlinePrePropertyChangeObserver(final Closure<T> inlinePrePropertyChangeObserver) {
+        this.inlinePrePropertyChangeObserver = inlinePrePropertyChangeObserver;
+
+        return this;
+    }
+
+    public AbstractPropertyBuilder<P, T> inlinePosPropertyChangeObserver(final Closure<T> inlinePosPropertyChangeObserver) {
+        this.inlinePosPropertyChangeObserver = inlinePosPropertyChangeObserver;
 
         return this;
     }
