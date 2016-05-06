@@ -35,7 +35,7 @@ public class DAOTest extends AbstractTest {
         userDAO = service.getDAO(UserDAO.class);
 
         for (final User user : buildUsers(lastNameUniqueId)) {
-            userDAO.updateOrPersist(user);
+            userDAO.save(user);
         }
     }
 
@@ -59,6 +59,12 @@ public class DAOTest extends AbstractTest {
     }
 
     @Test
+    public void testListOpts() {
+
+
+    }
+
+    @Test
     public void testUpdateOrPersistAndQueries() {
         final String id = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
 
@@ -68,7 +74,7 @@ public class DAOTest extends AbstractTest {
         user.setId(id);
         user.LASTNAME.set("Test123");
 
-        userDAO.updateOrPersist(user);
+        userDAO.save(user);
 
         assertEquals(user, userDAO.findById(id));
 

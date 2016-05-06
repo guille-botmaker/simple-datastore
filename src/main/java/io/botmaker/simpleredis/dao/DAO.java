@@ -34,11 +34,28 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         this.sample = buildPersistentObjectInstance();
     }
 
-    public void updateOrPersist(final P persistentObject) {
+    public void save(final P persistentObject) {
         prepareForUpdateOrPersist(persistentObject);
 
         getRetryingHandler().tryDSPut(persistentObject);
     }
+
+    public void saveAndAddToList(final P persistentObject, final String listName) {
+        prepareForUpdateOrPersist(persistentObject);
+
+        getRetryingHandler().trySaveAndAddToList(persistentObject, listName);
+    }
+
+    public void saveAndMoveToAnotherList(final P persistentObject, final String sourceListName, final String targetListName) {
+        prepareForUpdateOrPersist(persistentObject);
+
+        getRetryingHandler().trySaveMoveToAnotherList(persistentObject, sourceListName, targetListName);
+    }
+
+    public void removeFromList(final P persistentObject, final String listName) {
+        getRetryingHandler().tryRemoveFromList(persistentObject, listName);
+    }
+
 
     private void prepareForUpdateOrPersist(final P persistentObject) {
         persistentObject.setModified();

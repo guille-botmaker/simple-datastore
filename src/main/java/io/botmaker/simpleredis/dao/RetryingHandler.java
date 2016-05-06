@@ -271,6 +271,96 @@ public final class RetryingHandler implements Serializable {
     }
 
 
+    public void trySaveAndAddToList(final RedisEntity entity, final String listName) {
+        tryClosure((redisServer, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - trySaveAndAddToList", new Exception());
+            }
+
+            final String key = buildKey(entity, redisServer);
+            final String listKey = buildKey(entity.getEntityName(), "list:" + listName, entity.usesAppIdPrefix(), redisServer);
+            final String data = entity.getDataObject().toString();
+            final int expiring = entity.getSecondsToExpire();
+            final List<String> indexableProperties = buildIndexablePropertiesKeys(entity, redisServer);
+
+            try (final Jedis jedis = redisServer.getPool().getResource()) {
+                final Pipeline pipeline = jedis.pipelined();
+
+                pipeline.set(key, data);
+
+                if (expiring > 0) {
+                    pipeline.expire(key, expiring);
+                }
+
+                indexableProperties.stream().forEach(p -> {
+                    pipeline.set(p, key);
+
+                    if (expiring > 0) {
+                        pipeline.expire(p, expiring);
+                    }
+                });
+
+                pipeline.lpush(listKey, key);
+
+                pipeline.sync();
+            }
+        }, null);
+    }
+
+    public void tryRemoveFromList(final RedisEntity entity, final String listName) {
+        tryClosure((redisServer, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - tryRemoveFromList", new Exception());
+            }
+
+            final String key = buildKey(entity, redisServer);
+            final String listKey = buildKey(entity.getEntityName(), "list:" + listName, entity.usesAppIdPrefix(), redisServer);
+
+            try (final Jedis jedis = redisServer.getPool().getResource()) {
+                jedis.lrem(listKey, 0, key);
+            }
+        }, null);
+    }
+
+    public void trySaveMoveToAnotherList(final RedisEntity entity, final String sourceListName, final String targetListName) {
+        tryClosure((redisServer, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - trySaveMoveToAnotherList", new Exception());
+            }
+
+            final String key = buildKey(entity, redisServer);
+            final String sourceListKey = buildKey(entity.getEntityName(), "list:" + sourceListName, entity.usesAppIdPrefix(), redisServer);
+            final String targetListKey = buildKey(entity.getEntityName(), "list:" + targetListName, entity.usesAppIdPrefix(), redisServer);
+            final String data = entity.getDataObject().toString();
+            final int expiring = entity.getSecondsToExpire();
+            final List<String> indexableProperties = buildIndexablePropertiesKeys(entity, redisServer);
+
+            try (final Jedis jedis = redisServer.getPool().getResource()) {
+                final Pipeline pipeline = jedis.pipelined();
+
+                pipeline.set(key, data);
+
+                if (expiring > 0) {
+                    pipeline.expire(key, expiring);
+                }
+
+                indexableProperties.stream().forEach(p -> {
+                    pipeline.set(p, key);
+
+                    if (expiring > 0) {
+                        pipeline.expire(p, expiring);
+                    }
+                });
+
+                pipeline.lrem(sourceListKey, 0, key);
+                pipeline.lpush(targetListKey, key);
+
+                pipeline.sync();
+            }
+        }, null);
+    }
+
+
     public <T extends RedisEntity> void tryDSPutMultiple(final Collection<T> entities) {
         tryClosure((redisServer, results, loggingActivated) -> {
             if (loggingActivated) {

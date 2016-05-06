@@ -33,7 +33,13 @@ public interface IDAO<P extends RedisEntity> extends Serializable {
     P findUniqueByIndexableProperty(final String propertyName, final String id);
 
     // Updating methods =====
-    void updateOrPersist(final P persistentObject);
+    void saveAndAddToList(final P persistentObject, final String listName);
+
+    void saveAndMoveToAnotherList(final P persistentObject, final String sourceListName, final String targetListName);
+
+    void removeFromList(final P persistentObject, final String listName);
+
+    void save(final P persistentObject);
 
     void massiveUpload(final Collection<P> list);
 
