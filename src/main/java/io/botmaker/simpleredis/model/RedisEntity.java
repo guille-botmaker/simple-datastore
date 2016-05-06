@@ -1,7 +1,5 @@
 package io.botmaker.simpleredis.model;
 
-import com.google.api.server.spi.config.AnnotationBoolean;
-import com.google.api.server.spi.config.ApiResourceProperty;
 import io.botmaker.simpleredis.model.config.LONG;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
 import io.botmaker.simpleredis.model.config.STRING;
@@ -48,7 +46,6 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
 //    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
 //    public IntegerProperty GROUP_ID;
 
-    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public LongProperty LAST_MODIFICATION;
 
     public StringProperty OBJECT_TYPE;
@@ -125,12 +122,10 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         LAST_MODIFICATION.set(TimeUtils.buildStandardModificationTime());
     }
 
-    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public String getEntityName() {
         return entityName;
     }
 
-    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public boolean isFullyEquals(final RedisEntity other) {
         if (
                 other == null ||
@@ -193,7 +188,6 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         return true;
     }
 
-    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public DataObject getDataObjectForClient() {
         final DataObject result = new DataObject();
         final DataObject source = getDataObject();
@@ -233,7 +227,6 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         getDataObject().put(WithIdDataObject.ID_KEY, id);
     }
 
-    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public Map<String, PropertyMeta> getPropertiesMetadata() {
         return propertiesMetadata;
     }
@@ -245,7 +238,6 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         propertiesMetadata.put(name, propertyMeta);
     }
 
-    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public DataObject getDataObject() {
         return dataObject;
     }
@@ -257,12 +249,10 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
 
     protected abstract void config();
 
-    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public int getDaysSinceLastModification() {
         return getMinutesSinceLastModification() / (60 * 24);
     }
 
-    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public int getMinutesSinceLastModification() {
         final long lm = LAST_MODIFICATION.get();
 
@@ -288,7 +278,6 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         return ((int) (Math.abs((now.getTime().getTime() - modified.getTime().getTime())) / 60000));
     }
 
-    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public Date getLastModificationAsDate() {
         try {
             return new SimpleDateFormat(DATE_FORMAT).parse(Long.toString(LAST_MODIFICATION.get()));
@@ -297,7 +286,6 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         }
     }
 
-    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
     public boolean hasAccessedToday() {
         final String lastAccessDate = Long.toString(LAST_MODIFICATION.get()).substring(0, 6);
         final String today = Long.toString(TimeUtils.buildStandardModificationTime()).substring(0, 6);
