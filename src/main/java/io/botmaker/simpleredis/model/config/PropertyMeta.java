@@ -72,10 +72,11 @@ public abstract class PropertyMeta<E> implements Serializable {
             options.inlinePrePropertyChangeObserver.execute(value);
         }
 
+        final E oldValue = get();
         this.set(value, options.auditable);
 
         if (options.inlinePosPropertyChangeObserver != null) {
-            options.inlinePosPropertyChangeObserver.execute(value);
+            options.inlinePosPropertyChangeObserver.execute(oldValue);
         }
     }
 
