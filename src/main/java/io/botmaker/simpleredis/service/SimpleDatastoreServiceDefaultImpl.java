@@ -29,7 +29,12 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
 
     @Override
     public void configRedisServer(final String appId, final String redisHost) {
-        this.redisServer.configure(redisHost, appId);
+        configRedisServer(appId, redisHost, null);
+    }
+
+    @Override
+    public void configRedisServer(final String appId, final String redisHost, final String redisAuthPassword) {
+        this.redisServer.configure(redisHost, appId, redisAuthPassword);
     }
 
     @Override

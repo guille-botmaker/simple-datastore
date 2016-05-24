@@ -12,7 +12,7 @@ public final class RedisServer {
     //    private final JedisSentinelPool pool;
     private String appId;
 
-    public void configure(final String redisHost, final String appId) {
+    public void configure(final String redisHost, final String appId, final String redisAuthPassword) {
         this.appId = appId;
 
         final GenericObjectPoolConfig config = new GenericObjectPoolConfig();
@@ -21,7 +21,7 @@ public final class RedisServer {
         config.setTestWhileIdle(true);
         config.setTestOnCreate(false);
 
-        pool = new JedisPool(config, redisHost, Protocol.DEFAULT_PORT, 10000);
+        pool = new JedisPool(config, redisHost, Protocol.DEFAULT_PORT, 10000, redisAuthPassword);
 //        pool = new JedisSentinelPool(MASTER_NAME, Collections.singleton(new HostAndPort(host, port).toString()), config, 2000);
     }
 
