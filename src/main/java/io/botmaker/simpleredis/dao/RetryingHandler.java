@@ -297,15 +297,13 @@ public final class RetryingHandler implements Serializable {
         }, null);
     }
 
-
-    public void trySaveAndAddToList(final RedisEntity entity, final String listName) {
+    public void trySaveAndAddToLists(final RedisEntity entity, final String... listsName) {
         tryClosure((redisServer, results, loggingActivated) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - trySaveAndAddToList", new Exception());
             }
 
             final String key = buildKey(entity, redisServer);
-            final String listKey = buildKey(entity.getEntityName(), "list:" + listName, entity.usesAppIdPrefix(), redisServer);
             final String data = entity.getDataObject().toString();
             final int expiring = entity.getSecondsToExpire();
             final List<String> indexableProperties = buildIndexablePropertiesKeys(entity, redisServer);
@@ -327,7 +325,10 @@ public final class RetryingHandler implements Serializable {
                     }
                 });
 
-                pipeline.lpush(listKey, key);
+                for (final String listName : listsName) {
+                    final String listKey = buildKey(entity.getEntityName(), "list:" + listName, entity.usesAppIdPrefix(), redisServer);
+                    pipeline.lpush(listKey, key);
+                }
 
                 pipeline.sync();
             }
