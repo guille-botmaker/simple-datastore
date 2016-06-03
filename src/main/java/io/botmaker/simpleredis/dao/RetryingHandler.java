@@ -179,6 +179,11 @@ public final class RetryingHandler implements Serializable {
             final int expiring = entity.getSecondsToExpire();
 
             try (final Jedis jedis = redisServer.getPool().getResource()) {
+                final Map<String, PropertyMeta> indexableProperties = buildIndexablePropertiesKeys(entity, redisServer);
+                final String[] uniqueIndexesEntitiesToDeleteArray = new String[indexableProperties.size()];
+                indexableProperties.keySet().toArray(uniqueIndexesEntitiesToDeleteArray);
+                final List<String> indexablePropertyKeys = jedis.mget(uniqueIndexesEntitiesToDeleteArray);
+
                 final Pipeline pipeline = jedis.pipelined();
 
                 pipeline.set(key, data);
@@ -187,8 +192,8 @@ public final class RetryingHandler implements Serializable {
                     pipeline.expire(key, expiring);
                 }
 
+                putAllEntityIndexes(indexableProperties, indexablePropertyKeys, pipeline, key, expiring);
                 pipeline.sync();
-                putAllEntityIndexes(buildIndexablePropertiesKeys(entity, redisServer), jedis, key, expiring);
             }
         }, null);
     }
@@ -283,7 +288,7 @@ public final class RetryingHandler implements Serializable {
     }
 
 
-    private void putAllEntityIndexes(final Map<String, PropertyMeta> indexableProperties, final Jedis pipeline, final String key, final int expiring) {
+    private void putAllEntityIndexes(final Map<String, PropertyMeta> indexableProperties, final List<String> indexablePropertyKeys, final Pipeline pipeline, final String key, final int expiring) {
         indexableProperties.entrySet().stream().forEach(p -> {
 
             final String indexPropertyKey = p.getKey();
