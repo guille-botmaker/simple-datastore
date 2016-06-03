@@ -62,41 +62,13 @@ public final class RetryingHandler implements Serializable {
                         propertyValue;
     }
 
-    private List<String> buildIndexablePropertiesKeys(final RedisEntity entity, final RedisServer redisServer) {
-        return entity
-                .getIndexableProperties().stream()
-                .map(ip -> buildIndexableKey(ip, entity, ip.get(), redisServer))
-                .collect(Collectors.toList());
-    }
+    private Map<String, PropertyMeta> buildIndexablePropertiesKeys(final RedisEntity entity, final RedisServer redisServer) {
 
-    public <T extends RedisEntity> List<T> getFromList(final String listName, final boolean isTail, final int qty, final DAO<T> dao) {
-        final List<T> result = new ArrayList<>(qty);
+        final List<PropertyMeta> indexableProperties = entity.getIndexableProperties();
 
-        tryClosure((redisServer, results, loggingActivated) -> {
-            if (loggingActivated) {
-                LOGGER.log(Level.SEVERE, "PERF - getFromList", new Exception());
-            }
-
-            final String listKey = buildKey(dao.sample.getEntityName(), "list:" + listName, dao.sample.usesAppIdPrefix(), redisServer);
-            List<String> resultString = null;
-
-            try (final Jedis jedis = redisServer.getPool().getResource()) {
-                final List<String> lrange = jedis.lrange(listKey, isTail ? -qty : 0, isTail ? -1 : (qty - 1));
-
-                if (!lrange.isEmpty()) {
-                    final String[] array = new String[lrange.size()];
-                    lrange.toArray(array);
-                    resultString = jedis.mget(array);
-                }
-
-                if (resultString != null) {
-                    resultString.stream().
-                            map((Function<String, RedisEntity>) dao::buildPersistentObjectInstanceFromPersistedStringData).
-                            forEach(i -> result.add((T) i));
-                }
-            }
-        }, null);
-        return result;
+        final HashMap<String, PropertyMeta> map = new HashMap<>(indexableProperties.size());
+        indexableProperties.stream().forEach(ip -> map.put(buildIndexableKey(ip, entity, ip.get(), redisServer), ip));
+        return map;
     }
 
     public <T extends RedisEntity> T tryDSGet(final String entityKey, final DAO<T> dao) {
@@ -122,113 +94,25 @@ public final class RetryingHandler implements Serializable {
         return result[0];
     }
 
-//    public <T extends RedisEntity> List<T> tryDSGetAll(final DAO<T> dao) {
-//        final List<T> result = new ArrayList<>();
-//
-//        tryClosure((redisServer, results, loggingActivated) -> {
-//            if (loggingActivated) {
-//                LOGGER.log(Level.SEVERE, "PERF - tryDSGetAll", new Exception());
-//            }
-//
-//            final List<String> resultList;
-//            final T sample = dao.buildPersistentObjectInstance();
-//            sample.setId("*");
-//            final String keyName = buildKey(sample, redisServer);
-//            final String script =
-//                    "local the_keys = redis.call('keys', KEYS[1])\n" +
-//                            "if the_keys then\n" +
-//                            "return redis.call('mget', the_keys)\n" +
-//                            "else\n" +
-//                            "return nil end";
-//
-//
-//            try (final Jedis jedis = redisServer.getPool().getResource()) {
-//                resultList =
-//                        (List<String>) jedis.eval(script, 1, keyName);
-//            }
-//
-//            if (resultList != null) {
-//                result.addAll(resultList.stream()
-//                        .map(dao::buildPersistentObjectInstanceFromPersistedStringData)
-//                        .collect(Collectors.toList()));
-//            }
-//        }, null);
-//
-//        return result;
-//    }
-
-    public <T extends RedisEntity> T tryDSGetByIndexableProperty(final String indexablePropertyName, final String key, final DAO<T> dao) {
-        final T[] result = (T[]) new RedisEntity[1];
+    public <T extends RedisEntity> List<T> tryDSGetAll(final DAO<T> dao) {
+        final List<T> result = new ArrayList<>();
 
         tryClosure((redisServer, results, loggingActivated) -> {
             if (loggingActivated) {
-                LOGGER.log(Level.SEVERE, "PERF - tryDSGetByIndexableProperty", new Exception());
+                LOGGER.log(Level.SEVERE, "PERF - tryDSGetAll", new Exception());
             }
 
-            final T sample = dao.getSample();
-            final String keyName = buildIndexableKey(sample.getIndexablePropertyByName(indexablePropertyName), sample, key, redisServer);
-            final String data;
-            final String script =
-                    "local the_key = redis.call('get', KEYS[1])\n" +
-                            "if the_key then\n" +
-                            "return redis.call('get', the_key)\n" +
-                            "else\n" +
-                            "return nil end";
+            final T sample = dao.buildPersistentObjectInstance();
+            sample.setId("*");
+            final String keyName = buildKey(sample, redisServer);
 
-            try (final Jedis jedis = redisServer.getPool().getResource()) {
-                data = (String) jedis.eval(script, 1, keyName);
+            final List<T> entities = getMultiple(redisServer, "keys", keyName, dao);
+            if (entities != null) {
+                result.addAll(entities);
             }
+        }, null);
 
-            result[0] = data == null ? null : dao.buildPersistentObjectInstanceFromPersistedStringData(data);
-
-        }, result);
-
-        return result[0];
-    }
-
-    public void tryDSRemove(final String entityKey, final DAO dao) {
-        final RedisEntity redisEntity = tryDSGet(entityKey, dao);
-
-        if (redisEntity != null) {
-            tryClosure((redisServer, results, loggingActivated) -> {
-                if (loggingActivated) {
-                    LOGGER.log(Level.SEVERE, "PERF - tryDSRemove", new Exception());
-                }
-
-                final List<String> indexableProperties = buildIndexablePropertiesKeys(redisEntity, redisServer);
-                final String theKey = buildKey(dao.getEntityName(), entityKey, dao.getSample().usesAppIdPrefix(), redisServer);
-
-                try (final Jedis jedis = redisServer.getPool().getResource()) {
-                    final Pipeline pipeline = jedis.pipelined();
-
-                    pipeline.del(theKey);
-                    indexableProperties.stream().forEach(pipeline::del);
-
-                    pipeline.sync();
-                }
-            }, null);
-        }
-    }
-
-    public void tryDSRemove(final Collection<String> entityKeys, final DAO dao) {
-        final Map<String, RedisEntity> map = tryDSGetMultiple(entityKeys, dao);
-
-        if (!map.isEmpty()) {
-            tryClosure((redisServer, results, loggingActivated) -> {
-                if (loggingActivated) {
-                    LOGGER.log(Level.SEVERE, "PERF - tryDSRemoveMultiple", new Exception());
-                }
-
-                try (final Jedis jedis = redisServer.getPool().getResource()) {
-                    final Pipeline pipeline = jedis.pipelined();
-
-                    map.values().stream().map(re -> buildIndexablePropertiesKeys(re, redisServer)).forEach(ip -> ip.stream().forEach(pipeline::del));
-                    map.keySet().stream().forEach(pipeline::del);
-
-                    pipeline.sync();
-                }
-            }, null);
-        }
+        return result;
     }
 
     public <T extends RedisEntity> Map<String, T> tryDSGetMultiple(final Collection<String> keys, final DAO<T> dao) {
@@ -265,6 +149,25 @@ public final class RetryingHandler implements Serializable {
         return result;
     }
 
+    public <T extends RedisEntity> List<T> tryDSGetByIndexableProperty(final String indexablePropertyName, final String key, final DAO<T> dao) {
+        final List<T> result = new ArrayList<>(10);
+
+        tryClosure((redisServer, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - tryDSGetByIndexableProperty", new Exception());
+            }
+
+            final T sample = dao.getSample();
+            final String keyName = buildIndexableKey(sample.getIndexablePropertyByName(indexablePropertyName), sample, key, redisServer);
+            final List<T> entities = getMultiple(redisServer, "smembers", keyName, dao);
+            if (entities != null) {
+                result.addAll(entities);
+            }
+        }, null);
+
+        return result;
+    }
+
     public void tryDSPut(final RedisEntity entity) {
         tryClosure((redisServer, results, loggingActivated) -> {
             if (loggingActivated) {
@@ -274,120 +177,20 @@ public final class RetryingHandler implements Serializable {
             final String key = buildKey(entity, redisServer);
             final String data = entity.getDataObject().toString();
             final int expiring = entity.getSecondsToExpire();
-            final List<String> indexableProperties = buildIndexablePropertiesKeys(entity, redisServer);
 
             try (final Jedis jedis = redisServer.getPool().getResource()) {
-                final Pipeline pipeline = jedis.pipelined();
+                Pipeline pipeline = jedis.pipelined();
 
                 pipeline.set(key, data);
 
                 if (expiring > 0) {
                     pipeline.expire(key, expiring);
                 }
-
-                indexableProperties.stream().forEach(p -> {
-                    pipeline.set(p, key);
-
-                    if (expiring > 0) {
-                        pipeline.expire(p, expiring);
-                    }
-                });
+                putAllEntityIndexes(buildIndexablePropertiesKeys(entity, redisServer), pipeline, key, expiring);
                 pipeline.sync();
             }
         }, null);
     }
-
-    public void trySaveAndAddToLists(final RedisEntity entity, final String... listsName) {
-        tryClosure((redisServer, results, loggingActivated) -> {
-            if (loggingActivated) {
-                LOGGER.log(Level.SEVERE, "PERF - trySaveAndAddToList", new Exception());
-            }
-
-            final String key = buildKey(entity, redisServer);
-            final String data = entity.getDataObject().toString();
-            final int expiring = entity.getSecondsToExpire();
-            final List<String> indexableProperties = buildIndexablePropertiesKeys(entity, redisServer);
-
-            try (final Jedis jedis = redisServer.getPool().getResource()) {
-                final Pipeline pipeline = jedis.pipelined();
-
-                pipeline.set(key, data);
-
-                if (expiring > 0) {
-                    pipeline.expire(key, expiring);
-                }
-
-                indexableProperties.stream().forEach(p -> {
-                    pipeline.set(p, key);
-
-                    if (expiring > 0) {
-                        pipeline.expire(p, expiring);
-                    }
-                });
-
-                for (final String listName : listsName) {
-                    final String listKey = buildKey(entity.getEntityName(), "list:" + listName, entity.usesAppIdPrefix(), redisServer);
-                    pipeline.lpush(listKey, key);
-                }
-
-                pipeline.sync();
-            }
-        }, null);
-    }
-
-    public void tryRemoveFromList(final RedisEntity entity, final String listName) {
-        tryClosure((redisServer, results, loggingActivated) -> {
-            if (loggingActivated) {
-                LOGGER.log(Level.SEVERE, "PERF - tryRemoveFromList", new Exception());
-            }
-
-            final String key = buildKey(entity, redisServer);
-            final String listKey = buildKey(entity.getEntityName(), "list:" + listName, entity.usesAppIdPrefix(), redisServer);
-
-            try (final Jedis jedis = redisServer.getPool().getResource()) {
-                jedis.lrem(listKey, 0, key);
-            }
-        }, null);
-    }
-
-    public void trySaveMoveToAnotherList(final RedisEntity entity, final String sourceListName, final String targetListName) {
-        tryClosure((redisServer, results, loggingActivated) -> {
-            if (loggingActivated) {
-                LOGGER.log(Level.SEVERE, "PERF - trySaveMoveToAnotherList", new Exception());
-            }
-
-            final String key = buildKey(entity, redisServer);
-            final String sourceListKey = buildKey(entity.getEntityName(), "list:" + sourceListName, entity.usesAppIdPrefix(), redisServer);
-            final String targetListKey = buildKey(entity.getEntityName(), "list:" + targetListName, entity.usesAppIdPrefix(), redisServer);
-            final String data = entity.getDataObject().toString();
-            final int expiring = entity.getSecondsToExpire();
-            final List<String> indexableProperties = buildIndexablePropertiesKeys(entity, redisServer);
-
-            try (final Jedis jedis = redisServer.getPool().getResource()) {
-                final Pipeline pipeline = jedis.pipelined();
-
-                pipeline.set(key, data);
-
-                if (expiring > 0) {
-                    pipeline.expire(key, expiring);
-                }
-
-                indexableProperties.stream().forEach(p -> {
-                    pipeline.set(p, key);
-
-                    if (expiring > 0) {
-                        pipeline.expire(p, expiring);
-                    }
-                });
-
-                pipeline.lrem(sourceListKey, 0, key);
-                pipeline.lpush(targetListKey, key);
-
-                pipeline.sync();
-            }
-        }, null);
-    }
-
 
     public <T extends RedisEntity> void tryDSPutMultiple(final Collection<T> entities) {
         tryClosure((redisServer, results, loggingActivated) -> {
@@ -402,26 +205,118 @@ public final class RetryingHandler implements Serializable {
                     final String key = buildKey(entity, redisServer);
                     final String data = entity.getDataObject().toString();
                     final int expiring = entity.getSecondsToExpire();
-                    final List<String> indexableProperties = buildIndexablePropertiesKeys(entity, redisServer);
 
                     pipeline.set(key, data);
 
                     if (expiring > 0) {
                         pipeline.expire(key, expiring);
                     }
-
-                    indexableProperties.stream().forEach(p -> {
-                        pipeline.set(p, key);
-
-                        if (expiring > 0) {
-                            pipeline.expire(p, expiring);
-                        }
-                    });
+                    putAllEntityIndexes(buildIndexablePropertiesKeys(entity, redisServer), pipeline, key, expiring);
                 });
                 pipeline.sync();
             }
         }, null);
     }
+
+    public void tryDSRemove(final String entityKey, final DAO dao) {
+        final RedisEntity redisEntity = tryDSGet(entityKey, dao);
+
+        if (redisEntity != null) {
+            tryClosure((redisServer, results, loggingActivated) -> {
+                if (loggingActivated) {
+                    LOGGER.log(Level.SEVERE, "PERF - tryDSRemove", new Exception());
+                }
+
+                final Set<String> indexableProperties = buildIndexablePropertiesKeys(redisEntity, redisServer).keySet();
+                final String theKey = buildKey(dao.getEntityName(), entityKey, dao.getSample().usesAppIdPrefix(), redisServer);
+
+                try (final Jedis jedis = redisServer.getPool().getResource()) {
+                    final Pipeline pipeline = jedis.pipelined();
+
+                    pipeline.del(theKey);
+                    indexableProperties.stream().forEach(pipeline::srem);
+
+                    pipeline.sync();
+                }
+            }, null);
+        }
+    }
+
+    public void tryDSRemove(final Collection<String> entityKeys, final DAO dao) {
+        final Map<String, RedisEntity> map = tryDSGetMultiple(entityKeys, dao);
+
+        if (!map.isEmpty()) {
+            tryClosure((redisServer, results, loggingActivated) -> {
+                if (loggingActivated) {
+                    LOGGER.log(Level.SEVERE, "PERF - tryDSRemoveMultiple", new Exception());
+                }
+
+                try (final Jedis jedis = redisServer.getPool().getResource()) {
+                    final Pipeline pipeline = jedis.pipelined();
+
+                    map.values().stream().map(re -> buildIndexablePropertiesKeys(re, redisServer).keySet()).forEach(ip -> ip.stream().forEach(pipeline::del));
+                    map.keySet().stream().forEach(pipeline::srem);
+
+                    pipeline.sync();
+                }
+            }, null);
+        }
+    }
+
+    private <T extends RedisEntity> List<T> getMultiple(final RedisServer redisServer, final String redisCommand, final String keyName, final DAO<T> dao) {
+
+        final String script = "local keysArray = redis.call('" + redisCommand + "', KEYS[1])\n" +
+                "if next(keysArray) == nil then\n" +
+                "   return nil\n" +
+                "else\n" +
+                "   return redis.call('mget', unpack(keysArray))  end\n";
+
+        List<String> resultList;
+        try (final Jedis jedis = redisServer.getPool().getResource()) {
+            resultList = (List<String>) jedis.eval(script, 1, keyName);
+        }
+
+        return resultList == null ? null : resultList.stream()
+                .map(dao::buildPersistentObjectInstanceFromPersistedStringData)
+                .collect(Collectors.toList());
+    }
+
+    private void putAllEntityIndexes(final Map<String, PropertyMeta> indexableProperties, final Pipeline pipeline, final String key, final int expiring) {
+
+        indexableProperties.entrySet().stream().forEach(p -> {
+
+            final String indexPropertyKey = p.getKey();
+
+            final StringBuilder scriptStringBuilder = new StringBuilder(250);
+
+            scriptStringBuilder.append("local key = redis.call('spop', KEYS[1])\n");
+            scriptStringBuilder.append("redis.call('sadd', KEYS[1], ARGS[1])\n");
+            if (expiring > 0) {
+                scriptStringBuilder.append("redis.call('expire',indexPropertyKey, expiring) \n");
+            }
+
+            scriptStringBuilder.append("if key == nil then\n" +
+                    "   return nil\n");
+
+            if (p.getValue().isUniqueIndex()) {
+                scriptStringBuilder.append("else\n" +
+                        "   local entityToDelKey = redis.call('get', key)\n");
+//                        "   redis.call('del', entityToDelKey)\n");
+            }
+            scriptStringBuilder.append("end");
+
+
+            pipeline.eval(scriptStringBuilder.toString(), 1, indexPropertyKey, key);
+        });
+    }
+
+//    private void deleteUniqueIndexesEntities(final Jedis jedis, final List<Response<String>> uniqueIndexesEntitiesToDelete) {
+//        final Pipeline pipeline = jedis.pipelined();
+//        final String[] uniqueIndexesEntitiesToDeleteArray = new String[uniqueIndexesEntitiesToDelete.size()];
+//        uniqueIndexesEntitiesToDelete.stream().map(Response::get).collect(Collectors.toList()).toArray(uniqueIndexesEntitiesToDeleteArray);
+//        pipeline.del(uniqueIndexesEntitiesToDeleteArray);
+//        pipeline.sync();
+//    }
 
     private void tryClosure(final Closure closure, final Object[] results) {
         final ValuesContainer values = new ValuesContainer();
@@ -466,4 +361,27 @@ public final class RetryingHandler implements Serializable {
         public int retry = MAX_RETRIES;
         public int retryWait = WAIT_MS;
     }
+
+
+//    public static void main(String[] args) {
+//
+//        final SimpleDatastoreService service = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
+//        service.configRedisServer("test", "104.197.121.7", "fSsVBcC5mDcG4c24vjSsQ33Ba2ZKbj7W52HYnK3bBZYFGGD8kjIzSBmc4w");
+//        final RedisServer redisServer = service.getRedisServer();
+//
+//
+//        List<String> resultList = null;
+//        final String script =
+//                "local keysArray = redis.call('smembers', KEYS[1])\n" +
+//                        "if next(keysArray) == nil then\n" +
+//                        "   return nil\n" +
+//                        "else\n" +
+//                        "   return redis.call('mget', unpack(keysArray))  end\n";
+//
+//        try (final Jedis jedis = redisServer.getPool().getResource()) {
+//            //jedis.scriptKill();
+//            System.err.println("" + jedis.eval(script, 1, "test:User:index:AGE:35"));
+//        }
+//        System.err.println("resultList " + resultList);
+//    }
 }

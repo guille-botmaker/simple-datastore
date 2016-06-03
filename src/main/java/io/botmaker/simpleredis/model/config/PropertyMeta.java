@@ -46,11 +46,16 @@ public abstract class PropertyMeta<E> implements Serializable {
                 !Objects.equals(options.initialValue, other.options.initialValue) ||
                 options.sendToClient != other.options.sendToClient ||
                 options.auditable != other.options.auditable ||
-                options.indexable != other.options.indexable);
+                options.indexable != other.options.indexable ||
+                options.uniqueIndex != other.options.uniqueIndex);
     }
 
     public boolean isIndexable() {
         return options.indexable;
+    }
+
+    public boolean isUniqueIndex() {
+        return options.uniqueIndex;
     }
 
 //    public E getInitialValue() {

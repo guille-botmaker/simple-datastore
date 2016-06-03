@@ -26,6 +26,7 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     public Closure<T> inlinePrePropertyChangeObserver;
     public Closure<T> inlinePosPropertyChangeObserver;
     protected boolean indexable;
+    protected boolean uniqueIndex;
     protected boolean auditable;
 
     protected AbstractPropertyBuilder(final P propertyMeta, final T initialValue) {
@@ -46,7 +47,12 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     }
 
     public AbstractPropertyBuilder<P, T> indexable() {
+        return indexable(false);
+    }
+
+    public AbstractPropertyBuilder<P, T> indexable(final boolean unique) {
         this.indexable = true;
+        this.uniqueIndex = true;
 
         return this;
     }

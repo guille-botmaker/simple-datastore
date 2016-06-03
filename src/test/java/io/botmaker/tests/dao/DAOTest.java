@@ -34,9 +34,9 @@ public class DAOTest extends AbstractTest {
         super.setUp();
         userDAO = service.getDAO(UserDAO.class);
 
-        for (final User user : buildUsers(lastNameUniqueId)) {
-            userDAO.save(user);
-        }
+//        for (final User user : buildUsers(lastNameUniqueId)) {
+//            userDAO.save(user);
+//        }
     }
 
     @Test
@@ -59,27 +59,7 @@ public class DAOTest extends AbstractTest {
     }
 
     @Test
-    public void testListOpts() {
-        final String id = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
-        final String listName = "testlistforuser" + id;
-
-        final User user = new User();
-        user.setId(id);
-        user.LASTNAME.set("Test" + id);
-
-        assertTrue(userDAO.getFromList(listName, true, 100).isEmpty());
-
-        userDAO.saveAndAddToList(user, listName);
-
-        assertFalse(userDAO.getFromList(listName, true, 100).isEmpty());
-        assertEquals(userDAO.getFromList(listName, true, 100).size(), 1);
-
-        userDAO.removeFromList(user, listName);
-        assertTrue(userDAO.getFromList(listName, true, 100).isEmpty());
-    }
-
-    @Test
-    public void testUpdateOrPersistAndQueries() {
+    public void testSaveAndQueries() {
         final String id = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
 
         assertNull(userDAO.findById(id));
@@ -87,32 +67,42 @@ public class DAOTest extends AbstractTest {
         final User user = new User();
         user.setId(id);
         user.LASTNAME.set("Test123");
-
+        user.AGE.set(150);
         userDAO.save(user);
 
         assertEquals(user, userDAO.findById(id));
 
-        final List<String> ids = new ArrayList<>();
-        ids.add(id);
+        // find by id
+        User next = userDAO.findById(id);
+        assertEquals(user, next);
 
-        final User next = userDAO.findUniqueIdMultiple(ids).values().iterator().next();
+        // find by id multiple
+        next = userDAO.findUniqueIdMultiple(Arrays.asList(id)).values().iterator().next();
+        assertEquals(user, next);
+
+        // find by indexable (unique!) property
+        next = userDAO.findByLastName(user.LASTNAME.get());
+        assertEquals(user, next);
+
+        // find by indexable (not unique) property
+        next = userDAO.findByAge(150);
         assertEquals(user, next);
     }
 
     @Test
     public void testRemove() {
-        User theuser = userDAO.getByLastName("liendo" + lastNameUniqueId);
+        User theuser = userDAO.findByLastName("liendo" + lastNameUniqueId);
         assertNotNull(theuser);
 
         userDAO.remove(theuser.getId());
 
-        theuser = userDAO.getByLastName("liendo" + lastNameUniqueId);
+        theuser = userDAO.findByLastName("liendo" + lastNameUniqueId);
         assertNull(theuser);
     }
 
     @Test
     public void testRemoveMultiple() {
-        User theuser = userDAO.getByLastName("liendo" + lastNameUniqueId);
+        User theuser = userDAO.findByLastName("liendo" + lastNameUniqueId);
         assertNotNull(theuser);
 
         final List<String> ids = new ArrayList<>();
@@ -120,7 +110,7 @@ public class DAOTest extends AbstractTest {
 
         userDAO.remove(ids);
 
-        theuser = userDAO.getByLastName("liendo" + lastNameUniqueId);
+        theuser = userDAO.findByLastName("liendo" + lastNameUniqueId);
         assertNull(theuser);
     }
 
@@ -134,7 +124,7 @@ public class DAOTest extends AbstractTest {
 
     @Test
     public void testQuerySpecific() {
-        final User theUser = userDAO.getByLastName("liendo" + lastNameUniqueId);
+        final User theUser = userDAO.findByLastName("liendo" + lastNameUniqueId);
 
         assertNotNull(theUser);
         checkSpecificUser(theUser);

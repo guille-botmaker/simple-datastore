@@ -36,9 +36,9 @@ public class User extends RedisEntity {
     @Override
     protected void config() {
         FIRSTNAME = new STRING(this).build();
-        LASTNAME = new STRING(this).indexable().build();
+        LASTNAME = new STRING(this).indexable(true).build();
+        AGE = new INT(this).indexable(false).build();
 
-        AGE = new INT(this).build();
         BYTES = new BYTE_ARRAY(this).build();
         LONG_VALUE = new LONG(this).build();
         IS_FAKE = new BOOL(this).build();

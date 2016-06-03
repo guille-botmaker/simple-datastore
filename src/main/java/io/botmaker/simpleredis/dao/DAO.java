@@ -11,13 +11,13 @@ import java.util.Map;
 
 /**
  * This class is a wrapper for Datastore operations. Supports most of the DatastoreService and DatastoreAsyncService operations adding features such as:
- * <p/>
+ * <p>
  * - Entity to "RedisEntity" convertions
  * - caching usage
  * - retrying algorithms
  * - performance logging
  * - remote client massive and parallel data access
- * <p/>
+ * <p>
  * Every X_RedisEntity should have its X_DAO implementation. See tests for examples
  */
 public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
@@ -41,30 +41,30 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         getRetryingHandler().tryDSPut(persistentObject);
     }
 
-    public void saveAndAddToList(final P persistentObject, final String listName) {
-
-        saveAndAddToLists(persistentObject, listName);
-    }
-
-    public void saveAndAddToLists(final P persistentObject, final String... listsName) {
-        prepareForUpdateOrPersist(persistentObject);
-
-        getRetryingHandler().trySaveAndAddToLists(persistentObject, listsName);
-    }
-
-    public void saveAndMoveToAnotherList(final P persistentObject, final String sourceListName, final String targetListName) {
-        prepareForUpdateOrPersist(persistentObject);
-
-        getRetryingHandler().trySaveMoveToAnotherList(persistentObject, sourceListName, targetListName);
-    }
-
-    public void removeFromList(final P persistentObject, final String listName) {
-        getRetryingHandler().tryRemoveFromList(persistentObject, listName);
-    }
-
-    public List<P> getFromList(final String listName, final boolean isTail, final int qty) {
-        return RETRYING_HANDLER.getFromList(listName, isTail, qty, this);
-    }
+//    public void saveAndAddToList(final P persistentObject, final String listName) {
+//
+//        saveAndAddToLists(persistentObject, listName);
+//    }
+//
+//    public void saveAndAddToLists(final P persistentObject, final String... listsName) {
+//        prepareForUpdateOrPersist(persistentObject);
+//
+//        getRetryingHandler().trySaveAndAddToLists(persistentObject, listsName);
+//    }
+//
+//    public void saveAndMoveToAnotherList(final P persistentObject, final String sourceListName, final String targetListName) {
+//        prepareForUpdateOrPersist(persistentObject);
+//
+//        getRetryingHandler().trySaveMoveToAnotherList(persistentObject, sourceListName, targetListName);
+//    }
+//
+//    public void removeFromList(final P persistentObject, final String listName) {
+//        getRetryingHandler().tryRemoveFromList(persistentObject, listName);
+//    }
+//
+//    public List<P> getFromList(final String listName, final boolean isTail, final int qty) {
+//        return RETRYING_HANDLER.getFromList(listName, isTail, qty, this);
+//    }
 
     private void prepareForUpdateOrPersist(final P persistentObject) {
         persistentObject.setModified();
@@ -133,6 +133,15 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
 
     @Override
     public P findUniqueByIndexableProperty(final String propertyName, final String id) {
+        if (id == null || id.trim().length() == 0) {
+            return null;
+        }
+        final List<P> list = getRetryingHandler().tryDSGetByIndexableProperty(propertyName, id, this);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    @Override
+    public List<P> findMultipleByIndexableProperty(final String propertyName, final String id) {
         if (id == null || id.trim().length() == 0) {
             return null;
         }

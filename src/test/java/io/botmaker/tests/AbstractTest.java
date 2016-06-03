@@ -30,7 +30,7 @@ public abstract class AbstractTest {
             final User sample = new User();
             sample.FIRSTNAME.set("First Name " + randomUtils.getRandomSafeString(10));
             sample.LASTNAME.set("LAST Name " + randomUtils.getRandomSafeString(10));
-            sample.AGE.set(randomUtils.getIntBetweenInclusive(1, 100));
+            sample.AGE.set(randomUtils.getIntBetweenInclusive(30, 35));
             sample.BYTES.set(new byte[]{0x42, 0x55});
 
             final Map<String, String> complexValue = new HashMap<>();
@@ -86,7 +86,7 @@ public abstract class AbstractTest {
     public void setUp() throws Exception {
         synchronized (LOCK_OBJECT) {
             service = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
-            service.configRedisServer("test", "146.148.104.208");
+            service.configRedisServer("test", "104.197.121.7", "fSsVBcC5mDcG4c24vjSsQ33Ba2ZKbj7W52HYnK3bBZYFGGD8kjIzSBmc4w");
             service.registerDAO(new UserDAO());
 
             testClass = new TestClass();

@@ -8,7 +8,11 @@ public final class UserDAO extends DAO<User> {
         super(User.class);
     }
 
-    public User getByLastName(final String lastName) {
+    public User findByLastName(final String lastName) {
         return findUniqueByIndexableProperty(sample.LASTNAME.getPropertyName(), lastName);
+    }
+
+    public User findByAge(final int age) {
+        return findUniqueByIndexableProperty(sample.AGE.getPropertyName(), "" + age);
     }
 }
