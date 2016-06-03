@@ -179,15 +179,16 @@ public final class RetryingHandler implements Serializable {
             final int expiring = entity.getSecondsToExpire();
 
             try (final Jedis jedis = redisServer.getPool().getResource()) {
-                Pipeline pipeline = jedis.pipelined();
+                final Pipeline pipeline = jedis.pipelined();
 
                 pipeline.set(key, data);
 
                 if (expiring > 0) {
                     pipeline.expire(key, expiring);
                 }
-                putAllEntityIndexes(buildIndexablePropertiesKeys(entity, redisServer), pipeline, key, expiring);
+
                 pipeline.sync();
+                putAllEntityIndexes(buildIndexablePropertiesKeys(entity, redisServer), jedis, key, expiring);
             }
         }, null);
     }
@@ -211,7 +212,7 @@ public final class RetryingHandler implements Serializable {
                     if (expiring > 0) {
                         pipeline.expire(key, expiring);
                     }
-                    putAllEntityIndexes(buildIndexablePropertiesKeys(entity, redisServer), pipeline, key, expiring);
+//                    putAllEntityIndexes(buildIndexablePropertiesKeys(entity, redisServer), pipeline, key, expiring);
                 });
                 pipeline.sync();
             }
@@ -281,32 +282,34 @@ public final class RetryingHandler implements Serializable {
                 .collect(Collectors.toList());
     }
 
-    private void putAllEntityIndexes(final Map<String, PropertyMeta> indexableProperties, final Pipeline pipeline, final String key, final int expiring) {
 
+    private void putAllEntityIndexes(final Map<String, PropertyMeta> indexableProperties, final Jedis pipeline, final String key, final int expiring) {
         indexableProperties.entrySet().stream().forEach(p -> {
 
             final String indexPropertyKey = p.getKey();
 
             final StringBuilder scriptStringBuilder = new StringBuilder(250);
 
-            scriptStringBuilder.append("local key = redis.call('spop', KEYS[1])\n");
-            scriptStringBuilder.append("redis.call('sadd', KEYS[1], ARGS[1])\n");
+            scriptStringBuilder.append("redis.replicate_commands()\n");
+            scriptStringBuilder.append("redis.call('sadd', KEYS[1], ARGV[1])\n");
             if (expiring > 0) {
-                scriptStringBuilder.append("redis.call('expire',indexPropertyKey, expiring) \n");
+                scriptStringBuilder.append("redis.call('expire',KEYS[1], ARGV[2]) \n");
             }
 
-            scriptStringBuilder.append("if key == nil then\n" +
+            // NOTE: SPOP is not allowed in LUA scripts, so we use srandmember and srem later
+            scriptStringBuilder.append("local theKey = redis.call('srandmember', KEYS[1])\n");
+            scriptStringBuilder.append("if theKey == nil then\n" +
                     "   return nil\n");
 
             if (p.getValue().isUniqueIndex()) {
                 scriptStringBuilder.append("else\n" +
-                        "   local entityToDelKey = redis.call('get', key)\n");
-//                        "   redis.call('del', entityToDelKey)\n");
+                        "   redis.call('srem', KEYS[1], theKey)\n" +
+                        "   local entityToDelKey = redis.call('get', theKey)\n" +
+                        "   redis.call('del', entityToDelKey)\n");
             }
             scriptStringBuilder.append("end");
 
-
-            pipeline.eval(scriptStringBuilder.toString(), 1, indexPropertyKey, key);
+            pipeline.eval(scriptStringBuilder.toString(), 1, indexPropertyKey, key, expiring + "");
         });
     }
 
