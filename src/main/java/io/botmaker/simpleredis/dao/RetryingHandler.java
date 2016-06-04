@@ -68,7 +68,7 @@ public final class RetryingHandler implements Serializable {
         final List<PropertyMeta> indexableProperties = entity.getIndexableProperties();
 
         final List<IndexablePropertyInfoContainer> list = new ArrayList<>(indexableProperties.size());
-        indexableProperties.stream().forEach(ip -> list.add(new IndexablePropertyInfoContainer(entityKey, entity, buildIndexableKey(ip, entity, ip.get(), redisServer), ip)));
+        indexableProperties.stream().forEach(ip -> list.add(new IndexablePropertyInfoContainer(entityKey, buildIndexableKey(ip, entity, ip.get(), redisServer), ip)));
         return list;
     }
 
@@ -325,11 +325,11 @@ public final class RetryingHandler implements Serializable {
         }
         pipelined.sync();
 
-        // delete the old entities referenced by old unique index key
         final List<String> entitiesToDelete = responses.keySet().stream().map(Response::get).
                 filter(r -> r != null).collect(Collectors.toList());
         if (entitiesToDelete.size() > 0) {
 
+            // delete the old entities referenced by old unique index key
             final String[] entitiesToDeleteArray = new String[entitiesToDelete.size()];
             entitiesToDelete.toArray(entitiesToDeleteArray);
             final List<RedisEntity> oldEntities = instantiateEntities(dao, jedis.mget(entitiesToDeleteArray));
@@ -398,37 +398,13 @@ public final class RetryingHandler implements Serializable {
     public static final class IndexablePropertyInfoContainer {
 
         public final String entityKey;
-        public final RedisEntity entity;
         public final String propertyKey;
         public final PropertyMeta property;
 
-        public IndexablePropertyInfoContainer(final String entityKey, RedisEntity entity, String propertyKey, PropertyMeta property) {
+        public IndexablePropertyInfoContainer(final String entityKey, final String propertyKey, final PropertyMeta property) {
             this.entityKey = entityKey;
-            this.entity = entity;
             this.propertyKey = propertyKey;
             this.property = property;
         }
     }
-
-//    public static void main(String[] args) {
-//
-//        final SimpleDatastoreService service = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
-//        service.configRedisServer("test", "104.197.121.7", "fSsVBcC5mDcG4c24vjSsQ33Ba2ZKbj7W52HYnK3bBZYFGGD8kjIzSBmc4w");
-//        final RedisServer redisServer = service.getRedisServer();
-//
-//
-//        List<String> resultList = null;
-//        final String script =
-//                "local keysArray = redis.call('smembers', KEYS[1])\n" +
-//                        "if next(keysArray) == nil then\n" +
-//                        "   return nil\n" +
-//                        "else\n" +
-//                        "   return redis.call('mget', unpack(keysArray))  end\n";
-//
-//        try (final Jedis jedis = redisServer.getPool().getResource()) {
-//            //jedis.scriptKill();
-//            System.err.println("" + jedis.eval(script, 1, "test:User:index:AGE:35"));
-//        }
-//        System.err.println("resultList " + resultList);
-//    }
 }

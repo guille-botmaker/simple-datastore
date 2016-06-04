@@ -41,31 +41,6 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         getRetryingHandler().tryDSPut(this, persistentObject);
     }
 
-//    public void saveAndAddToList(final P persistentObject, final String listName) {
-//
-//        saveAndAddToLists(persistentObject, listName);
-//    }
-//
-//    public void saveAndAddToLists(final P persistentObject, final String... listsName) {
-//        prepareForUpdateOrPersist(persistentObject);
-//
-//        getRetryingHandler().trySaveAndAddToLists(persistentObject, listsName);
-//    }
-//
-//    public void saveAndMoveToAnotherList(final P persistentObject, final String sourceListName, final String targetListName) {
-//        prepareForUpdateOrPersist(persistentObject);
-//
-//        getRetryingHandler().trySaveMoveToAnotherList(persistentObject, sourceListName, targetListName);
-//    }
-//
-//    public void removeFromList(final P persistentObject, final String listName) {
-//        getRetryingHandler().tryRemoveFromList(persistentObject, listName);
-//    }
-//
-//    public List<P> getFromList(final String listName, final boolean isTail, final int qty) {
-//        return RETRYING_HANDLER.getFromList(listName, isTail, qty, this);
-//    }
-
     private void prepareForUpdateOrPersist(final P persistentObject) {
         persistentObject.setModified();
     }

@@ -25,6 +25,7 @@ public interface IDAO<P extends RedisEntity> extends Serializable {
     P buildPersistentObjectInstanceFromPersistedStringData(final String persistedStringData);
 
     // Querying methods =====
+
     P findById(final String id);
 
     Map<String, P> findUniqueIdMultiple(final Collection<String> ids);
@@ -35,16 +36,6 @@ public interface IDAO<P extends RedisEntity> extends Serializable {
 
     List<P> findMultipleByIndexableProperty(final String propertyName, final String id);
 
-    /*
-        List<P> getFromList(final String listName, final boolean isTail, final int qty);
-
-        // Updating methods =====
-        void saveAndAddToList(final P persistentObject, final String listName);
-
-        void saveAndMoveToAnotherList(final P persistentObject, final String sourceListName, final String targetListName);
-
-        void removeFromList(final P persistentObject, final String listName);
-    */
     void save(final P persistentObject);
 
     void massiveUpload(final Collection<P> list);
