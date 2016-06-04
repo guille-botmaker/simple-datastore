@@ -13,10 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -169,6 +166,7 @@ public class DAOTest extends AbstractTest {
         // change state
         user2.STATE.set("old");
 
+        // save massively
         userDAO.massiveUpload(Arrays.asList(user3, user2));
 
         assertNull(userDAO.findById(id1));
@@ -176,6 +174,60 @@ public class DAOTest extends AbstractTest {
         assertEquals(user3, userDAO.findById(id3));
         assertEquals(1, userDAO.findByState("new").size());
         assertEquals(1, userDAO.findByState("old").size());
+    }
+
+    @Test
+    public void testFindMultipleIntersectionOfIndexableProperty() {
+        final String id1 = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
+        assertNull(userDAO.findById(id1));
+
+        final User user1 = new User();
+        user1.setId(id1);
+        user1.LASTNAME.set("TestUser1");
+        user1.AGE.set(150);
+        user1.STATE.set("old");
+        userDAO.save(user1);
+        assertEquals(user1, userDAO.findById(id1));
+
+        final String id2 = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
+        assertNull(userDAO.findById(id2));
+
+        final User user2 = new User();
+        user2.setId(id2);
+        user2.LASTNAME.set("TestUser2");
+        user2.AGE.set(150);
+        user2.STATE.set("new");
+        userDAO.save(user2);
+        assertEquals(user2, userDAO.findById(id2));
+
+        final String id3 = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
+        assertNull(userDAO.findById(id3));
+
+        final User user3 = new User();
+        user3.setId(id3);
+        user3.LASTNAME.set("TestUser3");
+        user3.AGE.set(150);
+        user3.STATE.set("old");
+        userDAO.save(user3);
+        assertEquals(user3, userDAO.findById(id3));
+
+        HashMap<String, String> propertyNameAndValueMap = new HashMap<>(2);
+        propertyNameAndValueMap.put(user1.STATE.getPropertyName(), "old");
+        propertyNameAndValueMap.put(user1.AGE.getPropertyName(), "150");
+        List<User> userList = userDAO.findMultipleIntersectionOfIndexableProperty(propertyNameAndValueMap);
+        assertEquals(2, userList.size());
+        assertTrue(userList.contains(user1));
+        assertFalse(userList.contains(user2));
+        assertTrue(userList.contains(user3));
+
+        propertyNameAndValueMap = new HashMap<>(2);
+        propertyNameAndValueMap.put(user1.STATE.getPropertyName(), "new");
+        propertyNameAndValueMap.put(user1.AGE.getPropertyName(), "150");
+        userList = userDAO.findMultipleIntersectionOfIndexableProperty(propertyNameAndValueMap);
+        assertEquals(1, userList.size());
+        assertFalse(userList.contains(user1));
+        assertTrue(userList.contains(user2));
+        assertFalse(userList.contains(user3));
     }
 
     @Test

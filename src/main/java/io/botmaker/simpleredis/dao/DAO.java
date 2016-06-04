@@ -122,4 +122,12 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         }
         return getRetryingHandler().tryDSGetByIndexableProperty(propertyName, id, this);
     }
+
+    @Override
+    public List<P> findMultipleIntersectionOfIndexableProperty(final Map<String, String> propertyNameAndValueMap) {
+        if (propertyNameAndValueMap == null || propertyNameAndValueMap.size() == 0) {
+            return null;
+        }
+        return getRetryingHandler().tryDSGetIntersectionOfIndexableProperty(this, propertyNameAndValueMap);
+    }
 }

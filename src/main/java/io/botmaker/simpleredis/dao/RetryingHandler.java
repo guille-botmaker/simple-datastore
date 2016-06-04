@@ -107,7 +107,7 @@ public final class RetryingHandler implements Serializable {
             sample.setId("*");
             final String keyName = buildKey(sample, redisServer);
 
-            final List<T> entities = getMultiple(redisServer, "keys", keyName, dao);
+            final List<T> entities = getMultiple(dao, redisServer, "keys", keyName);
             if (entities != null) {
                 result.addAll(entities);
             }
@@ -161,10 +161,50 @@ public final class RetryingHandler implements Serializable {
 
             final T sample = dao.getSample();
             final String keyName = buildIndexableKey(sample.getIndexablePropertyByName(indexablePropertyName), sample, key, redisServer);
-            final List<T> entities = getMultiple(redisServer, "smembers", keyName, dao);
+            final List<T> entities = getMultiple(dao, redisServer, "smembers", keyName);
             if (entities != null) {
                 result.addAll(entities);
             }
+        }, null);
+
+        return result;
+    }
+
+    public <T extends RedisEntity> List<T> tryDSGetIntersectionOfIndexableProperty(final DAO<T> dao, final Map<String, String> propertyNameAndValueMap) {
+        final List<T> result = new ArrayList<>(10);
+
+        tryClosure((redisServer, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - tryDSGetByIndexableProperty", new Exception());
+            }
+
+            final T sample = dao.getSample();
+            int index = 1;
+            final List<String> keyNames = new ArrayList<>(propertyNameAndValueMap.size());
+            final StringBuilder keyLuaParameters = new StringBuilder();
+            for (final Map.Entry<String, String> entry : propertyNameAndValueMap.entrySet()) {
+                keyNames.add(buildIndexableKey(sample.getIndexablePropertyByName(entry.getKey()), sample,
+                        entry.getValue(), redisServer));
+                keyLuaParameters.append("KEYS[" + index++ + "], ");
+            }
+
+            if (keyLuaParameters.length() > 0) {
+                keyLuaParameters.delete(keyLuaParameters.length() - 2, keyLuaParameters.length());
+            }
+
+            final String script = "local keysArray = redis.call('SINTER', " + keyLuaParameters + ")\n" +
+                    "if next(keysArray) == nil then\n" +
+                    "   return nil\n" +
+                    "else\n" +
+                    "   return redis.call('mget', unpack(keysArray))  end\n";
+
+
+            List<String> resultList;
+            try (final Jedis jedis = redisServer.getPool().getResource()) {
+                resultList = (List<String>) jedis.eval(script, keyNames, Collections.EMPTY_LIST);
+            }
+
+            result.addAll(instantiateEntities(dao, resultList));
         }, null);
 
         return result;
@@ -286,7 +326,10 @@ public final class RetryingHandler implements Serializable {
         }
     }
 
-    private <T extends RedisEntity> List<T> getMultiple(final RedisServer redisServer, final String redisCommand, final String keyName, final DAO<T> dao) {
+    private <T extends RedisEntity> List<T> getMultiple(final DAO<T> dao, final RedisServer redisServer, final String redisCommand, String keyName/* *final List<String> keyNames*/) {
+
+//        final StringBuilder keyParameters = new StringBuilder(keyNames.length * 7);
+//        keyNames.forEach( kn -> keyParameters.append(" "));
 
         final String script = "local keysArray = redis.call('" + redisCommand + "', KEYS[1])\n" +
                 "if next(keysArray) == nil then\n" +
