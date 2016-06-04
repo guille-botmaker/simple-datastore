@@ -11,6 +11,7 @@ public class User extends RedisEntity {
     public StringProperty FIRSTNAME;
     public StringProperty LASTNAME;
     public IntegerProperty AGE;
+    public StringProperty STATE;
     public ByteArrayProperty BYTES;
     public LongProperty LONG_VALUE;
     public BooleanProperty IS_FAKE;
@@ -38,6 +39,7 @@ public class User extends RedisEntity {
         FIRSTNAME = new STRING(this).build();
         LASTNAME = new STRING(this).indexable(true).build();
         AGE = new INT(this).indexable(false).build();
+        STATE = new STRING(this).indexable(false).build();
 
         BYTES = new BYTE_ARRAY(this).build();
         LONG_VALUE = new LONG(this).build();

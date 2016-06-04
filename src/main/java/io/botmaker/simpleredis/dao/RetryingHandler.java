@@ -8,6 +8,7 @@ import io.botmaker.simpleredis.service.SimpleDatastoreService;
 import io.botmaker.simpleredis.service.SimpleDatastoreServiceFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
 
 import java.io.Serializable;
 import java.util.*;
@@ -62,13 +63,13 @@ public final class RetryingHandler implements Serializable {
                         propertyValue;
     }
 
-    private Map<String, PropertyMeta> buildIndexablePropertiesKeys(final RedisEntity entity, final RedisServer redisServer) {
+    private List<IndexablePropertyInfoContainer> buildIndexablePropertiesKeys(final String entityKey, final RedisEntity entity, final RedisServer redisServer) {
 
         final List<PropertyMeta> indexableProperties = entity.getIndexableProperties();
 
-        final HashMap<String, PropertyMeta> map = new HashMap<>(indexableProperties.size());
-        indexableProperties.stream().forEach(ip -> map.put(buildIndexableKey(ip, entity, ip.get(), redisServer), ip));
-        return map;
+        final List<IndexablePropertyInfoContainer> list = new ArrayList<>(indexableProperties.size());
+        indexableProperties.stream().forEach(ip -> list.add(new IndexablePropertyInfoContainer(entityKey, entity, buildIndexableKey(ip, entity, ip.get(), redisServer), ip)));
+        return list;
     }
 
     public <T extends RedisEntity> T tryDSGet(final String entityKey, final DAO<T> dao) {
@@ -139,6 +140,7 @@ public final class RetryingHandler implements Serializable {
                 if (resultList != null) {
                     result.putAll(
                             resultList.stream()
+                                    .filter(e -> e != null)
                                     .map((Function<String, RedisEntity>) dao::buildPersistentObjectInstanceFromPersistedStringData)
                                     .collect(Collectors.toMap(RedisEntity::getId, i -> (T) i))
                     );
@@ -168,7 +170,7 @@ public final class RetryingHandler implements Serializable {
         return result;
     }
 
-    public void tryDSPut(final RedisEntity entity) {
+    public void tryDSPut(final DAO dao, final RedisEntity entity) {
         tryClosure((redisServer, results, loggingActivated) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSPut", new Exception());
@@ -179,34 +181,43 @@ public final class RetryingHandler implements Serializable {
             final int expiring = entity.getSecondsToExpire();
 
             try (final Jedis jedis = redisServer.getPool().getResource()) {
-                final Map<String, PropertyMeta> indexableProperties = buildIndexablePropertiesKeys(entity, redisServer);
-                final String[] uniqueIndexesEntitiesToDeleteArray = new String[indexableProperties.size()];
-                indexableProperties.keySet().toArray(uniqueIndexesEntitiesToDeleteArray);
-                final List<String> indexablePropertyKeys = jedis.mget(uniqueIndexesEntitiesToDeleteArray);
+
+                // try to remove old entity if exists with their indexable properties
+                tryDSRemove(entity.getId(), dao);
+
+                // remove old entities that have the same unique indexable property
+                final List<IndexablePropertyInfoContainer> indexableProperties = buildIndexablePropertiesKeys(key, entity, redisServer);
+                removeOldEntitiesThatHaveTheSameUniqueIndexablePropertyValue(dao, redisServer, jedis, indexableProperties);
 
                 final Pipeline pipeline = jedis.pipelined();
-
                 pipeline.set(key, data);
-
                 if (expiring > 0) {
                     pipeline.expire(key, expiring);
                 }
 
-                putAllEntityIndexes(indexableProperties, indexablePropertyKeys, pipeline, key, expiring);
+                indexableProperties.forEach(e -> pipeline.sadd(e.propertyKey, key));
                 pipeline.sync();
             }
         }, null);
     }
 
-    public <T extends RedisEntity> void tryDSPutMultiple(final Collection<T> entities) {
+    public <T extends RedisEntity> void tryDSPutMultiple(final DAO dao, final Collection<T> entities) {
         tryClosure((redisServer, results, loggingActivated) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSPutMultiple", new Exception());
             }
 
             try (final Jedis jedis = redisServer.getPool().getResource()) {
-                final Pipeline pipeline = jedis.pipelined();
 
+                // try to remove old entities if exist with their indexable properties
+                tryDSRemove(entities.stream().map(e -> e.getId()).collect(Collectors.toList()), dao);
+
+                // remove old entities that have the same unique indexable property
+                final List<IndexablePropertyInfoContainer> indexableProperties = new ArrayList<>(entities.size());
+                entities.forEach(e -> indexableProperties.addAll(buildIndexablePropertiesKeys(buildKey(e, redisServer), e, redisServer)));
+                removeOldEntitiesThatHaveTheSameUniqueIndexablePropertyValue(dao, redisServer, jedis, indexableProperties);
+
+                final Pipeline pipeline = jedis.pipelined();
                 entities.stream().forEach(entity -> {
                     final String key = buildKey(entity, redisServer);
                     final String data = entity.getDataObject().toString();
@@ -217,15 +228,15 @@ public final class RetryingHandler implements Serializable {
                     if (expiring > 0) {
                         pipeline.expire(key, expiring);
                     }
-//                    putAllEntityIndexes(buildIndexablePropertiesKeys(entity, redisServer), pipeline, key, expiring);
                 });
+                indexableProperties.forEach(ip -> pipeline.sadd(ip.propertyKey, ip.entityKey));
                 pipeline.sync();
             }
         }, null);
     }
 
-    public void tryDSRemove(final String entityKey, final DAO dao) {
-        final RedisEntity redisEntity = tryDSGet(entityKey, dao);
+    public void tryDSRemove(final String entityId, final DAO dao) {
+        final RedisEntity redisEntity = tryDSGet(entityId, dao);
 
         if (redisEntity != null) {
             tryClosure((redisServer, results, loggingActivated) -> {
@@ -233,14 +244,14 @@ public final class RetryingHandler implements Serializable {
                     LOGGER.log(Level.SEVERE, "PERF - tryDSRemove", new Exception());
                 }
 
-                final Set<String> indexableProperties = buildIndexablePropertiesKeys(redisEntity, redisServer).keySet();
-                final String theKey = buildKey(dao.getEntityName(), entityKey, dao.getSample().usesAppIdPrefix(), redisServer);
+                final String theKey = buildKey(dao.getEntityName(), entityId, dao.getSample().usesAppIdPrefix(), redisServer);
+                final List<IndexablePropertyInfoContainer> indexableProperties = buildIndexablePropertiesKeys(theKey, redisEntity, redisServer);
 
                 try (final Jedis jedis = redisServer.getPool().getResource()) {
                     final Pipeline pipeline = jedis.pipelined();
 
                     pipeline.del(theKey);
-                    indexableProperties.stream().forEach(pipeline::srem);
+                    indexableProperties.stream().forEach(ip -> pipeline.srem(ip.propertyKey, ip.entityKey));
 
                     pipeline.sync();
                 }
@@ -248,8 +259,8 @@ public final class RetryingHandler implements Serializable {
         }
     }
 
-    public void tryDSRemove(final Collection<String> entityKeys, final DAO dao) {
-        final Map<String, RedisEntity> map = tryDSGetMultiple(entityKeys, dao);
+    public void tryDSRemove(final Collection<String> entityIds, final DAO dao) {
+        final Map<String, RedisEntity> map = tryDSGetMultiple(entityIds, dao);
 
         if (!map.isEmpty()) {
             tryClosure((redisServer, results, loggingActivated) -> {
@@ -260,8 +271,14 @@ public final class RetryingHandler implements Serializable {
                 try (final Jedis jedis = redisServer.getPool().getResource()) {
                     final Pipeline pipeline = jedis.pipelined();
 
-                    map.values().stream().map(re -> buildIndexablePropertiesKeys(re, redisServer).keySet()).forEach(ip -> ip.stream().forEach(pipeline::del));
-                    map.keySet().stream().forEach(pipeline::srem);
+
+                    final Map<RedisEntity, String> entitiesWithKey = new HashMap<>(entityIds.size());
+                    map.values().forEach(e -> entitiesWithKey.put(e, buildKey(e, redisServer)));
+
+                    entitiesWithKey.values().forEach(pipeline::del);
+                    entitiesWithKey.entrySet().stream().
+                            forEach(re -> buildIndexablePropertiesKeys(re.getValue(), re.getKey(), redisServer).
+                                    forEach(ip -> pipeline.srem(ip.propertyKey, ip.entityKey)));
 
                     pipeline.sync();
                 }
@@ -282,49 +299,57 @@ public final class RetryingHandler implements Serializable {
             resultList = (List<String>) jedis.eval(script, 1, keyName);
         }
 
+        return instantiateEntities(dao, resultList);
+    }
+
+    private <T extends RedisEntity> List<T> instantiateEntities(final DAO<T> dao, final List<String> resultList) {
         return resultList == null ? null : resultList.stream()
+                .filter(s -> s != null)
                 .map(dao::buildPersistentObjectInstanceFromPersistedStringData)
                 .collect(Collectors.toList());
     }
 
+    private void removeOldEntitiesThatHaveTheSameUniqueIndexablePropertyValue(final DAO dao, final RedisServer redisServer, final Jedis jedis, final List<IndexablePropertyInfoContainer> indexableProperties) {
 
-    private void putAllEntityIndexes(final Map<String, PropertyMeta> indexableProperties, final List<String> indexablePropertyKeys, final Pipeline pipeline, final String key, final int expiring) {
-        indexableProperties.entrySet().stream().forEach(p -> {
+        // IMPORTANT NOTE: there is no possibility of put this in a LUA script,
+        // because LUA script wont allow "spop" command!
 
-            final String indexPropertyKey = p.getKey();
-
-            final StringBuilder scriptStringBuilder = new StringBuilder(250);
-
-            scriptStringBuilder.append("redis.replicate_commands()\n");
-            scriptStringBuilder.append("redis.call('sadd', KEYS[1], ARGV[1])\n");
-            if (expiring > 0) {
-                scriptStringBuilder.append("redis.call('expire',KEYS[1], ARGV[2]) \n");
+        // remove the index key, so it remains unique
+        final Pipeline pipelined = jedis.pipelined();
+        final Map<Response<String>, List<IndexablePropertyInfoContainer>> responses = new HashMap<>(indexableProperties.size());
+        for (final IndexablePropertyInfoContainer indexableProperty : indexableProperties) {
+            final PropertyMeta propertyMeta = indexableProperty.property;
+            if (propertyMeta.isIndexable() && propertyMeta.isUniqueIndex()) {
+                responses.put(pipelined.spop(indexableProperty.propertyKey), indexableProperties);
             }
+        }
+        pipelined.sync();
 
-            // NOTE: SPOP is not allowed in LUA scripts, so we use srandmember and srem later
-            scriptStringBuilder.append("local theKey = redis.call('srandmember', KEYS[1])\n");
-            scriptStringBuilder.append("if theKey == nil then\n" +
-                    "   return nil\n");
+        // delete the old entities referenced by old unique index key
+        final List<String> entitiesToDelete = responses.keySet().stream().map(Response::get).
+                filter(r -> r != null).collect(Collectors.toList());
+        if (entitiesToDelete.size() > 0) {
 
-            if (p.getValue().isUniqueIndex()) {
-                scriptStringBuilder.append("else\n" +
-                        "   redis.call('srem', KEYS[1], theKey)\n" +
-                        "   local entityToDelKey = redis.call('get', theKey)\n" +
-                        "   redis.call('del', entityToDelKey)\n");
-            }
-            scriptStringBuilder.append("end");
+            final String[] entitiesToDeleteArray = new String[entitiesToDelete.size()];
+            entitiesToDelete.toArray(entitiesToDeleteArray);
+            final List<RedisEntity> oldEntities = instantiateEntities(dao, jedis.mget(entitiesToDeleteArray));
 
-            pipeline.eval(scriptStringBuilder.toString(), 1, indexPropertyKey, key, expiring + "");
-        });
+            final Pipeline pipelined2 = jedis.pipelined();
+            pipelined2.del(entitiesToDeleteArray);
+
+            //delete keys from non unique indexable properties that reference to the old entity key
+            final int[] index = {0};
+            oldEntities.forEach(e -> buildIndexablePropertiesKeys(entitiesToDeleteArray[index[0]++], e, redisServer).
+                    forEach(indexablePropertyInfoContainer -> {
+                                final PropertyMeta propertyMeta = indexablePropertyInfoContainer.property;
+                                if (propertyMeta.isIndexable() && !propertyMeta.isUniqueIndex()) {
+                                    pipelined2.srem(indexablePropertyInfoContainer.propertyKey, indexablePropertyInfoContainer.entityKey);
+                                }
+                            }
+                    ));
+            pipelined2.sync();
+        }
     }
-
-//    private void deleteUniqueIndexesEntities(final Jedis jedis, final List<Response<String>> uniqueIndexesEntitiesToDelete) {
-//        final Pipeline pipeline = jedis.pipelined();
-//        final String[] uniqueIndexesEntitiesToDeleteArray = new String[uniqueIndexesEntitiesToDelete.size()];
-//        uniqueIndexesEntitiesToDelete.stream().map(Response::get).collect(Collectors.toList()).toArray(uniqueIndexesEntitiesToDeleteArray);
-//        pipeline.del(uniqueIndexesEntitiesToDeleteArray);
-//        pipeline.sync();
-//    }
 
     private void tryClosure(final Closure closure, final Object[] results) {
         final ValuesContainer values = new ValuesContainer();
@@ -370,6 +395,20 @@ public final class RetryingHandler implements Serializable {
         public int retryWait = WAIT_MS;
     }
 
+    public static final class IndexablePropertyInfoContainer {
+
+        public final String entityKey;
+        public final RedisEntity entity;
+        public final String propertyKey;
+        public final PropertyMeta property;
+
+        public IndexablePropertyInfoContainer(final String entityKey, RedisEntity entity, String propertyKey, PropertyMeta property) {
+            this.entityKey = entityKey;
+            this.entity = entity;
+            this.propertyKey = propertyKey;
+            this.property = property;
+        }
+    }
 
 //    public static void main(String[] args) {
 //

@@ -52,7 +52,7 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
 
     public AbstractPropertyBuilder<P, T> indexable(final boolean unique) {
         this.indexable = true;
-        this.uniqueIndex = true;
+        this.uniqueIndex = unique;
 
         return this;
     }

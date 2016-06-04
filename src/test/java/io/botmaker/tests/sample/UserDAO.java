@@ -2,6 +2,8 @@ package io.botmaker.tests.sample;
 
 import io.botmaker.simpleredis.dao.DAO;
 
+import java.util.List;
+
 public final class UserDAO extends DAO<User> {
 
     public UserDAO() {
@@ -12,7 +14,11 @@ public final class UserDAO extends DAO<User> {
         return findUniqueByIndexableProperty(sample.LASTNAME.getPropertyName(), lastName);
     }
 
-    public User findByAge(final int age) {
-        return findUniqueByIndexableProperty(sample.AGE.getPropertyName(), "" + age);
+    public List<User> findByAge(final int age) {
+        return findMultipleByIndexableProperty(sample.AGE.getPropertyName(), "" + age);
+    }
+
+    public List<User> findByState(final String state) {
+        return findMultipleByIndexableProperty(sample.STATE.getPropertyName(), state);
     }
 }

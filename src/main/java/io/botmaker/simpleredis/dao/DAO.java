@@ -11,13 +11,13 @@ import java.util.Map;
 
 /**
  * This class is a wrapper for Datastore operations. Supports most of the DatastoreService and DatastoreAsyncService operations adding features such as:
- * <p>
+ * <p/>
  * - Entity to "RedisEntity" convertions
  * - caching usage
  * - retrying algorithms
  * - performance logging
  * - remote client massive and parallel data access
- * <p>
+ * <p/>
  * Every X_RedisEntity should have its X_DAO implementation. See tests for examples
  */
 public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
@@ -38,7 +38,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     public void save(final P persistentObject) {
         prepareForUpdateOrPersist(persistentObject);
 
-        getRetryingHandler().tryDSPut(persistentObject);
+        getRetryingHandler().tryDSPut(this, persistentObject);
     }
 
 //    public void saveAndAddToList(final P persistentObject, final String listName) {
@@ -70,9 +70,9 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         persistentObject.setModified();
     }
 
-//    public List<P> getAll() {
-//        return getRetryingHandler().tryDSGetAll(this);
-//    }
+    public List<P> getAll() {
+        return getRetryingHandler().tryDSGetAll(this);
+    }
 
     public P findById(final String id) {
         return RETRYING_HANDLER.tryDSGet(id, this);
@@ -86,7 +86,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         if (list == null || list.isEmpty()) {
             return;
         }
-        getRetryingHandler().tryDSPutMultiple(list);
+        getRetryingHandler().tryDSPutMultiple(this, list);
     }
 
     public void remove(final String id) {
