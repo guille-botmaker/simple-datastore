@@ -105,9 +105,9 @@ public final class RetryingHandler implements Serializable {
 
             final T sample = dao.buildPersistentObjectInstance();
             sample.setId("*");
-            final String keyName = buildKey(sample, redisServer);
 
-            final List<T> entities = getMultiple(dao, redisServer, "keys", keyName);
+            final String keyName = buildKey(sample, redisServer);
+            final List<T> entities = executeRedisLuaCommandForMultipleEntities(dao, redisServer, "keys", Collections.singletonList(keyName));
             if (entities != null) {
                 result.addAll(entities);
             }
@@ -161,7 +161,7 @@ public final class RetryingHandler implements Serializable {
 
             final T sample = dao.getSample();
             final String keyName = buildIndexableKey(sample.getIndexablePropertyByName(indexablePropertyName), sample, key, redisServer);
-            final List<T> entities = getMultiple(dao, redisServer, "smembers", keyName);
+            final List<T> entities = executeRedisLuaCommandForMultipleEntities(dao, redisServer, "smembers", Collections.singletonList(keyName));
             if (entities != null) {
                 result.addAll(entities);
             }
@@ -179,32 +179,12 @@ public final class RetryingHandler implements Serializable {
             }
 
             final T sample = dao.getSample();
-            int index = 1;
-            final List<String> keyNames = new ArrayList<>(propertyNameAndValueMap.size());
-            final StringBuilder keyLuaParameters = new StringBuilder();
-            for (final Map.Entry<String, String> entry : propertyNameAndValueMap.entrySet()) {
-                keyNames.add(buildIndexableKey(sample.getIndexablePropertyByName(entry.getKey()), sample,
-                        entry.getValue(), redisServer));
-                keyLuaParameters.append("KEYS[" + index++ + "], ");
-            }
+            final List<String> keyNames = propertyNameAndValueMap.entrySet().stream().
+                    map(entry ->
+                            buildIndexableKey(sample.getIndexablePropertyByName(entry.getKey()), sample, entry.getValue(), redisServer)).
+                    collect(Collectors.toList());
 
-            if (keyLuaParameters.length() > 0) {
-                keyLuaParameters.delete(keyLuaParameters.length() - 2, keyLuaParameters.length());
-            }
-
-            final String script = "local keysArray = redis.call('SINTER', " + keyLuaParameters + ")\n" +
-                    "if next(keysArray) == nil then\n" +
-                    "   return nil\n" +
-                    "else\n" +
-                    "   return redis.call('mget', unpack(keysArray))  end\n";
-
-
-            List<String> resultList;
-            try (final Jedis jedis = redisServer.getPool().getResource()) {
-                resultList = (List<String>) jedis.eval(script, keyNames, Collections.EMPTY_LIST);
-            }
-
-            result.addAll(instantiateEntities(dao, resultList));
+            result.addAll(executeRedisLuaCommandForMultipleEntities(dao, redisServer, "SINTER", keyNames));
         }, null);
 
         return result;
@@ -326,20 +306,27 @@ public final class RetryingHandler implements Serializable {
         }
     }
 
-    private <T extends RedisEntity> List<T> getMultiple(final DAO<T> dao, final RedisServer redisServer, final String redisCommand, String keyName/* *final List<String> keyNames*/) {
+    private <T extends RedisEntity> List<T> executeRedisLuaCommandForMultipleEntities(final DAO<T> dao, final RedisServer redisServer, final String redisCommand, final List<String> keyNames) {
 
-//        final StringBuilder keyParameters = new StringBuilder(keyNames.length * 7);
-//        keyNames.forEach( kn -> keyParameters.append(" "));
+        final StringBuilder keyLuaParameters = new StringBuilder();
+        for (int i = 1; i <= keyNames.size(); i++) {
+            keyLuaParameters.append("KEYS[" + i + "], ");
+        }
 
-        final String script = "local keysArray = redis.call('" + redisCommand + "', KEYS[1])\n" +
+        if (keyLuaParameters.length() > 0) {
+            keyLuaParameters.delete(keyLuaParameters.length() - 2, keyLuaParameters.length());
+        }
+
+        final String script = "local keysArray = redis.call('" + redisCommand + "', " + keyLuaParameters + ")\n" +
                 "if next(keysArray) == nil then\n" +
                 "   return nil\n" +
                 "else\n" +
                 "   return redis.call('mget', unpack(keysArray))  end\n";
 
+
         List<String> resultList;
         try (final Jedis jedis = redisServer.getPool().getResource()) {
-            resultList = (List<String>) jedis.eval(script, 1, keyName);
+            resultList = (List<String>) jedis.eval(script, keyNames, Collections.EMPTY_LIST);
         }
 
         return instantiateEntities(dao, resultList);
