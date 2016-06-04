@@ -123,6 +123,62 @@ public class DAOTest extends AbstractTest {
     }
 
     @Test
+    public void testUniqueAndNotUniqueIndexablePropertiesMultiple() {
+        final String id1 = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
+        assertNull(userDAO.findById(id1));
+        final User user1 = new User();
+        user1.setId(id1);
+        user1.LASTNAME.set("TestUser1");
+        user1.AGE.set(150);
+        user1.STATE.set("new");
+
+        final String id2 = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
+        assertNull(userDAO.findById(id2));
+        final User user2 = new User();
+        user2.setId(id2);
+        user2.LASTNAME.set("TestUser2");
+        user2.AGE.set(150);
+        user2.STATE.set("new");
+
+        userDAO.massiveUpload(Arrays.asList(user1, user2));
+        assertEquals(user1, userDAO.findById(id1));
+        assertEquals(user2, userDAO.findById(id2));
+
+        // find by indexable (unique!) property
+        final User userByLastName1 = userDAO.findByLastName(user1.LASTNAME.get());
+        final User userByLastName2 = userDAO.findByLastName(user2.LASTNAME.get());
+        assertEquals(user1, userByLastName1);
+        assertEquals(user2, userByLastName2);
+
+        // find by indexable (not unique) property
+        final List<User> usersbyAge = userDAO.findByAge(150);
+        assertEquals(2, usersbyAge.size());
+        assertTrue(usersbyAge.contains(user1));
+        assertTrue(usersbyAge.contains(user2));
+
+        //create a new entity with the same indexable unique property (SAME LAST NAME)
+        final String id3 = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
+        assertNull(userDAO.findById(id3));
+
+        final User user3 = new User();
+        user3.setId(id3);
+        user3.LASTNAME.set("TestUser1");
+        user3.AGE.set(150);
+        user3.STATE.set("new");
+
+        // change state
+        user2.STATE.set("old");
+
+        userDAO.massiveUpload(Arrays.asList(user3, user2));
+
+        assertNull(userDAO.findById(id1));
+        assertEquals(user2, userDAO.findById(id2));
+        assertEquals(user3, userDAO.findById(id3));
+        assertEquals(1, userDAO.findByState("new").size());
+        assertEquals(1, userDAO.findByState("old").size());
+    }
+
+    @Test
     public void testGetAll() {
 
         assertEquals(6, userDAO.getAll().size());
@@ -195,6 +251,11 @@ public class DAOTest extends AbstractTest {
 
         theuser = userDAO.findByLastName("liendo" + lastNameUniqueId);
         assertNull(theuser);
+
+        // test remove all
+        assertEquals(5, userDAO.getAll().size());
+        userDAO.remove(userDAO.getAll().stream().map(e -> e.getId()).collect(Collectors.toList()));
+        assertEquals(0, userDAO.getAll().size());
     }
 
     @Test
