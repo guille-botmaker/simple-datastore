@@ -333,7 +333,7 @@ public final class RetryingHandler implements Serializable {
     }
 
     private <T extends RedisEntity> List<T> instantiateEntities(final DAO<T> dao, final List<String> resultList) {
-        return resultList == null ? null : resultList.stream()
+        return resultList == null ? Collections.EMPTY_LIST : resultList.stream()
                 .filter(s -> s != null)
                 .map(dao::buildPersistentObjectInstanceFromPersistedStringData)
                 .collect(Collectors.toList());
