@@ -30,6 +30,7 @@ public final class RetryingHandler implements Serializable {
 
     private static final int MAX_RETRIES = 3;
     private static final int WAIT_MS = 800;
+    public static final String DEFAULT = "shared";
 
     public static void sleep(final int millis) {
         try {
@@ -45,7 +46,7 @@ public final class RetryingHandler implements Serializable {
     }
 
     private String buildKey(final String entityName, final String entityKey, final boolean entityUsesAppIdPrefix, final RedisServer redisServer) {
-        return (entityUsesAppIdPrefix ? redisServer.getAppId() : "default") +
+        return (entityUsesAppIdPrefix ? redisServer.getAppId() : DEFAULT) +
                 ":" +
                 entityName +
                 ":" +
@@ -54,7 +55,7 @@ public final class RetryingHandler implements Serializable {
 
     private String buildIndexableKey(final PropertyMeta propertyMeta, final RedisEntity entity, final Object propertyValue, final RedisServer redisServer) {
         return
-                (entity.usesAppIdPrefix() ? redisServer.getAppId() : "default") +
+                (entity.usesAppIdPrefix() ? redisServer.getAppId() : DEFAULT) +
                         ":" +
                         entity.getEntityName() +
                         ":index:" +
@@ -333,7 +334,7 @@ public final class RetryingHandler implements Serializable {
     }
 
     private <T extends RedisEntity> List<T> instantiateEntities(final DAO<T> dao, final List<String> resultList) {
-        return resultList == null ? null : resultList.stream()
+        return resultList == null ? Collections.EMPTY_LIST : resultList.stream()
                 .filter(s -> s != null)
                 .map(dao::buildPersistentObjectInstanceFromPersistedStringData)
                 .collect(Collectors.toList());
