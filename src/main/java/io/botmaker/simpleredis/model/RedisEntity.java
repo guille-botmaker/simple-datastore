@@ -40,7 +40,7 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
     private final int secondsToExpire; // 0 means never
     private final boolean usesAppIdPrefix;
 
-    private final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();
+    protected final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();
     // entity usefull properties
 
 //    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
@@ -68,7 +68,7 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         for (final Field field : getClass().getFields()) {
             if (PropertyMeta.class.isAssignableFrom(field.getType())) {
                 final String propertyName = field.getName();
-
+                field.setAccessible(true);
                 try {
                     final PropertyMeta propertyMeta = (PropertyMeta) field.get(this);
 
@@ -77,6 +77,8 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
 
                 } catch (final IllegalAccessException _illegalAccessException) {
                     throw new RuntimeException("Problems getting value for field [" + propertyName + "], of class [" + getClass() + "]. Possible private variable?: " + _illegalAccessException.getMessage(), _illegalAccessException);
+                } finally {
+                    field.setAccessible(false);
                 }
             }
         }
