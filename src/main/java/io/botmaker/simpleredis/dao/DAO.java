@@ -28,11 +28,12 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     //    protected final P sample;
     protected final Class<? extends P> beanClass;
     protected final P sample;
-
+    private String entityName;
 
     public DAO(final Class<? extends P> beanClass) {
         this.beanClass = beanClass;
         this.sample = buildPersistentObjectInstance();
+        this.entityName = RedisEntity.getEntityName(beanClass);
     }
 
     public void save(final P persistentObject) {
@@ -82,7 +83,11 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     }
 
     public String getEntityName() {
-        return RedisEntity.getEntityName(beanClass);
+        return entityName;
+    }
+
+    public void setEntityName(final String value) {
+        entityName = value;
     }
 
     @Override

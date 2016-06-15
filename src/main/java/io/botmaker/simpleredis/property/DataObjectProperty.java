@@ -7,7 +7,7 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 
-public final class DataObjectProperty<T extends DataObject> extends PropertyMeta<T> implements Serializable {
+public class DataObjectProperty<T extends DataObject> extends PropertyMeta<T> implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
 
