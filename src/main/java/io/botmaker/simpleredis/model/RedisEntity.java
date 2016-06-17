@@ -33,19 +33,16 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
     protected static final int EXPIRING_NEVER = 0;
 
     private static final long serialVersionUID = 6181606486836703354L;
+    protected final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();
     // persistent state
     private final DataObject dataObject = new DataObject();
-
     private final String entityName;
     private final int secondsToExpire; // 0 means never
     private final boolean usesAppIdPrefix;
-
-    protected final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();
     // entity usefull properties
 
 //    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
 //    public IntegerProperty GROUP_ID;
-
     public LongProperty LAST_MODIFICATION;
 
     public StringProperty OBJECT_TYPE;

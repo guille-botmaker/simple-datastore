@@ -25,12 +25,11 @@ import java.util.stream.Collectors;
  */
 public final class RetryingHandler implements Serializable {
 
+    public static final String DEFAULT = "shared";
     private static final long serialVersionUID = 472842924253314234L;
     private static final Logger LOGGER = Logger.getLogger(RetryingHandler.class.getName());
-
     private static final int MAX_RETRIES = 3;
     private static final int WAIT_MS = 800;
-    public static final String DEFAULT = "shared";
 
     public static void sleep(final int millis) {
         try {

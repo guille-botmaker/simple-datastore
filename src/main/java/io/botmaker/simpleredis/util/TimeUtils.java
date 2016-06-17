@@ -2,6 +2,7 @@ package io.botmaker.simpleredis.util;
 
 import io.botmaker.simpleredis.model.PersistentObject;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -93,8 +94,23 @@ public final class TimeUtils {
         return calendar.getTime();
     }
 
+    public static String toISODate(final Date d) {
+        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        return df.format(d);
+    }
+
+    public static Date getCurrent() {
+        return getCalendar().getTime();
+    }
+
+    public static String getCurrentAsISO() {
+        return toISODate(getCurrent());
+    }
+
     public static long getCurrentMillis() {
-        return getCalendar().getTime().getTime();
+        return getCurrent().getTime();
     }
 
     public static int getMinutesSinceStandardModificationTime(final long l) {

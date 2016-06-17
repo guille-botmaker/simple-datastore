@@ -1,9 +1,6 @@
 package io.botmaker.tests.dao;
 
 import io.botmaker.simpleredis.model.RedisEntity;
-import io.botmaker.simpleredis.service.RedisServer;
-import io.botmaker.simpleredis.service.SimpleDatastoreService;
-import io.botmaker.simpleredis.service.SimpleDatastoreServiceFactory;
 import io.botmaker.simpleredis.util.RandomUtils;
 import io.botmaker.tests.AbstractTest;
 import io.botmaker.tests.sample.User;
