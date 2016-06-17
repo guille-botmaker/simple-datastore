@@ -73,9 +73,7 @@ public final class RetryingHandler implements Serializable {
         return list;
     }
 
-
-    public <T extends RedisEntity> String tryDSRawGet(final String entityKey, final DAO<T> dao) {
-        final T sample = dao.getSample();
+    public String tryDSRawGet(final String entityName, final String entityKey, final boolean usesAppIdPrefix) {
 
         final String[] result = new String[1];
         tryClosure((redisServer, results, loggingActivated) -> {
@@ -83,7 +81,7 @@ public final class RetryingHandler implements Serializable {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSRawGet", new Exception());
             }
 
-            final String key = buildKey(dao.getEntityName(), entityKey, sample.usesAppIdPrefix(), redisServer);
+            final String key = buildKey(entityName, entityKey, usesAppIdPrefix, redisServer);
             final String data;
             try (final Jedis jedis = redisServer.getPool().getResource()) {
                 data = jedis.get(key);
@@ -94,6 +92,12 @@ public final class RetryingHandler implements Serializable {
         }, result);
 
         return result[0];
+    }
+
+    public <T extends RedisEntity> String tryDSRawGet(final String entityKey, final DAO<T> dao) {
+        final T sample = dao.getSample();
+
+        return tryDSRawGet(dao.getEntityName(), entityKey, sample.usesAppIdPrefix());
     }
 
     public <T extends RedisEntity> T tryDSGet(final String entityKey, final DAO<T> dao) {
@@ -223,6 +227,25 @@ public final class RetryingHandler implements Serializable {
 
                 indexableProperties.forEach(e -> pipeline.sadd(e.propertyKey, key));
                 pipeline.sync();
+            }
+        }, null);
+    }
+
+    public void tryDSRawPut(final String data, final int expiring, final String entityName, final String entityKey, final boolean usesAppIdPrefix) {
+        tryClosure((redisServer, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - tryDSRawPut", new Exception());
+            }
+
+            final String key = buildKey(entityName, entityKey, usesAppIdPrefix, redisServer);
+
+            try (final Jedis jedis = redisServer.getPool().getResource()) {
+
+                final Pipeline pipeline = jedis.pipelined();
+                pipeline.set(key, data);
+                if (expiring > 0) {
+                    pipeline.expire(key, expiring);
+                }
             }
         }, null);
     }
