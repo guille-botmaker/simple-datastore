@@ -283,6 +283,28 @@ public final class RetryingHandler implements Serializable {
         }, null);
     }
 
+    public void tryDSRawPutMultiple(final Map<String, String> datas, final int expiring, final String entityName, final boolean usesAppIdPrefix) {
+        tryClosure((redisServer, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - tryDSPutRawMultiple", new Exception());
+            }
+
+            try (final Jedis jedis = redisServer.getPool().getResource()) {
+
+                final Pipeline pipeline = jedis.pipelined();
+                datas.entrySet().forEach(entry -> {
+                    final String key = buildKey(entityName, entry.getKey(), usesAppIdPrefix, redisServer);
+                    pipeline.set(key, entry.getValue());
+
+                    if (expiring > 0) {
+                        pipeline.expire(key, expiring);
+                    }
+                });
+                pipeline.sync();
+            }
+        }, null);
+    }
+
     public void tryDSRemove(final String entityId, final DAO dao) {
         final RedisEntity redisEntity = tryDSGet(entityId, dao);
 
