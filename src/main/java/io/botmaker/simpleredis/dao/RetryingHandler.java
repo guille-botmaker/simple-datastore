@@ -329,6 +329,19 @@ public final class RetryingHandler implements Serializable {
         }
     }
 
+    public void tryDSRawRemove(final String entityName, final String entityKey, final boolean usesAppIdPrefix) {
+        tryClosure((redisServer, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - tryDSRawRemove", new Exception());
+            }
+
+            final String key = buildKey(entityName, entityKey, usesAppIdPrefix, redisServer);
+            try (final Jedis jedis = redisServer.getPool().getResource()) {
+                jedis.del(key);
+            }
+        }, null);
+    }
+
     public void tryDSRemove(final Collection<String> entityIds, final DAO dao) {
         final Map<String, RedisEntity> map = tryDSGetMultiple(entityIds, dao);
 
