@@ -12,6 +12,8 @@ import java.util.*;
  */
 public final class TimeUtils {
 
+    public static final String ISO_8601_DATE = "yyyy-MM-dd'T'HH:mm'Z'";
+
 //    public static long getNormalizedCurrentTimeMillisForBeginingOfDay() {
 //        final GregorianCalendar calendar = new GregorianCalendar();
 //        calendar.setTime(getCalendar().getTime());
@@ -95,10 +97,21 @@ public final class TimeUtils {
     }
 
     public static String toISODate(final Date d) {
-        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+        final DateFormat df = new SimpleDateFormat(ISO_8601_DATE);
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         return df.format(d);
+    }
+
+    public static Date fromISODate(final String isoDate) {
+        final DateFormat df = new SimpleDateFormat(ISO_8601_DATE);
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        try {
+            return df.parse(isoDate);
+        } catch (final ParseException parseException) {
+            throw new RuntimeException(parseException);
+        }
     }
 
     public static Date getCurrent() {
@@ -180,7 +193,6 @@ public final class TimeUtils {
      * returns YYYYMMDD
      */
     public static int buildStandardToday() {
-
         return buildStandardToday(getCalendar().getTime());
     }
 
