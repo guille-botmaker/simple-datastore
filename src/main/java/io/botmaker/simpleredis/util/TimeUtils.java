@@ -5,14 +5,17 @@ import io.botmaker.simpleredis.model.PersistentObject;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 /**
  * Pack of common date operations
  */
 public final class TimeUtils {
 
-    public static final String ISO_8601_DATE = "yyyy-MM-dd'T'HH:mm'Z'";
+    public static final String ISO_8601_DATE = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
 //    public static long getNormalizedCurrentTimeMillisForBeginingOfDay() {
 //        final GregorianCalendar calendar = new GregorianCalendar();
@@ -44,7 +47,7 @@ public final class TimeUtils {
 //    }
 
     public static Calendar getCalendar() {
-        return Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.US);
+        return Calendar.getInstance();
     }
 
     //    public static int getNowDayOfMonth() {
