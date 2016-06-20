@@ -316,6 +316,23 @@ public class DAOTest extends AbstractTest {
     }
 
     @Test
+    public void testRawMethods() {
+        userDAO.getRetryingHandler().tryDSOrderedSetPut(1, "user1", "{ name: 'fer1'}", "TCustomer:B1", false);
+        userDAO.getRetryingHandler().tryDSOrderedSetPut(2, "user1", "{ name: 'fer1'}", "TCustomer:B1", false);
+        userDAO.getRetryingHandler().tryDSOrderedSetPut(1, "user2", "{ name: 'fer2'}", "TCustomer:B1", false);
+        userDAO.getRetryingHandler().tryDSOrderedSetPut(1, "user3", "{ name: 'fer3'}", "TCustomer:B1", false);
+        userDAO.getRetryingHandler().tryDSOrderedSetPut(3, "user4", "{ name: 'fer4'}", "TCustomer:B2", false);
+        userDAO.getRetryingHandler().tryDSOrderedSetPut(3, "user5", "{ name: 'fer5'}", "TCustomer:B2", false);
+        userDAO.getRetryingHandler().tryDSOrderedSetPut(3, "user6", "{ name: 'fer6'}", "TCustomer:B2", false);
+
+        final List<String> strings = userDAO.getRetryingHandler().tryDSOrderedSetGetUnion("TCustomer", Arrays.asList("B1", "B2"), 2, false);
+
+        assertEquals(2, strings.size());
+        assertTrue(strings.get(0).contains("fer2"));
+        assertTrue(strings.get(1).contains("fer3"));
+    }
+
+    @Test
     public void testQuerySpecific() {
         final User theUser = userDAO.findByLastName("liendo" + lastNameUniqueId);
 

@@ -6,6 +6,7 @@ import io.botmaker.simpleredis.model.config.PropertyMeta;
 import io.botmaker.simpleredis.service.RedisServer;
 import io.botmaker.simpleredis.service.SimpleDatastoreService;
 import io.botmaker.simpleredis.service.SimpleDatastoreServiceFactory;
+import io.botmaker.simpleredis.util.RandomUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
@@ -93,14 +94,8 @@ public final class RetryingHandler implements Serializable {
         return result[0];
     }
 
-    public <T extends RedisEntity> String tryDSRawGet(final String entityKey, final DAO<T> dao) {
-        final T sample = dao.getSample();
-
-        return tryDSRawGet(dao.getEntityName(), entityKey, sample.usesAppIdPrefix());
-    }
-
     public <T extends RedisEntity> T tryDSGet(final String entityKey, final DAO<T> dao) {
-        final String data = tryDSRawGet(entityKey, dao);
+        final String data = tryDSRawGet(dao.getEntityName(), entityKey, dao.getSample().usesAppIdPrefix());
         return data == null ? null : dao.buildPersistentObjectInstanceFromPersistedStringData(data);
     }
 
@@ -179,7 +174,7 @@ public final class RetryingHandler implements Serializable {
         return result;
     }
 
-    public <T extends RedisEntity> List<T> tryDSGetIntersectionOfIndexableProperty(final DAO<T> dao, final Map<String, String> propertyNameAndValueMap) {
+    public <T extends RedisEntity> List<T> tryDSGetIntersectionOfIndexableProperties(final DAO<T> dao, final Map<String, String> propertyNameAndValueMap) {
         final List<T> result = new ArrayList<>(10);
 
         tryClosure((redisServer, results, loggingActivated) -> {
@@ -369,18 +364,68 @@ public final class RetryingHandler implements Serializable {
         }
     }
 
+    public List<String> tryDSOrderedSetGetUnion(final String entityName, final List<String> entityKeys, final int quantity, final boolean usesAppIdPrefix) {
+
+        final List[] entities = new List[1];
+        tryClosure((redisServer, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - tryDSOrderedSetGetUnion", new Exception());
+            }
+
+            final String entityPrefix = buildKey(entityName, "", usesAppIdPrefix, redisServer);
+            final String[] entityKeysArray = new String[entityKeys.size()];
+            final int[] i = {0};
+            entityKeys.forEach(k -> entityKeysArray[i[0]++] = entityPrefix + k + ":Set");
+            final String setResultKey = entityPrefix + "result" + RandomUtils.getInstance().getRandomSafeAlphaNumberString(5);
+
+            try (final Jedis jedis = redisServer.getPool().getResource()) {
+                final Pipeline pipelined = jedis.pipelined();
+                pipelined.zunionstore(setResultKey, entityKeysArray);
+                pipelined.expire(setResultKey, 30);
+                pipelined.sync();
+            }
+
+            entities[0] = executeRedisLuaCommandForMultipleRawEntities(redisServer, "ZRANGE", Collections.singletonList(setResultKey), Arrays.asList("0", "" + (quantity - 1)));
+        }, null);
+        return entities[0];
+    }
+
+    public void tryDSOrderedSetPut(final long score, final String entityKey, final String data, final String entityName, final boolean usesAppIdPrefix) {
+
+        tryClosure((redisServer, results, loggingActivated) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - tryDSRawPutOrderedSet", new Exception());
+            }
+
+            final String setKeyName = (usesAppIdPrefix ? redisServer.getAppId() : DEFAULT) + ":" + entityName + ":Set";
+            final String keyName = buildKey(entityName, entityKey, usesAppIdPrefix, redisServer);
+            try (final Jedis jedis = redisServer.getPool().getResource()) {
+                final Pipeline pipelined = jedis.pipelined();
+                pipelined.zadd(setKeyName, score, keyName);
+                pipelined.set(keyName, data);
+                pipelined.sync();
+            }
+
+        }, null);
+    }
+
     private <T extends RedisEntity> List<T> executeRedisLuaCommandForMultipleEntities(final DAO<T> dao, final RedisServer redisServer, final String redisCommand, final List<String> keyNames) {
 
-        final StringBuilder keyLuaParameters = new StringBuilder();
-        for (int i = 1; i <= keyNames.size(); i++) {
-            keyLuaParameters.append("KEYS[" + i + "], ");
-        }
+        return executeRedisLuaCommandForMultipleEntities(dao, redisServer, redisCommand, keyNames, Collections.EMPTY_LIST);
+    }
 
-        if (keyLuaParameters.length() > 0) {
-            keyLuaParameters.delete(keyLuaParameters.length() - 2, keyLuaParameters.length());
-        }
+    private <T extends RedisEntity> List<T> executeRedisLuaCommandForMultipleEntities(final DAO<T> dao, final RedisServer redisServer, final String redisCommand, final List<String> keyNames, final List<String> argNames) {
 
-        final String script = "local keysArray = redis.call('" + redisCommand + "', " + keyLuaParameters + ")\n" +
+        return instantiateEntities(dao, executeRedisLuaCommandForMultipleRawEntities(redisServer, redisCommand, keyNames, argNames));
+    }
+
+    private List<String> executeRedisLuaCommandForMultipleRawEntities(final RedisServer redisServer, final String redisCommand, final List<String> keyNames, final List<String> argNames) {
+
+        final String keys = buildLuaParameters("KEYS", keyNames);
+        String args = buildLuaParameters("ARGV", argNames);
+        args = (args.length() > 0 ? "," : "") + args;
+
+        final String script = "local keysArray = redis.call('" + redisCommand + "', " + keys + args + ")\n" +
                 "if next(keysArray) == nil then\n" +
                 "   return nil\n" +
                 "else\n" +
@@ -389,10 +434,22 @@ public final class RetryingHandler implements Serializable {
 
         List<String> resultList;
         try (final Jedis jedis = redisServer.getPool().getResource()) {
-            resultList = (List<String>) jedis.eval(script, keyNames, Collections.EMPTY_LIST);
+            resultList = (List<String>) jedis.eval(script, keyNames, argNames);
         }
 
-        return instantiateEntities(dao, resultList);
+        return resultList;
+    }
+
+    private String buildLuaParameters(final String name, final List<String> values) {
+        final StringBuilder keyLuaParameters = new StringBuilder();
+        for (int i = 1; i <= values.size(); i++) {
+            keyLuaParameters.append(name + "[" + i + "], ");
+        }
+
+        if (keyLuaParameters.length() > 0) {
+            keyLuaParameters.delete(keyLuaParameters.length() - 2, keyLuaParameters.length());
+        }
+        return keyLuaParameters.toString();
     }
 
     private <T extends RedisEntity> List<T> instantiateEntities(final DAO<T> dao, final List<String> resultList) {

@@ -133,6 +133,6 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         if (propertyNameAndValueMap == null || propertyNameAndValueMap.size() == 0) {
             return null;
         }
-        return getRetryingHandler().tryDSGetIntersectionOfIndexableProperty(this, propertyNameAndValueMap);
+        return getRetryingHandler().tryDSGetIntersectionOfIndexableProperties(this, propertyNameAndValueMap);
     }
 }
