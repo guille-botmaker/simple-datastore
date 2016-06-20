@@ -20,14 +20,14 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
 
     public static final int MAX_GROUPS = 100;
 
-    protected static final int EXPIRING_1_HOUR = 60 * 60;
-    protected static final int EXPIRING_1_DAY = EXPIRING_1_HOUR * 24;
-    protected static final int EXPIRING_1_WEEK = EXPIRING_1_DAY * 7;
-    protected static final int EXPIRING_1_MONTH = EXPIRING_1_WEEK * 4;
-    protected static final int EXPIRING_6_MONTHS = EXPIRING_1_MONTH * 6;
-    protected static final int EXPIRING_1_YEAR = EXPIRING_1_MONTH * 12;
-    protected static final int EXPIRING_3_YEARS = EXPIRING_1_YEAR * 3;
-    protected static final int EXPIRING_NEVER = 0;
+    public static final int EXPIRING_1_HOUR = 60 * 60;
+    public static final int EXPIRING_1_DAY = EXPIRING_1_HOUR * 24;
+    public static final int EXPIRING_1_WEEK = EXPIRING_1_DAY * 7;
+    public static final int EXPIRING_1_MONTH = EXPIRING_1_WEEK * 4;
+    public static final int EXPIRING_6_MONTHS = EXPIRING_1_MONTH * 6;
+    public static final int EXPIRING_1_YEAR = EXPIRING_1_MONTH * 12;
+    public static final int EXPIRING_3_YEARS = EXPIRING_1_YEAR * 3;
+    public static final int EXPIRING_NEVER = 0;
 
     private static final long serialVersionUID = 6181606486836703354L;
     protected final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();

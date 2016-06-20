@@ -532,7 +532,7 @@ public final class RetryingHandler implements Serializable {
         }
     }
 
-    private interface Closure {
+    public interface Closure {
 
         void execute(final RedisServer redisServer, final Object[] results, final boolean loggingActivated);
     }
