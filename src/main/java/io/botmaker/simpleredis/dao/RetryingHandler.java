@@ -409,6 +409,22 @@ public final class RetryingHandler implements Serializable {
         }, null);
     }
 
+    public void tryClosure(final Closure closure, final Object[] results) {
+        final ValuesContainer values = new ValuesContainer();
+        final SimpleDatastoreService simpleDatastoreService = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
+        final RedisServer redisServer = simpleDatastoreService.getRedisServer();
+        final boolean loggingActivated = simpleDatastoreService.isDatastoreCallsLoggingActivated();
+
+        while (true) {
+            try {
+                closure.execute(redisServer, results, loggingActivated);
+                break;
+            } catch (final Exception exception) {
+                handleError(values, exception, false);
+            }
+        }
+    }
+
     private <T extends RedisEntity> List<T> executeRedisLuaCommandForMultipleEntities(final DAO<T> dao, final RedisServer redisServer, final String redisCommand, final List<String> keyNames) {
 
         return executeRedisLuaCommandForMultipleEntities(dao, redisServer, redisCommand, keyNames, Collections.EMPTY_LIST);
@@ -498,22 +514,6 @@ public final class RetryingHandler implements Serializable {
                             }
                     ));
             pipelined2.sync();
-        }
-    }
-
-    private void tryClosure(final Closure closure, final Object[] results) {
-        final ValuesContainer values = new ValuesContainer();
-        final SimpleDatastoreService simpleDatastoreService = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
-        final RedisServer redisServer = simpleDatastoreService.getRedisServer();
-        final boolean loggingActivated = simpleDatastoreService.isDatastoreCallsLoggingActivated();
-
-        while (true) {
-            try {
-                closure.execute(redisServer, results, loggingActivated);
-                break;
-            } catch (final Exception exception) {
-                handleError(values, exception, false);
-            }
         }
     }
 
