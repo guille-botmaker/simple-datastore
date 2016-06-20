@@ -15,6 +15,7 @@ public class User extends RedisEntity {
     public ByteArrayProperty BYTES;
     public LongProperty LONG_VALUE;
     public BooleanProperty IS_FAKE;
+    public DateProperty LAST_ACCESS_TIME;
 
     public ListProperty<String> LIST_STRING;
     public ListProperty<Integer> LIST_INT;
@@ -44,6 +45,7 @@ public class User extends RedisEntity {
         BYTES = new BYTE_ARRAY(this).build();
         LONG_VALUE = new LONG(this).build();
         IS_FAKE = new BOOL(this).build();
+        LAST_ACCESS_TIME = new DATE(this).build();
 
         LIST_STRING = new LIST<String>(this).build();
         LIST_INT = new LIST<Integer>(this).build();

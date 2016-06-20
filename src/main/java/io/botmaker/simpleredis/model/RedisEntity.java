@@ -1,12 +1,9 @@
 package io.botmaker.simpleredis.model;
 
-import io.botmaker.simpleredis.model.config.LONG;
+import io.botmaker.simpleredis.model.config.DATE;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
 import io.botmaker.simpleredis.model.config.STRING;
-import io.botmaker.simpleredis.property.ByteArrayProperty;
-import io.botmaker.simpleredis.property.ListProperty;
-import io.botmaker.simpleredis.property.LongProperty;
-import io.botmaker.simpleredis.property.StringProperty;
+import io.botmaker.simpleredis.property.*;
 import io.botmaker.simpleredis.util.RandomUtils;
 import io.botmaker.simpleredis.util.TimeUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -41,9 +38,9 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
     private final boolean usesAppIdPrefix;
     // entity usefull properties
 
-//    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
+    //    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
 //    public IntegerProperty GROUP_ID;
-    public LongProperty LAST_MODIFICATION;
+    public DateProperty LAST_MODIFICATION;
 
     public StringProperty OBJECT_TYPE;
 
@@ -57,7 +54,7 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         this.usesAppIdPrefix = usesAppIdPrefix;
 
 //        GROUP_ID = new INT(this).indexable().build();
-        LAST_MODIFICATION = new LONG(this).sendToClient().mandatory().build();
+        LAST_MODIFICATION = new DATE(this).sendToClient().mandatory().build();
         OBJECT_TYPE = new STRING(this).sendToClient().mandatory().build();
 
         config();
@@ -118,7 +115,7 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
 
     @Override
     public void setModified() {
-        LAST_MODIFICATION.set(TimeUtils.buildStandardModificationTime());
+        LAST_MODIFICATION.set(TimeUtils.getCurrentAsISO());
     }
 
     public String getEntityName() {
@@ -253,7 +250,7 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
     }
 
     public int getMinutesSinceLastModification() {
-        final long lm = LAST_MODIFICATION.get();
+        final long lm = LAST_MODIFICATION.getTicks();
 
         if (lm == 0L) {
             return 0;
@@ -279,14 +276,14 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
 
     public Date getLastModificationAsDate() {
         try {
-            return new SimpleDateFormat(DATE_FORMAT).parse(Long.toString(LAST_MODIFICATION.get()));
+            return new SimpleDateFormat(DATE_FORMAT).parse(Long.toString(LAST_MODIFICATION.getTicks()));
         } catch (final ParseException _parseException) {
             throw new RuntimeException("Problems parsing date with value [" + LAST_MODIFICATION.get() + "]. Expected format [" + DATE_FORMAT + "]: " + _parseException.getMessage(), _parseException);
         }
     }
 
     public boolean hasAccessedToday() {
-        final String lastAccessDate = Long.toString(LAST_MODIFICATION.get()).substring(0, 6);
+        final String lastAccessDate = Long.toString(LAST_MODIFICATION.getTicks()).substring(0, 6);
         final String today = Long.toString(TimeUtils.buildStandardModificationTime()).substring(0, 6);
 
         return lastAccessDate.equals(today);

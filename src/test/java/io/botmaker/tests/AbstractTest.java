@@ -3,6 +3,7 @@ package io.botmaker.tests;
 import io.botmaker.simpleredis.service.SimpleDatastoreService;
 import io.botmaker.simpleredis.service.SimpleDatastoreServiceFactory;
 import io.botmaker.simpleredis.util.RandomUtils;
+import io.botmaker.simpleredis.util.TimeUtils;
 import io.botmaker.tests.sample.Address;
 import io.botmaker.tests.sample.User;
 import io.botmaker.tests.sample.UserDAO;
@@ -32,6 +33,7 @@ public abstract class AbstractTest {
             sample.LASTNAME.set("LAST Name " + randomUtils.getRandomSafeString(10));
             sample.AGE.set(randomUtils.getIntBetweenInclusive(30, 35));
             sample.BYTES.set(new byte[]{0x42, 0x55});
+            sample.LAST_MODIFICATION.set(TimeUtils.getCurrentAsISO());
 
             final Map<String, String> complexValue = new HashMap<>();
             complexValue.put(randomUtils.getRandomSafeAlphaNumberString(5), randomUtils.getRandomSafeAlphaNumberString(10));
@@ -76,6 +78,7 @@ public abstract class AbstractTest {
         sample.AGE.set(18);
         sample.LONG_VALUE.set(23123213L);
         sample.IS_FAKE.set(false);
+        sample.LAST_MODIFICATION.set(TimeUtils.getCurrentAsISO());
 
         result.add(sample);
 
