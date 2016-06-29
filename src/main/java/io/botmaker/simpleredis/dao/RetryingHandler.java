@@ -41,35 +41,37 @@ public final class RetryingHandler implements Serializable {
         }
     }
 
-    private String buildKey(final DAO dao, final RedisEntity entity, final RedisServer redisServer) {
-        return buildKey(dao.getEntityName(), entity.getId(), entity.usesAppIdPrefix(), redisServer);
+    private String buildKey(final DAO dao, final RedisEntity entity, final boolean isProductionEnvironment, final RedisServer redisServer) {
+        return buildKey(dao.getEntityName(), entity.getId(), entity.usesAppIdPrefix(), isProductionEnvironment, redisServer);
     }
 
-    private String buildKey(final String entityName, final String entityKey, final boolean entityUsesAppIdPrefix, final boolean isProductionEnvironment, final RedisServer redisServer) {
-        return (entityUsesAppIdPrefix ? redisServer.getAppId() : DEFAULT) +
+    private String buildKey(final String entityName, final String entityKey, final boolean entityUsesAppIdPrefix, final boolean isProductionEnvironment,
+                            final RedisServer redisServer) {
+
+        return (entityUsesAppIdPrefix ? redisServer.getAppId() : (isProductionEnvironment ? DEFAULT : redisServer.getAppId())) +
                 ":" +
                 entityName +
                 ":" +
                 entityKey;
     }
 
-    private String buildIndexableKey(final PropertyMeta propertyMeta, final DAO dao, final RedisEntity entity, final Object propertyValue, final RedisServer redisServer) {
-        return
-                (entity.usesAppIdPrefix() ? redisServer.getAppId() : DEFAULT) +
-                        ":" +
-                        dao.getEntityName() +
-                        ":index:" +
-                        propertyMeta.getPropertyName() +
-                        ":" +
-                        propertyValue;
+    private String buildIndexableKey(final PropertyMeta propertyMeta, final DAO dao, final RedisEntity entity, final boolean isProductionEnvironment, final Object propertyValue, final RedisServer redisServer) {
+        return (entity.usesAppIdPrefix() ? redisServer.getAppId() : (isProductionEnvironment ? DEFAULT : redisServer.getAppId())) +
+                ":" +
+                dao.getEntityName() +
+                "Indexes:" +
+                propertyMeta.getPropertyName() +
+                ":" +
+                propertyValue;
     }
 
-    private List<IndexablePropertyInfoContainer> buildIndexablePropertiesKeys(final String entityKey, final RedisEntity entity, final DAO dao, final RedisServer redisServer) {
+    private List<IndexablePropertyInfoContainer> buildIndexablePropertiesKeys(final String entityKey, final RedisEntity entity, final DAO dao,
+                                                                              final boolean isProductionEnvironment, final RedisServer redisServer) {
 
         final List<PropertyMeta> indexableProperties = entity.getIndexableProperties();
 
         final List<IndexablePropertyInfoContainer> list = new ArrayList<>(indexableProperties.size());
-        indexableProperties.stream().forEach(ip -> list.add(new IndexablePropertyInfoContainer(entityKey, buildIndexableKey(ip, dao, entity, ip.get(), redisServer), ip)));
+        indexableProperties.stream().forEach(ip -> list.add(new IndexablePropertyInfoContainer(entityKey, buildIndexableKey(ip, dao, entity, isProductionEnvironment, ip.get(), redisServer), ip)));
         return list;
     }
 
@@ -81,7 +83,7 @@ public final class RetryingHandler implements Serializable {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSRawGet", new Exception());
             }
 
-            final String key = buildKey(entityName, entityKey, usesAppIdPrefix, redisServer);
+            final String key = buildKey(entityName, entityKey, usesAppIdPrefix, isProductionEnvironment, redisServer);
             final String data;
             try (final Jedis jedis = redisServer.getPool().getResource()) {
                 data = jedis.get(key);
@@ -110,7 +112,7 @@ public final class RetryingHandler implements Serializable {
             final T sample = dao.buildPersistentObjectInstance();
             sample.setId("*");
 
-            final String keyName = buildKey(dao, sample, redisServer);
+            final String keyName = buildKey(dao, sample, isProductionEnvironment, redisServer);
             final List<T> entities = executeRedisLuaCommandForMultipleEntities(dao, redisServer, "keys", Collections.singletonList(keyName));
             if (entities != null) {
                 result.addAll(entities);
@@ -133,7 +135,7 @@ public final class RetryingHandler implements Serializable {
                 }
 
                 final String[] keysArray = keys.stream()
-                        .map(id -> buildKey(entityName, id, usesAppIdPrefix, redisServer))
+                        .map(id -> buildKey(entityName, id, usesAppIdPrefix, isProductionEnvironment, redisServer))
                         .toArray(String[]::new);
 
                 final List<String> resultList;
@@ -164,7 +166,7 @@ public final class RetryingHandler implements Serializable {
             }
 
             final T sample = dao.getSample();
-            final String keyName = buildIndexableKey(sample.getIndexablePropertyByName(indexablePropertyName), dao, sample, key, redisServer);
+            final String keyName = buildIndexableKey(sample.getIndexablePropertyByName(indexablePropertyName), dao, sample, isProductionEnvironment, key, redisServer);
             final List<T> entities = executeRedisLuaCommandForMultipleEntities(dao, redisServer, "smembers", Collections.singletonList(keyName));
             if (entities != null) {
                 result.addAll(entities);
@@ -185,7 +187,7 @@ public final class RetryingHandler implements Serializable {
             final T sample = dao.getSample();
             final List<String> keyNames = propertyNameAndValueMap.entrySet().stream().
                     map(entry ->
-                            buildIndexableKey(sample.getIndexablePropertyByName(entry.getKey()), dao, sample, entry.getValue(), redisServer)).
+                            buildIndexableKey(sample.getIndexablePropertyByName(entry.getKey()), dao, sample, isProductionEnvironment, entry.getValue(), redisServer)).
                     collect(Collectors.toList());
 
             result.addAll(executeRedisLuaCommandForMultipleEntities(dao, redisServer, "SINTER", keyNames));
@@ -200,7 +202,7 @@ public final class RetryingHandler implements Serializable {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSPut", new Exception());
             }
 
-            final String key = buildKey(dao, entity, redisServer);
+            final String key = buildKey(dao, entity, isProductionEnvironment, redisServer);
             final String data = entity.getDataObject().toString();
             final int expiring = entity.getSecondsToExpire();
 
@@ -210,8 +212,8 @@ public final class RetryingHandler implements Serializable {
                 tryDSRemove(entity.getId(), dao);
 
                 // remove old entities that have the same unique indexable property
-                final List<IndexablePropertyInfoContainer> indexableProperties = buildIndexablePropertiesKeys(key, entity, dao, redisServer);
-                removeOldEntitiesThatHaveTheSameUniqueIndexablePropertyValue(dao, redisServer, jedis, indexableProperties);
+                final List<IndexablePropertyInfoContainer> indexableProperties = buildIndexablePropertiesKeys(key, entity, dao, isProductionEnvironment, redisServer);
+                removeOldEntitiesThatHaveTheSameUniqueIndexablePropertyValue(dao, redisServer, jedis, indexableProperties, isProductionEnvironment);
 
                 final Pipeline pipeline = jedis.pipelined();
                 pipeline.set(key, data);
@@ -231,7 +233,7 @@ public final class RetryingHandler implements Serializable {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSRawPut", new Exception());
             }
 
-            final String key = buildKey(entityName, entityKey, usesAppIdPrefix, redisServer);
+            final String key = buildKey(entityName, entityKey, usesAppIdPrefix, isProductionEnvironment, redisServer);
 
             try (final Jedis jedis = redisServer.getPool().getResource()) {
 
@@ -257,12 +259,13 @@ public final class RetryingHandler implements Serializable {
 
                 // remove old entities that have the same unique indexable property
                 final List<IndexablePropertyInfoContainer> indexableProperties = new ArrayList<>(entities.size());
-                entities.forEach(e -> indexableProperties.addAll(buildIndexablePropertiesKeys(buildKey(dao, e, redisServer), e, dao, redisServer)));
-                removeOldEntitiesThatHaveTheSameUniqueIndexablePropertyValue(dao, redisServer, jedis, indexableProperties);
+                entities.forEach(e -> indexableProperties.addAll(buildIndexablePropertiesKeys(buildKey(dao, e, isProductionEnvironment, redisServer), e, dao,
+                        isProductionEnvironment, redisServer)));
+                removeOldEntitiesThatHaveTheSameUniqueIndexablePropertyValue(dao, redisServer, jedis, indexableProperties, isProductionEnvironment);
 
                 final Pipeline pipeline = jedis.pipelined();
                 entities.stream().forEach(entity -> {
-                    final String key = buildKey(dao, entity, redisServer);
+                    final String key = buildKey(dao, entity, isProductionEnvironment, redisServer);
                     final String data = entity.getDataObject().toString();
                     final int expiring = entity.getSecondsToExpire();
 
@@ -288,7 +291,7 @@ public final class RetryingHandler implements Serializable {
 
                 final Pipeline pipeline = jedis.pipelined();
                 datas.entrySet().forEach(entry -> {
-                    final String key = buildKey(entityName, entry.getKey(), usesAppIdPrefix, redisServer);
+                    final String key = buildKey(entityName, entry.getKey(), usesAppIdPrefix, isProductionEnvironment, redisServer);
                     pipeline.set(key, entry.getValue());
 
                     if (expiring > 0) {
@@ -309,8 +312,8 @@ public final class RetryingHandler implements Serializable {
                     LOGGER.log(Level.SEVERE, "PERF - tryDSRemove", new Exception());
                 }
 
-                final String theKey = buildKey(dao.getEntityName(), entityId, dao.getSample().usesAppIdPrefix(), redisServer);
-                final List<IndexablePropertyInfoContainer> indexableProperties = buildIndexablePropertiesKeys(theKey, redisEntity, dao, redisServer);
+                final String theKey = buildKey(dao.getEntityName(), entityId, dao.getSample().usesAppIdPrefix(), isProductionEnvironment, redisServer);
+                final List<IndexablePropertyInfoContainer> indexableProperties = buildIndexablePropertiesKeys(theKey, redisEntity, dao, isProductionEnvironment, redisServer);
 
                 try (final Jedis jedis = redisServer.getPool().getResource()) {
                     final Pipeline pipeline = jedis.pipelined();
@@ -330,7 +333,7 @@ public final class RetryingHandler implements Serializable {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSRawRemove", new Exception());
             }
 
-            final String key = buildKey(entityName, entityKey, usesAppIdPrefix, redisServer);
+            final String key = buildKey(entityName, entityKey, usesAppIdPrefix, isProductionEnvironment, redisServer);
             try (final Jedis jedis = redisServer.getPool().getResource()) {
                 jedis.del(key);
             }
@@ -351,11 +354,11 @@ public final class RetryingHandler implements Serializable {
 
 
                     final Map<RedisEntity, String> entitiesWithKey = new HashMap<>(entityIds.size());
-                    map.values().forEach(e -> entitiesWithKey.put(e, buildKey(dao, e, redisServer)));
+                    map.values().forEach(e -> entitiesWithKey.put(e, buildKey(dao, e, isProductionEnvironment, redisServer)));
 
                     entitiesWithKey.values().forEach(pipeline::del);
                     entitiesWithKey.entrySet().stream().
-                            forEach(re -> buildIndexablePropertiesKeys(re.getValue(), re.getKey(), dao, redisServer).
+                            forEach(re -> buildIndexablePropertiesKeys(re.getValue(), re.getKey(), dao, isProductionEnvironment, redisServer).
                                     forEach(ip -> pipeline.srem(ip.propertyKey, ip.entityKey)));
 
                     pipeline.sync();
@@ -365,17 +368,16 @@ public final class RetryingHandler implements Serializable {
     }
 
     public List<String> tryDSOrderedSetGetUnion(final String entityName, final List<String> entityKeys, final int quantity, final boolean usesAppIdPrefix) {
-
         final List[] entities = new List[1];
         tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSOrderedSetGetUnion", new Exception());
             }
 
-            final String entityPrefix = buildKey(entityName, "", usesAppIdPrefix, redisServer);
+            final String entityPrefix = buildKey(entityName, "", usesAppIdPrefix, isProductionEnvironment, redisServer);
             final String[] entityKeysArray = new String[entityKeys.size()];
             final int[] i = {0};
-            entityKeys.forEach(k -> entityKeysArray[i[0]++] = entityPrefix + k + ":Set");
+            entityKeys.forEach(k -> entityKeysArray[i[0]++] = entityPrefix + k + "Set");
             final String setResultKey = entityPrefix + "result" + RandomUtils.getInstance().getRandomSafeAlphaNumberString(5);
 
             try (final Jedis jedis = redisServer.getPool().getResource()) {
@@ -391,14 +393,17 @@ public final class RetryingHandler implements Serializable {
     }
 
     public void tryDSOrderedSetPut(final long score, final String entityKey, final String data, final String entityName, final boolean usesAppIdPrefix) {
-
         tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSRawPutOrderedSet", new Exception());
             }
 
-            final String setKeyName = (usesAppIdPrefix ? redisServer.getAppId() : DEFAULT) + ":" + entityName + ":Set";
-            final String keyName = buildKey(entityName, entityKey, usesAppIdPrefix, redisServer);
+            final String setKeyName = (usesAppIdPrefix ? redisServer.getAppId() : (isProductionEnvironment ? DEFAULT : redisServer.getAppId())) +
+                    ":" +
+                    entityName +
+                    "Set";
+
+            final String keyName = buildKey(entityName, entityKey, usesAppIdPrefix, isProductionEnvironment, redisServer);
             try (final Jedis jedis = redisServer.getPool().getResource()) {
                 final Pipeline pipelined = jedis.pipelined();
                 pipelined.zadd(setKeyName, score, keyName);
@@ -476,8 +481,8 @@ public final class RetryingHandler implements Serializable {
                 .collect(Collectors.toList());
     }
 
-    private void removeOldEntitiesThatHaveTheSameUniqueIndexablePropertyValue(final DAO dao, final RedisServer redisServer, final Jedis jedis, final List<IndexablePropertyInfoContainer> indexableProperties) {
-
+    private void removeOldEntitiesThatHaveTheSameUniqueIndexablePropertyValue(final DAO dao, final RedisServer redisServer, final Jedis jedis,
+                                                                              final List<IndexablePropertyInfoContainer> indexableProperties, final boolean isProductionEnvironment) {
         // IMPORTANT NOTE: there is no possibility of put this in a LUA script,
         // because LUA script wont allow "spop" command!
 
@@ -506,7 +511,7 @@ public final class RetryingHandler implements Serializable {
 
             //delete keys from non unique indexable properties that reference to the old entity key
             final int[] index = {0};
-            oldEntities.forEach(e -> buildIndexablePropertiesKeys(entitiesToDeleteArray[index[0]++], e, dao, redisServer).
+            oldEntities.forEach(e -> buildIndexablePropertiesKeys(entitiesToDeleteArray[index[0]++], e, dao, isProductionEnvironment, redisServer).
                     forEach(indexablePropertyInfoContainer -> {
                                 final PropertyMeta propertyMeta = indexablePropertyInfoContainer.property;
                                 if (propertyMeta.isIndexable() && !propertyMeta.isUniqueIndex()) {
