@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  */
 public final class RetryingHandler implements Serializable {
 
-    public static final String DEFAULT = "shared";
+    public static final String DEFAULT = "prod";
     private static final long serialVersionUID = 472842924253314234L;
     private static final Logger LOGGER = Logger.getLogger(RetryingHandler.class.getName());
     private static final int MAX_RETRIES = 3;
@@ -45,7 +45,7 @@ public final class RetryingHandler implements Serializable {
         return buildKey(dao.getEntityName(), entity.getId(), entity.usesAppIdPrefix(), redisServer);
     }
 
-    private String buildKey(final String entityName, final String entityKey, final boolean entityUsesAppIdPrefix, final RedisServer redisServer) {
+    private String buildKey(final String entityName, final String entityKey, final boolean entityUsesAppIdPrefix, final boolean isProductionEnvironment, final RedisServer redisServer) {
         return (entityUsesAppIdPrefix ? redisServer.getAppId() : DEFAULT) +
                 ":" +
                 entityName +
@@ -76,7 +76,7 @@ public final class RetryingHandler implements Serializable {
     public String tryDSRawGet(final String entityName, final String entityKey, final boolean usesAppIdPrefix) {
 
         final String[] result = new String[1];
-        tryClosure((redisServer, results, loggingActivated) -> {
+        tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSRawGet", new Exception());
             }
@@ -102,7 +102,7 @@ public final class RetryingHandler implements Serializable {
     public <T extends RedisEntity> List<T> tryDSGetAll(final DAO<T> dao) {
         final List<T> result = new ArrayList<>();
 
-        tryClosure((redisServer, results, loggingActivated) -> {
+        tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSGetAll", new Exception());
             }
@@ -127,7 +127,7 @@ public final class RetryingHandler implements Serializable {
         final boolean usesAppIdPrefix = sample.usesAppIdPrefix();
 
         if (keys != null && !keys.isEmpty()) {
-            tryClosure((redisServer, results, loggingActivated) -> {
+            tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
                 if (loggingActivated) {
                     LOGGER.log(Level.SEVERE, "PERF - tryDSGetMultiple", new Exception());
                 }
@@ -158,7 +158,7 @@ public final class RetryingHandler implements Serializable {
     public <T extends RedisEntity> List<T> tryDSGetByIndexableProperty(final String indexablePropertyName, final String key, final DAO<T> dao) {
         final List<T> result = new ArrayList<>(10);
 
-        tryClosure((redisServer, results, loggingActivated) -> {
+        tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSGetByIndexableProperty", new Exception());
             }
@@ -177,7 +177,7 @@ public final class RetryingHandler implements Serializable {
     public <T extends RedisEntity> List<T> tryDSGetIntersectionOfIndexableProperties(final DAO<T> dao, final Map<String, String> propertyNameAndValueMap) {
         final List<T> result = new ArrayList<>(10);
 
-        tryClosure((redisServer, results, loggingActivated) -> {
+        tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSGetByIndexableProperty", new Exception());
             }
@@ -195,7 +195,7 @@ public final class RetryingHandler implements Serializable {
     }
 
     public void tryDSPut(final DAO dao, final RedisEntity entity) {
-        tryClosure((redisServer, results, loggingActivated) -> {
+        tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSPut", new Exception());
             }
@@ -226,7 +226,7 @@ public final class RetryingHandler implements Serializable {
     }
 
     public void tryDSRawPut(final String data, final int expiring, final String entityName, final String entityKey, final boolean usesAppIdPrefix) {
-        tryClosure((redisServer, results, loggingActivated) -> {
+        tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSRawPut", new Exception());
             }
@@ -245,7 +245,7 @@ public final class RetryingHandler implements Serializable {
     }
 
     public <T extends RedisEntity> void tryDSPutMultiple(final DAO dao, final Collection<T> entities) {
-        tryClosure((redisServer, results, loggingActivated) -> {
+        tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSPutMultiple", new Exception());
             }
@@ -253,7 +253,7 @@ public final class RetryingHandler implements Serializable {
             try (final Jedis jedis = redisServer.getPool().getResource()) {
 
                 // try to remove old entities if exist with their indexable properties
-                tryDSRemove(entities.stream().map(e -> e.getId()).collect(Collectors.toList()), dao);
+                tryDSRemove(entities.stream().map(RedisEntity::getId).collect(Collectors.toList()), dao);
 
                 // remove old entities that have the same unique indexable property
                 final List<IndexablePropertyInfoContainer> indexableProperties = new ArrayList<>(entities.size());
@@ -279,7 +279,7 @@ public final class RetryingHandler implements Serializable {
     }
 
     public void tryDSRawPutMultiple(final Map<String, String> datas, final int expiring, final String entityName, final boolean usesAppIdPrefix) {
-        tryClosure((redisServer, results, loggingActivated) -> {
+        tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSPutRawMultiple", new Exception());
             }
@@ -304,7 +304,7 @@ public final class RetryingHandler implements Serializable {
         final RedisEntity redisEntity = tryDSGet(entityId, dao);
 
         if (redisEntity != null) {
-            tryClosure((redisServer, results, loggingActivated) -> {
+            tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
                 if (loggingActivated) {
                     LOGGER.log(Level.SEVERE, "PERF - tryDSRemove", new Exception());
                 }
@@ -325,7 +325,7 @@ public final class RetryingHandler implements Serializable {
     }
 
     public void tryDSRawRemove(final String entityName, final String entityKey, final boolean usesAppIdPrefix) {
-        tryClosure((redisServer, results, loggingActivated) -> {
+        tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSRawRemove", new Exception());
             }
@@ -341,7 +341,7 @@ public final class RetryingHandler implements Serializable {
         final Map<String, RedisEntity> map = tryDSGetMultiple(entityIds, dao);
 
         if (!map.isEmpty()) {
-            tryClosure((redisServer, results, loggingActivated) -> {
+            tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
                 if (loggingActivated) {
                     LOGGER.log(Level.SEVERE, "PERF - tryDSRemoveMultiple", new Exception());
                 }
@@ -367,7 +367,7 @@ public final class RetryingHandler implements Serializable {
     public List<String> tryDSOrderedSetGetUnion(final String entityName, final List<String> entityKeys, final int quantity, final boolean usesAppIdPrefix) {
 
         final List[] entities = new List[1];
-        tryClosure((redisServer, results, loggingActivated) -> {
+        tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSOrderedSetGetUnion", new Exception());
             }
@@ -392,7 +392,7 @@ public final class RetryingHandler implements Serializable {
 
     public void tryDSOrderedSetPut(final long score, final String entityKey, final String data, final String entityName, final boolean usesAppIdPrefix) {
 
-        tryClosure((redisServer, results, loggingActivated) -> {
+        tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSRawPutOrderedSet", new Exception());
             }
@@ -414,10 +414,11 @@ public final class RetryingHandler implements Serializable {
         final SimpleDatastoreService simpleDatastoreService = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
         final RedisServer redisServer = simpleDatastoreService.getRedisServer();
         final boolean loggingActivated = simpleDatastoreService.isDatastoreCallsLoggingActivated();
+        final boolean isProductionEnvironment = simpleDatastoreService.isProductionEnvironment();
 
         while (true) {
             try {
-                closure.execute(redisServer, results, loggingActivated);
+                closure.execute(redisServer, results, loggingActivated, isProductionEnvironment);
                 break;
             } catch (final Exception exception) {
                 handleError(values, exception, false);
@@ -427,7 +428,7 @@ public final class RetryingHandler implements Serializable {
 
     private <T extends RedisEntity> List<T> executeRedisLuaCommandForMultipleEntities(final DAO<T> dao, final RedisServer redisServer, final String redisCommand, final List<String> keyNames) {
 
-        return executeRedisLuaCommandForMultipleEntities(dao, redisServer, redisCommand, keyNames, Collections.EMPTY_LIST);
+        return executeRedisLuaCommandForMultipleEntities(dao, redisServer, redisCommand, keyNames, Collections.emptyList());
     }
 
     private <T extends RedisEntity> List<T> executeRedisLuaCommandForMultipleEntities(final DAO<T> dao, final RedisServer redisServer, final String redisCommand, final List<String> keyNames, final List<String> argNames) {
@@ -459,7 +460,7 @@ public final class RetryingHandler implements Serializable {
     private String buildLuaParameters(final String name, final List<String> values) {
         final StringBuilder keyLuaParameters = new StringBuilder();
         for (int i = 1; i <= values.size(); i++) {
-            keyLuaParameters.append(name + "[" + i + "], ");
+            keyLuaParameters.append(name).append("[").append(i).append("], ");
         }
 
         if (keyLuaParameters.length() > 0) {
@@ -534,7 +535,7 @@ public final class RetryingHandler implements Serializable {
 
     public interface Closure {
 
-        void execute(final RedisServer redisServer, final Object[] results, final boolean loggingActivated);
+        void execute(final RedisServer redisServer, final Object[] results, final boolean loggingActivated, final boolean isProductionEnvironment);
     }
 
     public static final class ValuesContainer implements Serializable {

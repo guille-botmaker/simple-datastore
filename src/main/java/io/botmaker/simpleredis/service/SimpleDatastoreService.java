@@ -11,6 +11,8 @@ public interface SimpleDatastoreService {
 
     boolean isDatastoreCallsLoggingActivated();
 
+    boolean isProductionEnvironment();
+
     void registerDAO(final DAO dao);
 
     <T extends DAO> T getDAO(final Class<T> daoClass);
@@ -18,9 +20,9 @@ public interface SimpleDatastoreService {
     DAO getDAO(final String entityName);
 
     // Redis methods
-    void configRedisServer(final String appId, final String redisHost);
+    void configRedisServer(final String appId, final String redisHost, final boolean isProductionEnvironment);
 
-    void configRedisServer(final String appId, final String redisHost, final String redisAuthPassword);
+    void configRedisServer(final String appId, final String redisHost, final boolean isProductionEnvironment, final String redisAuthPassword);
 
     RedisServer getRedisServer();
 }
