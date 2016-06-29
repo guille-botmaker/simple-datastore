@@ -1,6 +1,7 @@
 package io.botmaker.simpleredis.property;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.botmaker.simpleredis.model.DataObject;
 import io.botmaker.simpleredis.model.RedisEntity;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.function.Function;
 
 public class StringProperty extends PropertyMeta<String> implements Serializable {
 
@@ -40,12 +42,12 @@ public class StringProperty extends PropertyMeta<String> implements Serializable
         return s != null && s.trim().length() > 0;
     }
 
-    public <T> T load(final Class<T> type) {
+    public <T> T load(final Class<T> type, final Function<ObjectMapper, JavaType> typeFactory) {
         final String s = this.get();
 
         if (s != null) {
             try {
-                return mapper.readValue(jsonFactory.createParser(new StringReader(s)), mapper.getTypeFactory().constructType(type));
+                return mapper.readValue(jsonFactory.createParser(new StringReader(s)), typeFactory.apply(mapper));
             } catch (final IOException e) {
                 // nothing to do (exception could not happen)
             }
