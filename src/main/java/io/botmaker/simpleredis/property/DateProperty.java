@@ -15,9 +15,8 @@ public class DateProperty extends StringProperty implements Serializable {
     }
 
     /**
-     *
      * @return the number of milliseconds since January 1, 1970, 00:00:00 GMT
-     *          represented by this date.
+     * represented by this date.
      */
     public long getTicks() {
         final String isoDate = get();
@@ -28,9 +27,8 @@ public class DateProperty extends StringProperty implements Serializable {
     }
 
     /**
-     *
      * @param ticks the number of milliseconds since January 1, 1970, 00:00:00 GMT
-     *          represented by this date.
+     *              represented by this date.
      */
     public void setTicks(final long ticks) {
         set(TimeUtils.toISODate(new Date(ticks)));
