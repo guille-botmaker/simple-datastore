@@ -16,7 +16,7 @@ public final class RedisStream extends AbstractStream {
 
     public Stream<String> stream(final String searchPrefix, @Nullable final Predicate<? super String> keyFilter, final int redisScanCount) {
         return
-                StreamSupport.stream(new Supplier(jedis.dbSize(), searchPrefix, redisScanCount, report, jedis, SCRIPT), false).
+                StreamSupport.stream(new Supplier(jedis.dbSize(), searchPrefix, redisScanCount, tenMinutesBatchProcess, jedis, SCRIPT), false).
                         parallel().
                         filter(key -> keyFilter == null || keyFilter.test(key));
     }

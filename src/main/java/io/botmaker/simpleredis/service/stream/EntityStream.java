@@ -26,16 +26,16 @@ public final class EntityStream<E extends RedisEntity, D extends DAO<E>> extends
     public Stream<E> stream(final String searchPrefix, final Class<D> daoClass, @Nullable final Predicate<? super String> keyFilter, final int redisScanCount) {
         final D dao = SimpleDatastoreServiceFactory.getSimpleDatastoreService().getDAO(daoClass);
         return
-                StreamSupport.stream(new Supplier(jedis.dbSize(), searchPrefix, redisScanCount, report, jedis, SCRIPT), false).
+                StreamSupport.stream(new Supplier(jedis.dbSize(), searchPrefix, redisScanCount, tenMinutesBatchProcess, jedis, SCRIPT), false).
                         parallel().
                         filter(key -> keyFilter == null || keyFilter.test(key)).
                         map(dataString -> {
                             try {
                                 final E result = dao.buildPersistentObjectInstanceFromPersistedStringData(dataString);
-                                report.addSuccessful();
+                                tenMinutesBatchProcess.addSuccessful();
                                 return result;
                             } catch (final Exception e) {
-                                report.addProblems("RedisStream problem on item with data [" + dataString + "]: " + e.getMessage() + " -> " + ExceptionUtils.exceptionToString(e));
+                                tenMinutesBatchProcess.addProblems("RedisStream problem on item with data [" + dataString + "]: " + e.getMessage() + " -> " + ExceptionUtils.exceptionToString(e));
                                 return null;
                             }
                         }).
