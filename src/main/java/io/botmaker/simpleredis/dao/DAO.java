@@ -2,6 +2,8 @@ package io.botmaker.simpleredis.dao;
 
 import io.botmaker.simpleredis.model.DataObject;
 import io.botmaker.simpleredis.model.RedisEntity;
+import io.botmaker.simpleredis.service.SimpleDatastoreService;
+import io.botmaker.simpleredis.service.SimpleDatastoreServiceFactory;
 import org.apache.commons.collections4.Predicate;
 
 import java.io.Serializable;
@@ -63,6 +65,13 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
             return;
         }
         getRetryingHandler().tryDSPutMultiple(this, list);
+    }
+
+    public String getDataRedixPrefix() {
+        final SimpleDatastoreService simpleDatastoreService = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
+
+        return getRetryingHandler().buildKey(entityName, "", sample.usesAppIdPrefix(), simpleDatastoreService.isProductionEnvironment(),
+                simpleDatastoreService.getRedisServer());
     }
 
     public void remove(final String id) {

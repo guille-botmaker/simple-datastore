@@ -41,18 +41,18 @@ public final class RetryingHandler implements Serializable {
         }
     }
 
-    private String buildKey(final DAO dao, final RedisEntity entity, final boolean isProductionEnvironment, final RedisServer redisServer) {
-        return buildKey(dao.getEntityName(), entity.getId(), entity.usesAppIdPrefix(), isProductionEnvironment, redisServer);
-    }
-
-    private String buildKey(final String entityName, final String entityKey, final boolean entityUsesAppIdPrefix, final boolean isProductionEnvironment,
-                            final RedisServer redisServer) {
+    public static String buildKey(final String entityName, final String entityKey, final boolean entityUsesAppIdPrefix, final boolean isProductionEnvironment,
+                                  final RedisServer redisServer) {
 
         return (entityUsesAppIdPrefix ? redisServer.getAppId() : (isProductionEnvironment ? DEFAULT : redisServer.getAppId())) +
                 ":" +
                 entityName +
                 ":" +
                 entityKey;
+    }
+
+    private String buildKey(final DAO dao, final RedisEntity entity, final boolean isProductionEnvironment, final RedisServer redisServer) {
+        return buildKey(dao.getEntityName(), entity.getId(), entity.usesAppIdPrefix(), isProductionEnvironment, redisServer);
     }
 
     private String buildIndexableKey(final PropertyMeta propertyMeta, final DAO dao, final RedisEntity entity, final boolean isProductionEnvironment, final Object propertyValue, final RedisServer redisServer) {
