@@ -2,7 +2,6 @@ package io.botmaker.simpleredis.service;
 
 import io.botmaker.simpleredis.dao.DAO;
 import io.botmaker.simpleredis.dao.ResourceDAO;
-import io.botmaker.simpleredis.dao.TenMinutesBatchProcessDAO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +16,6 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
 
     public SimpleDatastoreServiceDefaultImpl() {
         registerDAO(new ResourceDAO());
-        registerDAO(new TenMinutesBatchProcessDAO());
     }
 
     @Override
