@@ -94,11 +94,7 @@ public final class TenMinutesBatchProcess extends RedisEntity {
                 "when processing [" + total + "] items. " +
                 "[" + itemsPerSec + "] items per sec. " +
                 "processing time was [" + getRunningTime() + "] secs\n" +
-                problemsBuffer;
-    }
-
-    public String getProblemsReport() {
-        return problemsBuffer.toString();
+                PROBLEMS_SAMPLE.get();
     }
 
     public String getRunningTime() {
