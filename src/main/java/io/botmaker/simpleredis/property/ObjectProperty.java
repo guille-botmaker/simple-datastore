@@ -57,7 +57,7 @@ public class ObjectProperty<T> extends PropertyMeta<T> implements Serializable {
         if (value != null) {
             final StringWriter stringWriter = new StringWriter(500);
             try {
-                mapper.writeValue(stringWriter, itemClass);
+                mapper.writeValue(stringWriter, value);
             } catch (final IOException e) {
                 Logger.getLogger(ObjectProperty.class.getName()).log(Level.SEVERE, "dataObject [" + dataObject + "]: " + e.getMessage(), e);
                 throw new RuntimeException(e);

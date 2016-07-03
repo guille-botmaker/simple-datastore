@@ -4,6 +4,7 @@ import io.botmaker.simpleredis.dao.RetryingHandler;
 import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.util.RandomUtils;
 import io.botmaker.tests.AbstractTest;
+import io.botmaker.tests.sample.ABean;
 import io.botmaker.tests.sample.User;
 import io.botmaker.tests.sample.UserDAO;
 import org.junit.Before;
@@ -184,10 +185,7 @@ public class DAOTest extends AbstractTest {
         user1.LASTNAME.set("TestUser1");
         user1.AGE.set(150);
         user1.STATE.set("old");
-        final Map<String, Integer> m = new HashMap<>();
-        m.put("1", 1);
-        m.put("2", 2);
-        user1.SAMPLE_ARBITRARY_OBJECT.set(m);
+        user1.SAMPLE_ARBITRARY_OBJECT.set(new ABean("1", 1));
         userDAO.save(user1);
         assertEquals(user1, userDAO.findById(id1));
 
