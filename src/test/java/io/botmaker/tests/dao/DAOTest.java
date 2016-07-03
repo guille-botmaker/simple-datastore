@@ -184,6 +184,10 @@ public class DAOTest extends AbstractTest {
         user1.LASTNAME.set("TestUser1");
         user1.AGE.set(150);
         user1.STATE.set("old");
+        final Map<String, Integer> m = new HashMap<>();
+        m.put("1", 1);
+        m.put("2", 2);
+        user1.SAMPLE_ARBITRARY_OBJECT.set(m);
         userDAO.save(user1);
         assertEquals(user1, userDAO.findById(id1));
 
