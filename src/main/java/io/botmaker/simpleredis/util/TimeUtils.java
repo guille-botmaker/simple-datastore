@@ -177,7 +177,7 @@ public final class TimeUtils {
         return calendar.getTime();
     }
 
-    // 0 is sunday...6 is saturdat
+    // 0 is sunday...6 is saturday
     public static int getDayOfWeek(final Date date) {
 
         final Calendar calendar = TimeUtils.getCalendar();
