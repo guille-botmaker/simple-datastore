@@ -177,12 +177,12 @@ public final class TimeUtils {
         return calendar.getTime();
     }
 
-    // 0 is monday...6 is sunday
+    // 0 is sunday...6 is saturdat
     public static int getDayOfWeek(final Date date) {
 
         final Calendar calendar = TimeUtils.getCalendar();
         calendar.setTime(date);
-        return calendar.get(Calendar.DAY_OF_WEEK) - 2;
+        return calendar.get(Calendar.DAY_OF_WEEK) - 1;
     }
 
     public static int getHour() {
