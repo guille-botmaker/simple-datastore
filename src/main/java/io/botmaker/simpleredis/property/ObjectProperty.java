@@ -65,9 +65,9 @@ public class ObjectProperty<T> extends PropertyMeta<T> implements Serializable {
 
         if (value != null) {
             try {
-                final ByteArrayOutputStream byteOutputStream = compress ? new ByteArrayOutputStream(5000) : null;
+                final ByteArrayOutputStream byteOutputStream = compress ? new ByteArrayOutputStream(20000) : null;
                 final StringWriter stringWriter = compress ? null : new StringWriter(500);
-                final OutputStream outputStream = compress ? new GZIPOutputStream(byteOutputStream) : null;
+                final OutputStream outputStream = compress ? new GZIPOutputStream(byteOutputStream, 20000) : null;
 
                 try {
                     if (compress) {
