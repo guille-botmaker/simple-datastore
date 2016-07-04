@@ -2,7 +2,6 @@ package io.botmaker.simpleredis.property;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import io.botmaker.simpleredis.model.DataObject;
 import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
@@ -66,7 +65,7 @@ public class ObjectProperty<T> extends PropertyMeta<T> implements Serializable {
 
         if (value != null) {
             try {
-                final ByteOutputStream byteOutputStream = compress ? new ByteOutputStream(5000) : null;
+                final ByteArrayOutputStream byteOutputStream = compress ? new ByteArrayOutputStream(5000) : null;
                 final StringWriter stringWriter = compress ? null : new StringWriter(500);
                 final OutputStream outputStream = compress ? new GZIPOutputStream(byteOutputStream) : null;
 
@@ -74,7 +73,7 @@ public class ObjectProperty<T> extends PropertyMeta<T> implements Serializable {
                     if (compress) {
                         mapper.writeValue(outputStream, value);
                         outputStream.close();
-                        s = "C" + Base64.encodeBase64String(byteOutputStream.getBytes());
+                        s = "C" + Base64.encodeBase64String(byteOutputStream.toByteArray());
                     } else {
                         mapper.writeValue(stringWriter, value);
                         stringWriter.close();
