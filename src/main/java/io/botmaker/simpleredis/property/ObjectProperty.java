@@ -1,6 +1,7 @@
 package io.botmaker.simpleredis.property;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.botmaker.simpleredis.model.DataObject;
 import io.botmaker.simpleredis.model.RedisEntity;
@@ -8,6 +9,7 @@ import io.botmaker.simpleredis.model.config.PropertyMeta;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.*;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
@@ -21,10 +23,12 @@ public class ObjectProperty<T> extends PropertyMeta<T> implements Serializable {
 
     private final Class<T> itemClass;
     private final boolean compress;
+    private final Function<ObjectMapper, TypeReference> typeReference;
 
-    public ObjectProperty(final RedisEntity owner, final Class<T> _itemClass, final boolean compress) {
+    public ObjectProperty(final RedisEntity owner, final Class<T> _itemClass, final Function<ObjectMapper, TypeReference> typeReference, final boolean compress) {
         super(owner);
         itemClass = _itemClass;
+        this.typeReference = typeReference;
         this.compress = compress;
     }
 
@@ -44,9 +48,9 @@ public class ObjectProperty<T> extends PropertyMeta<T> implements Serializable {
 
             if (compressed) {
                 return mapper.readValue(jsonFactory.createParser(new GZIPInputStream(new ByteArrayInputStream(Base64.decodeBase64(string.substring(1))))),
-                        mapper.constructType(itemClass));
+                        typeReference.apply(mapper));
             } else {
-                return mapper.readValue(jsonFactory.createParser(new StringReader(string.substring(1))), mapper.constructType(itemClass));
+                return mapper.readValue(jsonFactory.createParser(new StringReader(string.substring(1))), typeReference.apply(mapper));
             }
         } catch (final IOException e) {
             Logger.getLogger(ObjectProperty.class.getName()).log(Level.SEVERE, "dataObject [" + dataObject + "]: " + e.getMessage(), e);
@@ -67,7 +71,7 @@ public class ObjectProperty<T> extends PropertyMeta<T> implements Serializable {
             try {
                 final ByteArrayOutputStream byteOutputStream = compress ? new ByteArrayOutputStream(20000) : null;
                 final StringWriter stringWriter = compress ? null : new StringWriter(500);
-                final OutputStream outputStream = compress ? new GZIPOutputStream(byteOutputStream, 20000) : null;
+                final OutputStream outputStream = compress ? new GZIPOutputStream(byteOutputStream, 50000) : null;
 
                 try {
                     if (compress) {

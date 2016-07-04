@@ -1,5 +1,6 @@
 package io.botmaker.tests.sample;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.model.config.*;
 import io.botmaker.simpleredis.property.*;
@@ -63,7 +64,9 @@ public class User extends RedisEntity {
         ADDRESSES_MAP = new MAP<Address>(this, Address.class).build();
         COMPLEX_MAP_STRING_STRING = new COMPLEX_ANY<>(this).build();
 
-        SAMPLE_ARBITRARY_OBJECT = new OBJECT<>(this, ABean.class).build();
-        SAMPLE_ARBITRARY_OBJECT_COMP = new OBJECT<>(this, ABean.class, true).build();
+        SAMPLE_ARBITRARY_OBJECT = new OBJECT<>(this, ABean.class, mapper -> new TypeReference<ABean>() {
+        }).build();
+        SAMPLE_ARBITRARY_OBJECT_COMP = new OBJECT<>(this, ABean.class, mapper -> new TypeReference<ABean>() {
+        }, true).build();
     }
 }
