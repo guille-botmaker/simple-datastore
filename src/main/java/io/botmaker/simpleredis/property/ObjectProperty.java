@@ -2,16 +2,17 @@ package io.botmaker.simpleredis.property;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import io.botmaker.simpleredis.model.DataObject;
 import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
+import org.apache.commons.codec.binary.Base64;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class ObjectProperty<T> extends PropertyMeta<T> implements Serializable {
 
@@ -20,10 +21,12 @@ public class ObjectProperty<T> extends PropertyMeta<T> implements Serializable {
     private static final ObjectMapper mapper = new ObjectMapper(jsonFactory);
 
     private final Class<T> itemClass;
+    private final boolean compress;
 
-    public ObjectProperty(final RedisEntity owner, final Class<T> _itemClass) {
+    public ObjectProperty(final RedisEntity owner, final Class<T> _itemClass, final boolean compress) {
         super(owner);
         itemClass = _itemClass;
+        this.compress = compress;
     }
 
     public Class<T> getItemClass() {
@@ -38,7 +41,14 @@ public class ObjectProperty<T> extends PropertyMeta<T> implements Serializable {
         }
 
         try {
-            return mapper.readValue(jsonFactory.createParser(new StringReader(string)), mapper.constructType(itemClass));
+            final boolean compressed = string.charAt(0) == 'C';
+
+            if (compressed) {
+                return mapper.readValue(jsonFactory.createParser(new GZIPInputStream(new ByteArrayInputStream(Base64.decodeBase64(string.substring(1))))),
+                        mapper.constructType(itemClass));
+            } else {
+                return mapper.readValue(jsonFactory.createParser(new StringReader(string.substring(1))), mapper.constructType(itemClass));
+            }
         } catch (final IOException e) {
             Logger.getLogger(ObjectProperty.class.getName()).log(Level.SEVERE, "dataObject [" + dataObject + "]: " + e.getMessage(), e);
             throw new RuntimeException(e);
@@ -55,14 +65,28 @@ public class ObjectProperty<T> extends PropertyMeta<T> implements Serializable {
         String s = null;
 
         if (value != null) {
-            final StringWriter stringWriter = new StringWriter(500);
             try {
-                mapper.writeValue(stringWriter, value);
+                final ByteOutputStream byteOutputStream = compress ? new ByteOutputStream(5000) : null;
+                final StringWriter stringWriter = compress ? null : new StringWriter(500);
+                final OutputStream outputStream = compress ? new GZIPOutputStream(byteOutputStream) : null;
+
+                try {
+                    if (compress) {
+                        mapper.writeValue(outputStream, value);
+                        outputStream.close();
+                        s = "C" + Base64.encodeBase64String(byteOutputStream.getBytes());
+                    } else {
+                        mapper.writeValue(stringWriter, value);
+                        stringWriter.close();
+                        s = "R" + stringWriter.toString();
+                    }
+                } catch (final IOException e) {
+                    Logger.getLogger(ObjectProperty.class.getName()).log(Level.SEVERE, "dataObject [" + dataObject + "]: " + e.getMessage(), e);
+                    throw new RuntimeException(e);
+                }
             } catch (final IOException e) {
-                Logger.getLogger(ObjectProperty.class.getName()).log(Level.SEVERE, "dataObject [" + dataObject + "]: " + e.getMessage(), e);
-                throw new RuntimeException(e);
+                throw new RuntimeException("Could not setValue [" + value + "]: " + e.getMessage(), e);
             }
-            s = stringWriter.toString();
         }
         dataObject.put(name, s);
     }

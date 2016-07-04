@@ -176,6 +176,28 @@ public class DAOTest extends AbstractTest {
     }
 
     @Test
+    public void testObjectProperty() {
+        final String id1 = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
+        assertNull(userDAO.findById(id1));
+
+        final User user1 = new User();
+        user1.setId(id1);
+        user1.LASTNAME.set("TestUser1");
+        user1.AGE.set(150);
+        user1.STATE.set("old");
+        user1.SAMPLE_ARBITRARY_OBJECT.set(new ABean("1", 1));
+        user1.SAMPLE_ARBITRARY_OBJECT_COMP.set(new ABean("1", 1));
+        userDAO.save(user1);
+
+        final User user2 = userDAO.findById(id1);
+        assertEquals(user1, user2);
+        assertTrue(user2.SAMPLE_ARBITRARY_OBJECT.get().s.equals("1"));
+        assertTrue(user2.SAMPLE_ARBITRARY_OBJECT.get().i == 1);
+        assertTrue(user2.SAMPLE_ARBITRARY_OBJECT_COMP.get().s.equals("1"));
+        assertTrue(user2.SAMPLE_ARBITRARY_OBJECT_COMP.get().i == 1);
+    }
+
+    @Test
     public void testFindMultipleIntersectionOfIndexableProperty() {
         final String id1 = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
         assertNull(userDAO.findById(id1));

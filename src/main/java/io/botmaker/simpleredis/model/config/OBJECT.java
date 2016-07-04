@@ -8,6 +8,10 @@ public final class OBJECT<T> extends AbstractPropertyBuilder<ObjectProperty, T> 
     private static final long serialVersionUID = -2702019041291004750L;
 
     public OBJECT(final RedisEntity owner, final Class<T> itemClass) {
-        super(new ObjectProperty<>(owner, itemClass), null);
+        this(owner, itemClass, false);
+    }
+
+    public OBJECT(final RedisEntity owner, final Class<T> itemClass, final boolean compress) {
+        super(new ObjectProperty<>(owner, itemClass, compress), null);
     }
 }

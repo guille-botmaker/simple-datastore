@@ -31,6 +31,7 @@ public class User extends RedisEntity {
     public ComplexAnyProperty<Map<String, String>> COMPLEX_MAP_STRING_STRING; // slow implementation but supports anything serializable
 
     public ObjectProperty<ABean> SAMPLE_ARBITRARY_OBJECT;
+    public ObjectProperty<ABean> SAMPLE_ARBITRARY_OBJECT_COMP;
 
 
     public User() {
@@ -63,5 +64,6 @@ public class User extends RedisEntity {
         COMPLEX_MAP_STRING_STRING = new COMPLEX_ANY<>(this).build();
 
         SAMPLE_ARBITRARY_OBJECT = new OBJECT<>(this, ABean.class).build();
+        SAMPLE_ARBITRARY_OBJECT_COMP = new OBJECT<>(this, ABean.class, true).build();
     }
 }
