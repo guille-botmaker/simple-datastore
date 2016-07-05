@@ -5,6 +5,7 @@ import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.service.SimpleDatastoreService;
 import io.botmaker.simpleredis.service.SimpleDatastoreServiceFactory;
 import org.apache.commons.collections4.Predicate;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -143,5 +144,13 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
             return null;
         }
         return getRetryingHandler().tryDSGetIntersectionOfIndexableProperties(this, propertyNameAndValueMap);
+    }
+
+    @Override
+    public List<P> findMultipleUnionOfIndexableProperty(final List<Pair<String, String>> propertyNameAndValuePair) {
+        if (propertyNameAndValuePair == null || propertyNameAndValuePair.size() == 0) {
+            return null;
+        }
+        return getRetryingHandler().tryDSGetUnionOfIndexableProperties(this, propertyNameAndValuePair);
     }
 }

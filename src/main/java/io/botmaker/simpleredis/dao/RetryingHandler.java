@@ -7,6 +7,7 @@ import io.botmaker.simpleredis.service.RedisServer;
 import io.botmaker.simpleredis.service.SimpleDatastoreService;
 import io.botmaker.simpleredis.service.SimpleDatastoreServiceFactory;
 import io.botmaker.simpleredis.util.RandomUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
@@ -196,7 +197,7 @@ public final class RetryingHandler implements Serializable {
         return result;
     }
 
-    public <T extends RedisEntity> List<T> tryDSGetUnionOfIndexableProperties(final DAO<T> dao, final Map<String, String> propertyNameAndValueMap) {
+    public <T extends RedisEntity> List<T> tryDSGetUnionOfIndexableProperties(final DAO<T> dao, final List<Pair<String, String>> propertyNameAndValuePair) {
         final List<T> result = new ArrayList<>(10);
 
         tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
@@ -205,7 +206,7 @@ public final class RetryingHandler implements Serializable {
             }
 
             final T sample = dao.getSample();
-            final List<String> keyNames = propertyNameAndValueMap.entrySet().stream().
+            final List<String> keyNames = propertyNameAndValuePair.stream().
                     map(entry ->
                             buildIndexableKey(sample.getIndexablePropertyByName(entry.getKey()), dao, sample, isProductionEnvironment, entry.getValue(), redisServer)).
                     collect(Collectors.toList());

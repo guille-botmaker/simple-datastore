@@ -1,6 +1,7 @@
 package io.botmaker.simpleredis.dao;
 
 import io.botmaker.simpleredis.model.RedisEntity;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -9,13 +10,13 @@ import java.util.Map;
 
 /**
  * This class is a wrapper for Datastore operations. Supports most of the DatastoreService and DatastoreAsyncService operations adding features such as:
- * <p/>
+ * <p>
  * - Entity to "DatastoreEntity" convertions
  * - caching usage
  * - retrying algorithms
  * - performance logging
  * - remote client massive and parallel data access
- * <p/>
+ * <p>
  * Every X_DataStoreEntity should have its X_DAO implementation. See tests for examples
  */
 public interface IDAO<P extends RedisEntity> extends Serializable {
@@ -37,6 +38,8 @@ public interface IDAO<P extends RedisEntity> extends Serializable {
     List<P> findMultipleByIndexableProperty(final String propertyName, final String id);
 
     List<P> findMultipleIntersectionOfIndexableProperty(final Map<String, String> propertyNameAndValueMap);
+
+    List<P> findMultipleUnionOfIndexableProperty(final List<Pair<String, String>> propertyNameAndValuePair);
 
     void save(final P persistentObject);
 

@@ -7,6 +7,7 @@ import io.botmaker.tests.AbstractTest;
 import io.botmaker.tests.sample.ABean;
 import io.botmaker.tests.sample.User;
 import io.botmaker.tests.sample.UserDAO;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,7 +61,7 @@ public class DAOTest extends AbstractTest {
     }
 
     @Test
-    public void testUniqueAndNotUniqueIndexableProperties() {
+    public void testUniqueAndNonUniqueIndexableProperties() {
         final String id1 = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
         assertNull(userDAO.findById(id1));
 
@@ -119,7 +120,7 @@ public class DAOTest extends AbstractTest {
     }
 
     @Test
-    public void testUniqueAndNotUniqueIndexablePropertiesMultiple() {
+    public void testUniqueAndNonUniqueIndexablePropertiesMultiple() {
         final String id1 = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
         assertNull(userDAO.findById(id1));
         final User user1 = new User();
@@ -248,6 +249,62 @@ public class DAOTest extends AbstractTest {
         userList = userDAO.findMultipleIntersectionOfIndexableProperty(propertyNameAndValueMap);
         assertEquals(1, userList.size());
         assertFalse(userList.contains(user1));
+        assertTrue(userList.contains(user2));
+        assertFalse(userList.contains(user3));
+    }
+
+    @Test
+    public void testFindMultipleUnionOfIndexableProperty() {
+        final String id1 = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
+        assertNull(userDAO.findById(id1));
+
+        final User user1 = new User();
+        user1.setId(id1);
+        user1.LASTNAME.set("TestUser1");
+        user1.AGE.set(10);
+        user1.STATE.set("old");
+        user1.SAMPLE_ARBITRARY_OBJECT.set(new ABean("1", 1));
+        userDAO.save(user1);
+        assertEquals(user1, userDAO.findById(id1));
+
+        final String id2 = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
+        assertNull(userDAO.findById(id2));
+
+        final User user2 = new User();
+        user2.setId(id2);
+        user2.LASTNAME.set("TestUser2");
+        user2.AGE.set(20);
+        user2.STATE.set("new");
+        userDAO.save(user2);
+        assertEquals(user2, userDAO.findById(id2));
+
+        final String id3 = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
+        assertNull(userDAO.findById(id3));
+
+        final User user3 = new User();
+        user3.setId(id3);
+        user3.LASTNAME.set("TestUser3");
+        user3.AGE.set(20);
+        user3.STATE.set("old");
+        userDAO.save(user3);
+        assertEquals(user3, userDAO.findById(id3));
+
+        ArrayList<Pair<String, String>> propertyNameAndValueMap = new ArrayList<>(3);
+        propertyNameAndValueMap.add(Pair.of(user1.STATE.getPropertyName(), "old"));
+        propertyNameAndValueMap.add(Pair.of(user1.AGE.getPropertyName(), "10"));
+        propertyNameAndValueMap.add(Pair.of(user1.AGE.getPropertyName(), "20"));
+        List<User> userList = userDAO.findMultipleUnionOfIndexableProperty(propertyNameAndValueMap);
+        assertEquals(3, userList.size());
+        assertTrue(userList.contains(user1));
+        assertTrue(userList.contains(user2));
+        assertTrue(userList.contains(user3));
+
+        propertyNameAndValueMap = new ArrayList<>(2);
+        propertyNameAndValueMap.add(Pair.of(user1.STATE.getPropertyName(), "new"));
+        propertyNameAndValueMap.add(Pair.of(user1.AGE.getPropertyName(), "10"));
+        userList = userDAO.findMultipleUnionOfIndexableProperty(propertyNameAndValueMap);
+        assertEquals(2, userList.size());
+        assertTrue(userList.contains(user1));
         assertTrue(userList.contains(user2));
         assertFalse(userList.contains(user3));
     }
