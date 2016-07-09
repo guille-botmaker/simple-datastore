@@ -411,8 +411,8 @@ public class DAOTest extends AbstractTest {
         final List<String> strings = retryingHandler.tryDSOrderedSetGetUnion("TCustomer", Arrays.asList("B1", "B2"), 2, false);
 
         assertEquals(2, strings.size());
-        assertTrue(strings.get(0).contains("fer2"));
-        assertTrue(strings.get(1).contains("fer3"));
+        assertTrue(strings.get(0).contains("fer6"));
+        assertTrue(strings.get(1).contains("fer5"));
     }
 
     @Test

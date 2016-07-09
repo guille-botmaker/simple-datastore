@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
+import redis.clients.jedis.ZParams;
 
 import java.io.Serializable;
 import java.util.*;
@@ -403,12 +404,13 @@ public final class RetryingHandler implements Serializable {
 
             try (final Jedis jedis = redisServer.getPool().getResource()) {
                 final Pipeline pipelined = jedis.pipelined();
+
                 pipelined.zunionstore(setResultKey, entityKeysArray);
                 pipelined.expire(setResultKey, 30);
                 pipelined.sync();
             }
 
-            entities[0] = executeRedisLuaCommandForMultipleRawEntities(redisServer, "ZRANGE", Collections.singletonList(setResultKey), Arrays.asList("0", "" + (quantity - 1)));
+            entities[0] = executeRedisLuaCommandForMultipleRawEntities(redisServer, "ZREVRANGE", Collections.singletonList(setResultKey), Arrays.asList("0", "" + (quantity - 1)));
         }, null);
         return entities[0];
     }
