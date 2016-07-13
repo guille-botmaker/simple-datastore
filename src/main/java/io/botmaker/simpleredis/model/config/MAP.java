@@ -4,7 +4,7 @@ import io.botmaker.simpleredis.model.DataObject;
 import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.property.MapProperty;
 
-public final class MAP<T> extends AbstractPropertyBuilder<MapProperty, T> {
+public final class MAP<T> extends AbstractPropertyBuilder<MapProperty<T>, T> {
 
     private static final long serialVersionUID = -2702019046191004750L;
 
