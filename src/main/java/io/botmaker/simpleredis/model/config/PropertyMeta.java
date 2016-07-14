@@ -1,5 +1,6 @@
 package io.botmaker.simpleredis.model.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.botmaker.simpleredis.audit.AuditHandlerServiceFactory;
 import io.botmaker.simpleredis.model.DataObject;
 import io.botmaker.simpleredis.model.RedisEntity;
@@ -14,10 +15,10 @@ import java.util.Objects;
 public abstract class PropertyMeta<E> implements Serializable {
 
     private static final long serialVersionUID = 6181606486836703354L;
+    @JsonIgnore
     private final RedisEntity owner;
     protected String name;
     protected AbstractPropertyBuilder<? extends PropertyMeta<E>, E> options;
-
 
     protected PropertyMeta(final RedisEntity owner) {
         this.owner = owner;

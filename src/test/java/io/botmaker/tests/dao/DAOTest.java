@@ -1,5 +1,10 @@
 package io.botmaker.tests.dao;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.botmaker.simpleredis.dao.RetryingHandler;
 import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.util.RandomUtils;
@@ -423,10 +428,40 @@ public class DAOTest extends AbstractTest {
         checkSpecificUser(theUser);
     }
 
+    @Test
+    public void testRedisEntityIsSerializableWithJackson() {
+        final User theUser = userDAO.findByLastName("liendo" + lastNameUniqueId);
+
+        final TypeReference<User> userTypeReference = new TypeReference<User>() {
+        };
+
+        try {
+            final String user = getObjectMapper().writerFor(userTypeReference).writeValueAsString(theUser);
+            System.err.println("User: " + user);
+//            final ObjectMapper objectMapper = getObjectMapper();
+//            final Object userCopy = objectMapper.readValue(user, userTypeReference);
+
+        } catch (final java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void checkSpecificUser(final User user) {
         assertEquals(user.FIRSTNAME.get(), "hernan");
         assertEquals(user.LASTNAME.get(), "liendo" + lastNameUniqueId);
         assertEquals(user.AGE.get(), Integer.valueOf(18));
         assertEquals(user.IS_FAKE.get(), Boolean.FALSE);
+    }
+
+    private static ObjectMapper getObjectMapper() {
+        final ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()
+                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+        return mapper;
     }
 }

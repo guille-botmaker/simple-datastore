@@ -1,5 +1,6 @@
 package io.botmaker.simpleredis.model.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.collections4.Closure;
 
 import java.io.Serializable;
@@ -11,6 +12,7 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
 
     private static final long serialVersionUID = -2702019046191004750L;
     public final List<String> stringSpecificValues = new ArrayList<>();
+    @JsonIgnore
     private final P propertyMeta;
     public boolean sendToClient;
 

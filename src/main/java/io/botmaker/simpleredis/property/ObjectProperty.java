@@ -1,5 +1,6 @@
 package io.botmaker.simpleredis.property;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +24,7 @@ public class ObjectProperty<T> extends PropertyMeta<T> implements Serializable {
 
     private final Class<T> itemClass;
     private final boolean compress;
+    @JsonIgnore
     private final Function<ObjectMapper, TypeReference> typeReference;
 
     public ObjectProperty(final RedisEntity owner, final Class<T> _itemClass, final Function<ObjectMapper, TypeReference> typeReference, final boolean compress) {
