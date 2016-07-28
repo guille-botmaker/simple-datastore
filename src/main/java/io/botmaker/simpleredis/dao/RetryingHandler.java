@@ -160,7 +160,7 @@ public final class RetryingHandler implements Serializable {
     }
 
     public <T extends RedisEntity> List<T> tryDSGetByIndexableProperty(final String indexablePropertyName, final String key, final DAO<T> dao) {
-        final List<T> result = new ArrayList<>(10);
+        final List<T> result = new ArrayList<>();
 
         tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
@@ -173,6 +173,58 @@ public final class RetryingHandler implements Serializable {
             if (entities != null) {
                 result.addAll(entities);
             }
+        }, null);
+
+        return result;
+    }
+
+    public <T extends RedisEntity> List<T> tryDSGetLastOccurrencesByIndexableProperty(final String indexablePropertyName, final String key,
+                                                                                      final int ocurrences, final DAO<T> dao) {
+        final List<T> result = new ArrayList<>(ocurrences);
+
+        tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
+            if (loggingActivated) {
+                LOGGER.log(Level.SEVERE, "PERF - tryDSGetLastOccurrencesByIndexableProperty", new Exception());
+            }
+
+            final T sample = dao.getSample();
+            final String keyName = indexablePropertyNameToSortedSet(
+                    buildIndexableKey(sample.getIndexablePropertyByName(indexablePropertyName), dao, sample, isProductionEnvironment, key, redisServer)
+            );
+
+            final List<String> range = new ArrayList<>(2);
+            range.add(String.valueOf(-ocurrences));
+            range.add(String.valueOf(-1));
+            final List<T> entities = executeRedisLuaCommandForMultipleEntities(dao, redisServer, "zrange", Collections.singletonList(keyName), range);
+            if (entities != null) {
+                result.addAll(entities);
+            }
+
+
+//            final List<String> data;
+//            final String keys = buildLuaParameters("KEYS", keyNames);
+//            String args = buildLuaParameters("ARGV", argNames);
+//            args = (args.length() > 0 ? "," : "") + args;
+//
+//            final String script = "local keysArray = redis.call('zrange', " + keys + args + ")\n" +
+//                    "if next(keysArray) == nil then\n" +
+//                    "   return nil\n" +
+//                    "else\n" +
+//                    "   return redis.call('mget', unpack(keysArray))  end\n";
+//
+//            try (final Jedis jedis = redisServer.getPool().getResource()) {
+//                {String.valueOf(-ocurrences), String.valueOf(-1)}
+//                data = (List<String>) jedis.eval(script, keyName, );
+//            }
+//
+//            data = jedis.zrange(keyName, -ocurrences, -1);
+//
+//            if (data != null && !data.isEmpty()) {
+//                final List<T> entities = instantiateEntities(dao, new ArrayList<>(data));
+//                if (entities != null) {
+//                    result.addAll(entities);
+//                }
+//            }
         }, null);
 
         return result;
@@ -576,7 +628,7 @@ public final class RetryingHandler implements Serializable {
 
     private String indexablePropertyNameToSortedSet(final String indexablePropertyName) {
         final int index = indexablePropertyName.lastIndexOf(':');
-        return indexablePropertyName.substring(0, index) + ":SORTED:" + indexablePropertyName.substring(index + 1);
+        return indexablePropertyName.substring(0, index) + "_SORTED:" + indexablePropertyName.substring(index + 1);
     }
 
     private void handleError(final ValuesContainer values, final Exception exception, final boolean isTimeoutException) {

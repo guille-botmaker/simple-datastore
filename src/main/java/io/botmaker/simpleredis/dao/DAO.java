@@ -14,13 +14,13 @@ import java.util.Map;
 
 /**
  * This class is a wrapper for Datastore operations. Supports most of the DatastoreService and DatastoreAsyncService operations adding features such as:
- * <p/>
+ * <p>
  * - Entity to "RedisEntity" convertions
  * - caching usage
  * - retrying algorithms
  * - performance logging
  * - remote client massive and parallel data access
- * <p/>
+ * <p>
  * Every X_RedisEntity should have its X_DAO implementation. See tests for examples
  */
 public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
@@ -136,6 +136,14 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
             return null;
         }
         return getRetryingHandler().tryDSGetByIndexableProperty(propertyName, id, this);
+    }
+
+    @Override
+    public List<P> findMultipleLastOccurrencesByIndexableProperty(final String propertyName, final int ocurrences, final String id) {
+        if (id == null || id.trim().length() == 0) {
+            return null;
+        }
+        return getRetryingHandler().tryDSGetLastOccurrencesByIndexableProperty(propertyName, id, ocurrences, this);
     }
 
     @Override

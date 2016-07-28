@@ -34,6 +34,18 @@ public class DAOTest extends AbstractTest {
         return Arrays.asList(new Object[2][0]);
     }
 
+    private static ObjectMapper getObjectMapper() {
+        final ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()
+                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+        return mapper;
+    }
+
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -179,6 +191,22 @@ public class DAOTest extends AbstractTest {
         assertEquals(user3, userDAO.findById(id3));
         assertEquals(1, userDAO.findByState("new").size());
         assertEquals(1, userDAO.findByState("old").size());
+    }
+
+    @Test
+    public void testLastOccurrencesByIndexableProperty() {
+        for (int i = 0; i < 10; i++) {
+            final User u = new User();
+            u.setNewId();
+            u.LASTNAME.set("TestUserLastName" + i);
+            u.AGE.set(150);
+            u.STATE.set("old");
+            userDAO.save(u);
+        }
+
+        final List<User> result = userDAO.findMultipleLastOccurrencesByIndexableProperty(userDAO.getSample().AGE.getPropertyName(), 2, "150");
+        assertEquals(2, result.size());
+        assertEquals("TestUserLastName9", result.get(1).LASTNAME.get());
     }
 
     @Test
@@ -451,17 +479,5 @@ public class DAOTest extends AbstractTest {
         assertEquals(user.LASTNAME.get(), "liendo" + lastNameUniqueId);
         assertEquals(user.AGE.get(), Integer.valueOf(18));
         assertEquals(user.IS_FAKE.get(), Boolean.FALSE);
-    }
-
-    private static ObjectMapper getObjectMapper() {
-        final ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()
-                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
-        return mapper;
     }
 }

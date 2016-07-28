@@ -39,6 +39,8 @@ public interface IDAO<P extends RedisEntity> extends Serializable {
 
     List<P> findMultipleIntersectionOfIndexableProperty(final Map<String, String> propertyNameAndValueMap);
 
+    List<P> findMultipleLastOccurrencesByIndexableProperty(final String propertyName, final int ocurrences, final String id);
+
     List<P> findMultipleUnionOfIndexableProperty(final List<Pair<String, String>> propertyNameAndValuePair);
 
     void save(final P persistentObject);
