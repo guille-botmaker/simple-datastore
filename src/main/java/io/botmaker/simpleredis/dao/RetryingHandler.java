@@ -7,11 +7,11 @@ import io.botmaker.simpleredis.service.RedisServer;
 import io.botmaker.simpleredis.service.SimpleDatastoreService;
 import io.botmaker.simpleredis.service.SimpleDatastoreServiceFactory;
 import io.botmaker.simpleredis.util.RandomUtils;
+import io.botmaker.simpleredis.util.TimeUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
-import redis.clients.jedis.ZParams;
 
 import java.io.Serializable;
 import java.util.*;
@@ -228,13 +228,13 @@ public final class RetryingHandler implements Serializable {
             final String data = entity.getDataObject().toString();
             final int expiring = entity.getSecondsToExpire();
 
+            // try to remove old entity if exists with their indexable properties
+            tryDSRemove(entity.getId(), dao);
+
+            final List<IndexablePropertyInfoContainer> indexableProperties = buildIndexablePropertiesKeys(key, entity, dao, isProductionEnvironment, redisServer);
+
             try (final Jedis jedis = redisServer.getPool().getResource()) {
-
-                // try to remove old entity if exists with their indexable properties
-                tryDSRemove(entity.getId(), dao);
-
                 // remove old entities that have the same unique indexable property
-                final List<IndexablePropertyInfoContainer> indexableProperties = buildIndexablePropertiesKeys(key, entity, dao, isProductionEnvironment, redisServer);
                 removeOldEntitiesThatHaveTheSameUniqueIndexablePropertyValue(dao, redisServer, jedis, indexableProperties, isProductionEnvironment);
 
                 final Pipeline pipeline = jedis.pipelined();
@@ -243,7 +243,17 @@ public final class RetryingHandler implements Serializable {
                     pipeline.expire(key, expiring);
                 }
 
-                indexableProperties.forEach(e -> pipeline.sadd(e.propertyKey, key));
+                indexableProperties.forEach(e -> {
+                    pipeline.sadd(e.propertyKey, key);
+
+                    final String sortedSetKey = indexablePropertyNameToSortedSet(e.propertyKey);
+                    pipeline.zadd(sortedSetKey, TimeUtils.fromISODate(entity.LAST_MODIFICATION.get()).getTime(), key);
+
+                    if (expiring > 0) {
+                        pipeline.expire(e.propertyKey, expiring);
+                        pipeline.expire(sortedSetKey, expiring);
+                    }
+                });
                 pipeline.sync();
             }
         }, null);
@@ -274,15 +284,15 @@ public final class RetryingHandler implements Serializable {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSPutMultiple", new Exception());
             }
 
+            // try to remove old entities if exist with their indexable properties
+            tryDSRemove(entities.stream().map(RedisEntity::getId).collect(Collectors.toList()), dao);
+
+            final List<IndexablePropertyInfoContainer> indexableProperties = new ArrayList<>(entities.size());
+            entities.forEach(e -> indexableProperties.addAll(buildIndexablePropertiesKeys(buildKey(dao, e, isProductionEnvironment, redisServer), e, dao,
+                    isProductionEnvironment, redisServer)));
+
             try (final Jedis jedis = redisServer.getPool().getResource()) {
-
-                // try to remove old entities if exist with their indexable properties
-                tryDSRemove(entities.stream().map(RedisEntity::getId).collect(Collectors.toList()), dao);
-
                 // remove old entities that have the same unique indexable property
-                final List<IndexablePropertyInfoContainer> indexableProperties = new ArrayList<>(entities.size());
-                entities.forEach(e -> indexableProperties.addAll(buildIndexablePropertiesKeys(buildKey(dao, e, isProductionEnvironment, redisServer), e, dao,
-                        isProductionEnvironment, redisServer)));
                 removeOldEntitiesThatHaveTheSameUniqueIndexablePropertyValue(dao, redisServer, jedis, indexableProperties, isProductionEnvironment);
 
                 final Pipeline pipeline = jedis.pipelined();
@@ -296,8 +306,19 @@ public final class RetryingHandler implements Serializable {
                     if (expiring > 0) {
                         pipeline.expire(key, expiring);
                     }
+
+                    indexableProperties.forEach(ip -> {
+                        pipeline.sadd(ip.propertyKey, ip.entityKey);
+
+                        final String sortedSetKey = indexablePropertyNameToSortedSet(ip.propertyKey);
+                        pipeline.zadd(sortedSetKey, TimeUtils.fromISODate(entity.LAST_MODIFICATION.get()).getTime(), ip.entityKey);
+
+                        if (expiring > 0) {
+                            pipeline.expire(ip.propertyKey, expiring);
+                            pipeline.expire(sortedSetKey, expiring);
+                        }
+                    });
                 });
-                indexableProperties.forEach(ip -> pipeline.sadd(ip.propertyKey, ip.entityKey));
                 pipeline.sync();
             }
         }, null);
@@ -341,7 +362,10 @@ public final class RetryingHandler implements Serializable {
                     final Pipeline pipeline = jedis.pipelined();
 
                     pipeline.del(theKey);
-                    indexableProperties.stream().forEach(ip -> pipeline.srem(ip.propertyKey, ip.entityKey));
+                    indexableProperties.stream().forEach(ip -> {
+                        pipeline.srem(ip.propertyKey, ip.entityKey);
+                        pipeline.zrem(indexablePropertyNameToSortedSet(ip.propertyKey), ip.entityKey);
+                    });
 
                     pipeline.sync();
                 }
@@ -381,7 +405,10 @@ public final class RetryingHandler implements Serializable {
                     entitiesWithKey.values().forEach(pipeline::del);
                     entitiesWithKey.entrySet().stream().
                             forEach(re -> buildIndexablePropertiesKeys(re.getValue(), re.getKey(), dao, isProductionEnvironment, redisServer).
-                                    forEach(ip -> pipeline.srem(ip.propertyKey, ip.entityKey)));
+                                    forEach(ip -> {
+                                        pipeline.srem(ip.propertyKey, ip.entityKey);
+                                        pipeline.zrem(indexablePropertyNameToSortedSet(ip.propertyKey), ip.entityKey);
+                                    }));
 
                     pipeline.sync();
                 }
@@ -539,11 +566,17 @@ public final class RetryingHandler implements Serializable {
                                 final PropertyMeta propertyMeta = indexablePropertyInfoContainer.property;
                                 if (propertyMeta.isIndexable() && !propertyMeta.isUniqueIndex()) {
                                     pipelined2.srem(indexablePropertyInfoContainer.propertyKey, indexablePropertyInfoContainer.entityKey);
+                                    pipelined2.zrem(indexablePropertyNameToSortedSet(indexablePropertyInfoContainer.propertyKey), indexablePropertyInfoContainer.entityKey);
                                 }
                             }
                     ));
             pipelined2.sync();
         }
+    }
+
+    private String indexablePropertyNameToSortedSet(final String indexablePropertyName) {
+        final int index = indexablePropertyName.lastIndexOf(':');
+        return indexablePropertyName.substring(0, index) + ":SORTED:" + indexablePropertyName.substring(index + 1);
     }
 
     private void handleError(final ValuesContainer values, final Exception exception, final boolean isTimeoutException) {
