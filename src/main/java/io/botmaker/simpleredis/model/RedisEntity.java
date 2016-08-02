@@ -23,6 +23,8 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
 
     public static final int MAX_GROUPS = 100;
 
+    public static final int EXPIRING_5_MINUTES = 60 * 5;
+    public static final int EXPIRING_10_MINUTES = 60 * 10;
     public static final int EXPIRING_1_HOUR = 60 * 60;
     public static final int EXPIRING_1_DAY = EXPIRING_1_HOUR * 24;
     public static final int EXPIRING_1_WEEK = EXPIRING_1_DAY * 7;
