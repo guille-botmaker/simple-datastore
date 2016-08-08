@@ -561,7 +561,7 @@ public final class RetryingHandler implements Serializable {
             resultList = (List<String>) jedis.eval(script, keyNames, argNames);
         }
 
-        return resultList;
+        return resultList == null ? Collections.emptyList() : resultList;
     }
 
     private String buildLuaParameters(final String name, final List<String> values) {
