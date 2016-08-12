@@ -7,4 +7,6 @@ public interface DAOCustomByIdCache<P extends RedisEntity> {
     P get(final String id);
 
     void put(final String id, final P result);
+
+    void setDAO(final DAO<P> dao);
 }
