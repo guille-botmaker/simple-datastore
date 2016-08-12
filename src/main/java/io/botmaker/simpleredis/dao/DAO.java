@@ -150,7 +150,17 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         if (id == null || id.trim().length() == 0) {
             return null;
         }
+
+        final List<P> cached = customByIdCache == null ? null : customByIdCache.getByParams(propertyName, id);
+        if (cached != null && !cached.isEmpty())
+            return cached.get(0);
+
+
         final List<P> list = getRetryingHandler().tryDSGetByIndexableProperty(propertyName, id, this);
+
+        if (customByIdCache != null)
+            customByIdCache.putByParams(list, propertyName, id);
+
         return list.isEmpty() ? null : list.get(0);
     }
 
