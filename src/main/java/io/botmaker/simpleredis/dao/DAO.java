@@ -43,6 +43,10 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         this.sample = buildPersistentObjectInstance();
         this.entityName = RedisEntity.getEntityName(beanClass);
         this.customByIdCache = customByIdCache;
+
+        if (customByIdCache != null) {
+            customByIdCache.setDAO(this);
+        }
     }
 
     public void save(final P persistentObject) {
