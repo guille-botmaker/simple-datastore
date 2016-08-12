@@ -81,6 +81,10 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
 
     }
 
+    protected DAOCustomByIdCache<P> getCustomByIdCache() {
+        return customByIdCache;
+    }
+
     public Map<String, P> findUniqueIdMultiple(final Collection<String> ids) {
         return getRetryingHandler().tryDSGetMultiple(ids, this);
     }
