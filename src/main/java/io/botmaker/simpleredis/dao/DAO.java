@@ -31,12 +31,18 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     //    protected final P sample;
     protected final Class<? extends P> beanClass;
     protected final P sample;
+    private final DAOCustomByIdCache<P> customByIdCache;
     private String entityName;
 
     public DAO(final Class<? extends P> beanClass) {
+        this(beanClass, null);
+    }
+
+    public DAO(final Class<? extends P> beanClass, final DAOCustomByIdCache<P> customByIdCache) {
         this.beanClass = beanClass;
         this.sample = buildPersistentObjectInstance();
         this.entityName = RedisEntity.getEntityName(beanClass);
+        this.customByIdCache = customByIdCache;
     }
 
     public void save(final P persistentObject) {
@@ -54,7 +60,18 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     }
 
     public P findById(final String id) {
-        return RETRYING_HANDLER.tryDSGet(id, this);
+        if (id == null)
+            return null;
+
+        final P cached = customByIdCache == null ? null : customByIdCache.get(id);
+        if (cached != null)
+            return cached;
+
+        final P result = RETRYING_HANDLER.tryDSGet(id, this);
+        if (customByIdCache != null)
+            customByIdCache.put(id, result);
+        return result;
+
     }
 
     public Map<String, P> findUniqueIdMultiple(final Collection<String> ids) {
