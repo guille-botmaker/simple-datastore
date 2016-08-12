@@ -50,6 +50,9 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     }
 
     public void save(final P persistentObject) {
+        if (customByIdCache != null && customByIdCache.alternativeSave(persistentObject))
+            return;
+
         prepareForUpdateOrPersist(persistentObject);
 
         getRetryingHandler().tryDSPut(this, persistentObject);
@@ -156,7 +159,17 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         if (id == null || id.trim().length() == 0) {
             return null;
         }
-        return getRetryingHandler().tryDSGetByIndexableProperty(propertyName, id, this);
+
+        final List<P> cached = customByIdCache == null ? null : customByIdCache.getByParams(propertyName, id);
+        if (cached != null && !cached.isEmpty())
+            return cached;
+
+        final List<P> result = getRetryingHandler().tryDSGetByIndexableProperty(propertyName, id, this);
+
+        if (customByIdCache != null)
+            customByIdCache.putByParams(result, propertyName, id);
+
+        return result;
     }
 
     @Override
@@ -172,7 +185,17 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         if (propertyNameAndValueMap == null || propertyNameAndValueMap.size() == 0) {
             return null;
         }
-        return getRetryingHandler().tryDSGetIntersectionOfIndexableProperties(this, propertyNameAndValueMap);
+
+        final List<P> cached = customByIdCache == null ? null : customByIdCache.getByParams(propertyNameAndValueMap);
+        if (cached != null && !cached.isEmpty())
+            return cached;
+
+        final List<P> result = getRetryingHandler().tryDSGetIntersectionOfIndexableProperties(this, propertyNameAndValueMap);
+
+        if (customByIdCache != null)
+            customByIdCache.putByParams(result, propertyNameAndValueMap);
+
+        return result;
     }
 
     @Override
