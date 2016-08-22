@@ -46,6 +46,17 @@ public final class TimeUtils {
 //        return getCalendar().getTimeInMillis();
 //    }
 
+    /**
+     * @return if "2016-06-29T14:12:29.243Z" then "201606291412"
+     */
+    public static String convertIsoToUniqueMinute(final String isoTimestamp) {
+        return isoTimestamp == null ? null : isoTimestamp.substring(0, 4) +
+                isoTimestamp.substring(5, 7) +
+                isoTimestamp.substring(8, 10) +
+                isoTimestamp.substring(11, 13) +
+                isoTimestamp.substring(14, 16);
+    }
+
     public static Calendar getCalendar() {
         return Calendar.getInstance();
     }
