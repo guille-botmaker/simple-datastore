@@ -20,9 +20,9 @@ public interface SimpleDatastoreService {
     DAO getDAO(final String entityName);
 
     // Redis methods
-    void configRedisServer(final String appId, final String redisHost, final boolean isProductionEnvironment);
+    void configRedisServer(final String appId, final String redisHost, final int redisPost, final boolean isProductionEnvironment);
 
-    void configRedisServer(final String appId, final String redisHost, final boolean isProductionEnvironment, final String redisAuthPassword);
+    void configRedisServer(final String appId, final String redisHost, final int redisPort, final boolean isProductionEnvironment, final String redisAuthPassword);
 
     RedisServer getRedisServer();
 }

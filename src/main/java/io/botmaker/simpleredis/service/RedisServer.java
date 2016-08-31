@@ -2,7 +2,6 @@ package io.botmaker.simpleredis.service;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.Protocol;
 
 public final class RedisServer {
 
@@ -12,7 +11,7 @@ public final class RedisServer {
     //    private final JedisSentinelPool pool;
     private String appId;
 
-    public void configure(final String redisHost, final String appId, final String redisAuthPassword) {
+    public void configure(final String redisHost, final int redisPort, final String appId, final String redisAuthPassword) {
         this.appId = appId;
 
         final GenericObjectPoolConfig config = new GenericObjectPoolConfig();
@@ -21,7 +20,7 @@ public final class RedisServer {
         config.setTestWhileIdle(true);
         config.setTestOnCreate(false);
 
-        pool = new JedisPool(config, redisHost, Protocol.DEFAULT_PORT, 10000, redisAuthPassword);
+        pool = new JedisPool(config, redisHost, redisPort, 10000, redisAuthPassword);
 //        pool = new JedisSentinelPool(MASTER_NAME, Collections.singleton(new HostAndPort(host, port).toString()), config, 2000);
     }
 

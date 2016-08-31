@@ -34,13 +34,13 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     }
 
     @Override
-    public void configRedisServer(final String appId, final String redisHost, final boolean isProductionEnvironment) {
-        this.configRedisServer(appId, redisHost, isProductionEnvironment, null);
+    public void configRedisServer(final String appId, final String redisHost, final int redisPort, final boolean isProductionEnvironment) {
+        this.configRedisServer(appId, redisHost, redisPort, isProductionEnvironment, null);
     }
 
     @Override
-    public void configRedisServer(final String appId, final String redisHost, final boolean isProductionEnvironment, final String redisAuthPassword) {
-        this.redisServer.configure(redisHost, appId, redisAuthPassword);
+    public void configRedisServer(final String appId, final String redisHost, final int redisPort, final boolean isProductionEnvironment, final String redisAuthPassword) {
+        this.redisServer.configure(redisHost, redisPort, appId, redisAuthPassword);
         this.isProductionEnvironment = isProductionEnvironment;
     }
 
