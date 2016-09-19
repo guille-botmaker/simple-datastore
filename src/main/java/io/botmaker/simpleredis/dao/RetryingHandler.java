@@ -634,7 +634,7 @@ public final class RetryingHandler implements Serializable {
     private void handleError(final ValuesContainer values, final Exception exception, final boolean isTimeoutException) {
         values.retry = values.retry - 1;
 
-        if (values.retry == 0) {
+        if (values.retry <= 0) {
             LOGGER.log(Level.SEVERE, "PERF - No more tries for datastore access: " + exception.getMessage(), exception);
             throw new NoMoreRetriesException(exception);
         }
