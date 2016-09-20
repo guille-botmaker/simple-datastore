@@ -50,7 +50,11 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     }
 
     public void save(final P persistentObject) {
-        if (customByIdCache != null && customByIdCache.alternativeSave(persistentObject))
+        save(persistentObject, false);
+    }
+
+    public void save(final P persistentObject, final boolean avoidUsingCustomCache) {
+        if (!avoidUsingCustomCache && customByIdCache != null && customByIdCache.alternativeSave(persistentObject))
             return;
 
         prepareForUpdateOrPersist(persistentObject);
