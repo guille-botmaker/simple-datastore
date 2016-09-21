@@ -90,7 +90,7 @@ public abstract class AbstractTest {
     public void setUp() throws Exception {
         synchronized (LOCK_OBJECT) {
             service = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
-            service.configRedisServer("test", "146.148.90.52", Protocol.DEFAULT_PORT, false, "fSsVBcC5mDcG4c24vjSsQ33Ba2ZKbj7W52HYnK3bBZYFGGD8kjIzSBmc4w");
+            service.configRedisServer("test", "cluster.botmaker.com", 32307, false);
             service.registerDAO(new UserDAO());
 
             testClass = new TestClass();

@@ -78,6 +78,29 @@ public class DAOTest extends AbstractTest {
     }
 
     @Test
+    public void testJsonProperty() {
+        final Map<String, Object> inner = new HashMap<>();
+        inner.put("is1", "is1");
+        inner.put("ii22", 22);
+
+        final User user = new User();
+        user.setId(RandomUtils.getInstance().getRandomSafeAlphaNumberString(10));
+        user.LASTNAME.set("TestUser1");
+        user.JSON_PROPERTY.put("s1", "1");
+        user.JSON_PROPERTY.put("s2", "2");
+        user.JSON_PROPERTY.put("i1", 1);
+        user.JSON_PROPERTY.put("i2", 2);
+        user.JSON_PROPERTY.put("inner", inner);
+
+        userDAO.save(user);
+        final User dbUser = userDAO.findById(user.getId());
+        assertEquals(user, dbUser);
+        assertEquals(user.getDataObjectForClient().toString(), dbUser.getDataObjectForClient().toString());
+        assertEquals(user.JSON_PROPERTY.get("s2").toString(), "2");
+        assertEquals(dbUser.JSON_PROPERTY.get("s2").toString(), "2");
+    }
+
+    @Test
     public void testUniqueAndNonUniqueIndexableProperties() {
         final String id1 = RandomUtils.getInstance().getRandomSafeAlphaNumberString(10);
         assertNull(userDAO.findById(id1));

@@ -34,6 +34,8 @@ public class User extends RedisEntity {
     public ObjectProperty<ABean> SAMPLE_ARBITRARY_OBJECT;
     public ObjectProperty<ABean> SAMPLE_ARBITRARY_OBJECT_COMP;
 
+    public JSONProperty JSON_PROPERTY;
+
 
     public User() {
         super(true, EXPIRING_1_HOUR);
@@ -68,5 +70,7 @@ public class User extends RedisEntity {
         }).build();
         SAMPLE_ARBITRARY_OBJECT_COMP = new OBJECT<>(this, ABean.class, mapper -> new TypeReference<ABean>() {
         }, true).build();
+
+        JSON_PROPERTY = new JSON(this).sendToClient().build();
     }
 }
