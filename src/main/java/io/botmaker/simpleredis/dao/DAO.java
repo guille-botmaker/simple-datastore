@@ -49,6 +49,10 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         }
     }
 
+    public String getEntityPrefix() {
+        return null;
+    }
+
     public void save(final P persistentObject) {
         save(persistentObject, false);
     }
@@ -103,7 +107,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     public String getDataRedixPrefix() {
         final SimpleDatastoreService simpleDatastoreService = SimpleDatastoreServiceFactory.getSimpleDatastoreService();
 
-        return getRetryingHandler().buildKey(entityName, "", sample.usesAppIdPrefix(), simpleDatastoreService.isProductionEnvironment(),
+        return getRetryingHandler().buildKey(entityName, "", sample.usesAppIdPrefix(), getEntityPrefix(), simpleDatastoreService.isProductionEnvironment(),
                 simpleDatastoreService.getRedisServer());
     }
 
