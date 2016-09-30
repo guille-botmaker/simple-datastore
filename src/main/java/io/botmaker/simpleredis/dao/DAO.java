@@ -199,6 +199,14 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     }
 
     @Override
+    public List<P> findMultipleSortedFromToByIndexableProperty(final String propertyName, final String id, final int from, final int to) {
+        if (id == null || id.trim().length() == 0) {
+            return null;
+        }
+        return getRetryingHandler().tryDSGetFromToByIndexableProperty(propertyName, id, from, to, this);
+    }
+
+    @Override
     public List<P> findMultipleIntersectionOfIndexableProperty(final Map<String, String> propertyNameAndValueMap) {
         if (propertyNameAndValueMap == null || propertyNameAndValueMap.size() == 0) {
             return null;

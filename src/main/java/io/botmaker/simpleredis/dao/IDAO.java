@@ -43,6 +43,8 @@ public interface IDAO<P extends RedisEntity> extends Serializable {
 
     List<P> findMultipleUnionOfIndexableProperty(final List<Pair<String, String>> propertyNameAndValuePair);
 
+    List<P> findMultipleSortedFromToByIndexableProperty(final String propertyName, final String id, final int from, final int to);
+
     void save(final P persistentObject);
 
     void massiveUpload(final Collection<P> list);

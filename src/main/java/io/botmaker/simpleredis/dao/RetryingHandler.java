@@ -180,7 +180,14 @@ public final class RetryingHandler implements Serializable {
 
     public <T extends RedisEntity> List<T> tryDSGetLastOccurrencesByIndexableProperty(final String indexablePropertyName, final String key,
                                                                                       final int ocurrences, final DAO<T> dao) {
-        final List<T> result = new ArrayList<>(ocurrences);
+
+        return tryDSGetFromToByIndexableProperty(indexablePropertyName, key, -ocurrences, -1, dao);
+    }
+
+
+    public <T extends RedisEntity> List<T> tryDSGetFromToByIndexableProperty(final String indexablePropertyName, final String key,
+                                                                             final int from, final int to, final DAO<T> dao) {
+        final List<T> result = new ArrayList<>(200);
 
         tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
@@ -193,8 +200,8 @@ public final class RetryingHandler implements Serializable {
             );
 
             final List<String> range = new ArrayList<>(2);
-            range.add(String.valueOf(-ocurrences));
-            range.add(String.valueOf(-1));
+            range.add(String.valueOf(from));
+            range.add(String.valueOf(to));
             final List<T> entities = executeRedisLuaCommandForMultipleEntities(dao, redisServer, "zrange", Collections.singletonList(keyName), range);
             if (entities != null) {
                 result.addAll(entities);
