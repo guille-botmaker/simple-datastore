@@ -43,33 +43,28 @@ public final class RetryingHandler implements Serializable {
         }
     }
 
-    public static String buildKey(final String entityName, final String entityKey, final boolean entityUsesAppIdPrefix, final String prefix,
-                                  final boolean isProductionEnvironment, final RedisServer redisServer) {
+    public static String buildKey(final String entityName, final String entityKey, final boolean entityUsesAppIdPrefix, final boolean isProductionEnvironment,
+                                  final RedisServer redisServer) {
 
-        final String s;
-        if (entityUsesAppIdPrefix)
-            s = prefix != null ? prefix : redisServer.getAppId();
-        else
-            s = isProductionEnvironment ? DEFAULT : redisServer.getAppId();
-
-        return s + ":" + entityName + ":" + entityKey;
+        return (entityUsesAppIdPrefix ? redisServer.getAppId() : (isProductionEnvironment ? DEFAULT : redisServer.getAppId())) +
+                ":" +
+                entityName +
+                ":" +
+                entityKey;
     }
 
     private String buildKey(final DAO dao, final RedisEntity entity, final boolean isProductionEnvironment, final RedisServer redisServer) {
-        return buildKey(dao.getEntityName(), entity.getId(), entity.usesAppIdPrefix(), entity.getPrefix(), isProductionEnvironment, redisServer);
+        return buildKey(dao.getEntityName(), entity.getId(), entity.usesAppIdPrefix(), isProductionEnvironment, redisServer);
     }
 
-    private String buildIndexableKey(final PropertyMeta propertyMeta, final DAO dao, final RedisEntity entity, final boolean isProductionEnvironment,
-                                     final Object propertyValue, final RedisServer redisServer) {
-
-        final String prefix = entity.getPrefix();
-        final String s;
-        if (entity.usesAppIdPrefix())
-            s = prefix != null ? prefix : redisServer.getAppId();
-        else
-            s = isProductionEnvironment ? DEFAULT : redisServer.getAppId();
-
-        return s + ":" + dao.getEntityName() + "Indexes:" + propertyMeta.getPropertyName() + ":" + propertyValue;
+    private String buildIndexableKey(final PropertyMeta propertyMeta, final DAO dao, final RedisEntity entity, final boolean isProductionEnvironment, final Object propertyValue, final RedisServer redisServer) {
+        return (entity.usesAppIdPrefix() ? redisServer.getAppId() : (isProductionEnvironment ? DEFAULT : redisServer.getAppId())) +
+                ":" +
+                dao.getEntityName() +
+                "Indexes:" +
+                propertyMeta.getPropertyName() +
+                ":" +
+                propertyValue;
     }
 
     private List<IndexablePropertyInfoContainer> buildIndexablePropertiesKeys(final String entityKey, final RedisEntity entity, final DAO dao,
@@ -82,7 +77,7 @@ public final class RetryingHandler implements Serializable {
         return list;
     }
 
-    public String tryDSRawGet(final String entityName, final String entityKey, final boolean usesAppIdPrefix, final String prefix) {
+    public String tryDSRawGet(final String entityName, final String entityKey, final boolean usesAppIdPrefix) {
 
         final String[] result = new String[1];
         tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
@@ -90,7 +85,7 @@ public final class RetryingHandler implements Serializable {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSRawGet", new Exception());
             }
 
-            final String key = buildKey(entityName, entityKey, usesAppIdPrefix, prefix, isProductionEnvironment, redisServer);
+            final String key = buildKey(entityName, entityKey, usesAppIdPrefix, isProductionEnvironment, redisServer);
             final String data;
             try (final Jedis jedis = redisServer.getPool().getResource()) {
                 data = jedis.get(key);
@@ -104,7 +99,7 @@ public final class RetryingHandler implements Serializable {
     }
 
     public <T extends RedisEntity> T tryDSGet(final String entityKey, final DAO<T> dao) {
-        final String data = tryDSRawGet(dao.getEntityName(), entityKey, dao.getSample().usesAppIdPrefix(), dao.getSample().getPrefix());
+        final String data = tryDSRawGet(dao.getEntityName(), entityKey, dao.getSample().usesAppIdPrefix());
         return data == null ? null : dao.buildPersistentObjectInstanceFromPersistedStringData(data);
     }
 
@@ -134,7 +129,6 @@ public final class RetryingHandler implements Serializable {
         final T sample = dao.getSample();
         final String entityName = dao.getEntityName();
         final boolean usesAppIdPrefix = sample.usesAppIdPrefix();
-        final String prefix = sample.getPrefix();
 
         if (keys != null && !keys.isEmpty()) {
             tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
@@ -143,7 +137,7 @@ public final class RetryingHandler implements Serializable {
                 }
 
                 final String[] keysArray = keys.stream()
-                        .map(id -> buildKey(entityName, id, usesAppIdPrefix, prefix, isProductionEnvironment, redisServer))
+                        .map(id -> buildKey(entityName, id, usesAppIdPrefix, isProductionEnvironment, redisServer))
                         .toArray(String[]::new);
 
                 final List<String> resultList;
@@ -317,13 +311,13 @@ public final class RetryingHandler implements Serializable {
         }, null);
     }
 
-    public void tryDSRawPut(final String data, final int expiring, final String entityName, final String entityKey, final boolean usesAppIdPrefix, final String prefix) {
+    public void tryDSRawPut(final String data, final int expiring, final String entityName, final String entityKey, final boolean usesAppIdPrefix) {
         tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSRawPut", new Exception());
             }
 
-            final String key = buildKey(entityName, entityKey, usesAppIdPrefix, prefix, isProductionEnvironment, redisServer);
+            final String key = buildKey(entityName, entityKey, usesAppIdPrefix, isProductionEnvironment, redisServer);
 
             try (final Jedis jedis = redisServer.getPool().getResource()) {
 
@@ -382,7 +376,7 @@ public final class RetryingHandler implements Serializable {
         }, null);
     }
 
-    public void tryDSRawPutMultiple(final Map<String, String> datas, final int expiring, final String entityName, final boolean usesAppIdPrefix, final String prefix) {
+    public void tryDSRawPutMultiple(final Map<String, String> datas, final int expiring, final String entityName, final boolean usesAppIdPrefix) {
         tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSRawPutMultiple", new Exception());
@@ -392,7 +386,7 @@ public final class RetryingHandler implements Serializable {
 
                 final Pipeline pipeline = jedis.pipelined();
                 datas.entrySet().forEach(entry -> {
-                    final String key = buildKey(entityName, entry.getKey(), usesAppIdPrefix, prefix, isProductionEnvironment, redisServer);
+                    final String key = buildKey(entityName, entry.getKey(), usesAppIdPrefix, isProductionEnvironment, redisServer);
                     pipeline.set(key, entry.getValue());
 
                     if (expiring > 0) {
@@ -413,7 +407,7 @@ public final class RetryingHandler implements Serializable {
                     LOGGER.log(Level.SEVERE, "PERF - tryDSRemove", new Exception());
                 }
 
-                final String theKey = buildKey(dao.getEntityName(), entityId, dao.getSample().usesAppIdPrefix(), dao.getSample().getPrefix(), isProductionEnvironment, redisServer);
+                final String theKey = buildKey(dao.getEntityName(), entityId, dao.getSample().usesAppIdPrefix(), isProductionEnvironment, redisServer);
                 final List<IndexablePropertyInfoContainer> indexableProperties = buildIndexablePropertiesKeys(theKey, redisEntity, dao, isProductionEnvironment, redisServer);
 
                 try (final Jedis jedis = redisServer.getPool().getResource()) {
@@ -431,13 +425,13 @@ public final class RetryingHandler implements Serializable {
         }
     }
 
-    public void tryDSRawRemove(final String entityName, final String entityKey, final boolean usesAppIdPrefix, final String prefix) {
+    public void tryDSRawRemove(final String entityName, final String entityKey, final boolean usesAppIdPrefix) {
         tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSRawRemove", new Exception());
             }
 
-            final String key = buildKey(entityName, entityKey, usesAppIdPrefix, prefix, isProductionEnvironment, redisServer);
+            final String key = buildKey(entityName, entityKey, usesAppIdPrefix, isProductionEnvironment, redisServer);
             try (final Jedis jedis = redisServer.getPool().getResource()) {
                 jedis.del(key);
             }
@@ -474,14 +468,14 @@ public final class RetryingHandler implements Serializable {
         }
     }
 
-    public List<String> tryDSOrderedSetGetUnion(final String entityName, final List<String> entityKeys, final int quantity, final boolean usesAppIdPrefix, final String prefix) {
+    public List<String> tryDSOrderedSetGetUnion(final String entityName, final List<String> entityKeys, final int quantity, final boolean usesAppIdPrefix) {
         final List[] entities = new List[1];
         tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSOrderedSetGetUnion", new Exception());
             }
 
-            final String entityPrefix = buildKey(entityName, "", usesAppIdPrefix, prefix, isProductionEnvironment, redisServer);
+            final String entityPrefix = buildKey(entityName, "", usesAppIdPrefix, isProductionEnvironment, redisServer);
             final String[] entityKeysArray = new String[entityKeys.size()];
             final int[] i = {0};
             entityKeys.forEach(k -> entityKeysArray[i[0]++] = entityPrefix + k + "Set");
@@ -500,7 +494,7 @@ public final class RetryingHandler implements Serializable {
         return entities[0];
     }
 
-    public void tryDSOrderedSetPut(final long score, final String entityKey, final String data, final String entityName, final boolean usesAppIdPrefix, final String prefix) {
+    public void tryDSOrderedSetPut(final long score, final String entityKey, final String data, final String entityName, final boolean usesAppIdPrefix) {
         tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
             if (loggingActivated) {
                 LOGGER.log(Level.SEVERE, "PERF - tryDSOrderedSetPut", new Exception());
@@ -511,7 +505,7 @@ public final class RetryingHandler implements Serializable {
                     entityName +
                     "Set";
 
-            final String keyName = buildKey(entityName, entityKey, usesAppIdPrefix, prefix, isProductionEnvironment, redisServer);
+            final String keyName = buildKey(entityName, entityKey, usesAppIdPrefix, isProductionEnvironment, redisServer);
             try (final Jedis jedis = redisServer.getPool().getResource()) {
                 final Pipeline pipelined = jedis.pipelined();
                 pipelined.zadd(setKeyName, score, keyName);

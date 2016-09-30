@@ -41,7 +41,6 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
     private final String entityName;
     private final int secondsToExpire; // 0 means never
     private final boolean usesAppIdPrefix;
-    private final String prefix;
     // entity usefull properties
 
     //    @ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
@@ -52,17 +51,12 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
 
 
     protected RedisEntity(final boolean usesAppIdPrefix, final int secondsToExpire) {
-        this(usesAppIdPrefix, secondsToExpire, null);
-    }
-
-    protected RedisEntity(final boolean usesAppIdPrefix, final int secondsToExpire, final String prefix) {
         entityName = getEntityName(this.getClass());
 
         setNewId();
 
         this.secondsToExpire = secondsToExpire;
         this.usesAppIdPrefix = usesAppIdPrefix;
-        this.prefix = prefix;
 
 //        GROUP_ID = new INT(this).indexable().build();
         LAST_MODIFICATION = new DATE(this).sendToClient().mandatory().build();
@@ -122,10 +116,6 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
 
     public boolean usesAppIdPrefix() {
         return usesAppIdPrefix;
-    }
-
-    public String getPrefix() {
-        return prefix;
     }
 
     @Override
