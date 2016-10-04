@@ -7,7 +7,6 @@ import io.botmaker.simpleredis.service.RedisServer;
 import io.botmaker.simpleredis.service.SimpleDatastoreService;
 import io.botmaker.simpleredis.service.SimpleDatastoreServiceFactory;
 import io.botmaker.simpleredis.util.RandomUtils;
-import io.botmaker.simpleredis.util.TimeUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
@@ -306,7 +305,7 @@ public final class RetryingHandler implements Serializable {
                     pipeline.sadd(e.propertyKey, key);
 
                     final String sortedSetKey = indexablePropertyNameToSortedSet(e.propertyKey);
-                    pipeline.zadd(sortedSetKey, TimeUtils.fromISODate(entity.LAST_MODIFICATION.get()).getTime(), key);
+                    pipeline.zadd(sortedSetKey, entity.getSortingScore(), key);
 
                     if (expiring > 0) {
                         pipeline.expire(e.propertyKey, expiring);
@@ -370,7 +369,7 @@ public final class RetryingHandler implements Serializable {
                         pipeline.sadd(ip.propertyKey, ip.entityKey);
 
                         final String sortedSetKey = indexablePropertyNameToSortedSet(ip.propertyKey);
-                        pipeline.zadd(sortedSetKey, TimeUtils.fromISODate(entity.LAST_MODIFICATION.get()).getTime(), ip.entityKey);
+                        pipeline.zadd(sortedSetKey, entity.getSortingScore(), ip.entityKey);
 
                         if (expiring > 0) {
                             pipeline.expire(ip.propertyKey, expiring);

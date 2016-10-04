@@ -97,6 +97,10 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         return RandomUtils.getInstance().getRandomSafeAlphaNumberString(20);
     }
 
+    public double getSortingScore() {
+        return TimeUtils.fromISODate(this.LAST_MODIFICATION.get()).getTime();
+    }
+
     public int getSecondsToExpire() {
         return secondsToExpire;
     }
