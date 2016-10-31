@@ -287,7 +287,7 @@ public final class RetryingHandler implements Serializable {
             final int expiring = entity.getSecondsToExpire();
 
             // try to remove old entity if exists with their indexable properties
-            tryDSRemove(entity.getId(), dao);
+            tryDSRemove(entity.getId(), dao, true);
 
             final List<IndexablePropertyInfoContainer> indexableProperties = buildIndexablePropertiesKeys(key, entity, dao, isProductionEnvironment, redisServer);
 
@@ -343,7 +343,7 @@ public final class RetryingHandler implements Serializable {
             }
 
             // try to remove old entities if exist with their indexable properties
-            tryDSRemove(entities.stream().map(RedisEntity::getId).collect(Collectors.toList()), dao);
+            tryDSRemove(entities.stream().map(RedisEntity::getId).collect(Collectors.toList()), dao, true);
 
             final List<IndexablePropertyInfoContainer> indexableProperties = new ArrayList<>(entities.size());
             entities.forEach(e -> indexableProperties.addAll(buildIndexablePropertiesKeys(buildKey(dao, e, isProductionEnvironment, redisServer), e, dao,
@@ -405,6 +405,11 @@ public final class RetryingHandler implements Serializable {
     }
 
     public void tryDSRemove(final String entityId, final DAO dao) {
+
+        tryDSRemove(entityId, dao, false);
+    }
+
+    public void tryDSRemove(final String entityId, final DAO dao, final boolean onlyProperties) {
         final RedisEntity redisEntity = tryDSGet(entityId, dao);
 
         if (redisEntity != null) {
@@ -419,7 +424,9 @@ public final class RetryingHandler implements Serializable {
                 try (final Jedis jedis = redisServer.getPool().getResource()) {
                     final Pipeline pipeline = jedis.pipelined();
 
-                    pipeline.del(theKey);
+                    if (!onlyProperties) {
+                        pipeline.del(theKey);
+                    }
                     indexableProperties.stream().forEach(ip -> {
                         pipeline.srem(ip.propertyKey, ip.entityKey);
                         pipeline.zrem(indexablePropertyNameToSortedSet(ip.propertyKey), ip.entityKey);
@@ -444,7 +451,13 @@ public final class RetryingHandler implements Serializable {
         }, null);
     }
 
+
     public void tryDSRemove(final Collection<String> entityIds, final DAO dao) {
+
+        tryDSRemove(entityIds, dao, false);
+    }
+
+    public void tryDSRemove(final Collection<String> entityIds, final DAO dao, final boolean onlyProperties) {
         final Map<String, RedisEntity> map = tryDSGetMultiple(entityIds, dao);
 
         if (!map.isEmpty()) {
@@ -460,7 +473,9 @@ public final class RetryingHandler implements Serializable {
                     final Map<RedisEntity, String> entitiesWithKey = new HashMap<>(entityIds.size());
                     map.values().forEach(e -> entitiesWithKey.put(e, buildKey(dao, e, isProductionEnvironment, redisServer)));
 
-                    entitiesWithKey.values().forEach(pipeline::del);
+                    if (!onlyProperties) {
+                        entitiesWithKey.values().forEach(pipeline::del);
+                    }
                     entitiesWithKey.entrySet().stream().
                             forEach(re -> buildIndexablePropertiesKeys(re.getValue(), re.getKey(), dao, isProductionEnvironment, redisServer).
                                     forEach(ip -> {
@@ -583,7 +598,7 @@ public final class RetryingHandler implements Serializable {
     }
 
     private <T extends RedisEntity> List<T> instantiateEntities(final DAO<T> dao, final List<String> resultList) {
-        return resultList == null ? Collections.EMPTY_LIST : resultList.stream()
+        return resultList == null ? Collections.emptyList() : resultList.stream()
                 .filter(s -> s != null)
                 .map(dao::buildPersistentObjectInstanceFromPersistedStringData)
                 .collect(Collectors.toList());

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -175,10 +176,10 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     @Override
     public List<P> findMultipleByIndexableProperty(final String propertyName, final String id) {
         if (id == null || id.trim().length() == 0) {
-            return null;
+            return Collections.emptyList();
         }
 
-        final List<P> cached = customByIdCache == null ? null : customByIdCache.getByParams(propertyName, id);
+        final List<P> cached = customByIdCache == null ? Collections.emptyList() : customByIdCache.getByParams(propertyName, id);
         if (cached != null && !cached.isEmpty())
             return cached;
 
@@ -193,7 +194,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     @Override
     public List<P> findMultipleLastOccurrencesByIndexableProperty(final String propertyName, final int ocurrences, final String id) {
         if (id == null || id.trim().length() == 0) {
-            return null;
+            return Collections.emptyList();
         }
         return getRetryingHandler().tryDSGetLastOccurrencesByIndexableProperty(propertyName, id, ocurrences, this);
     }
@@ -201,7 +202,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     @Override
     public List<P> findMultipleSortedFromToByIndexableProperty(final String propertyName, final String id, final int from, final int to) {
         if (id == null || id.trim().length() == 0) {
-            return null;
+            return Collections.emptyList();
         }
         return getRetryingHandler().tryDSGetFromToByIndexableProperty(propertyName, id, from, to, this);
     }
@@ -209,7 +210,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     @Override
     public List<P> findMultipleIntersectionOfIndexableProperty(final Map<String, String> propertyNameAndValueMap) {
         if (propertyNameAndValueMap == null || propertyNameAndValueMap.size() == 0) {
-            return null;
+            return Collections.emptyList();
         }
 
         final List<P> cached = customByIdCache == null ? null : customByIdCache.getByParams(propertyNameAndValueMap);
@@ -227,7 +228,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     @Override
     public List<P> findMultipleUnionOfIndexableProperty(final List<Pair<String, String>> propertyNameAndValuePair) {
         if (propertyNameAndValuePair == null || propertyNameAndValuePair.size() == 0) {
-            return null;
+            return Collections.emptyList();
         }
         return getRetryingHandler().tryDSGetUnionOfIndexableProperties(this, propertyNameAndValuePair);
     }
