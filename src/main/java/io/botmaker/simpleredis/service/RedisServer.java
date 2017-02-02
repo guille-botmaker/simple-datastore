@@ -1,6 +1,8 @@
 package io.botmaker.simpleredis.service;
 
+import io.botmaker.simpleredis.util.TimeUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 public final class RedisServer {
@@ -118,15 +120,6 @@ public final class RedisServer {
 //        }));
 //    }
 //
-//    private void releaseLock(final String key) {
-//        RedisServer.getInstance().call(new RedisClosure() {
-//            @Override
-//            public Object execute(final Jedis jedis, final String appIds) {
-//                jedis.del(appIds + key);
-//                return null;
-//            }
-//        });
-//    }
 //
 //    private Object doCallImpl(final RedisClosure redisClosure) throws Exception {
 //        Jedis jedis = null;
@@ -144,4 +137,20 @@ public final class RedisServer {
 //            }
 //        }
 //    }
+
+    public boolean tryToLock(final String key, final int expirationSeconds) {
+        try (final Jedis jedis = getPool().getResource()) {
+            if ("ok".equalsIgnoreCase(jedis.set(key, TimeUtils.getCurrentAsISO(), "NX", "EX", expirationSeconds))) {
+                // if lock adquired
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void releaseLock(final String key) {
+        try (final Jedis jedis = getPool().getResource()) {
+            jedis.del(key);
+        }
+    }
 }
