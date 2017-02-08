@@ -10,6 +10,8 @@ public interface DAOCustomByIdCache<P extends RedisEntity> {
 
     void put(final String id, final P result);
 
+    void remove(final String id);
+
     void setDAO(final DAO<P> dao);
 
     /**
