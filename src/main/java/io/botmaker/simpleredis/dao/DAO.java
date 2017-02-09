@@ -111,13 +111,15 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     public void remove(final String id) {
 
         getRetryingHandler().tryDSRemove(id, this);
-        customByIdCache.remove(id);
+        if (customByIdCache != null)
+            customByIdCache.remove(id);
     }
 
     public void remove(final Collection<String> ids) {
 
         getRetryingHandler().tryDSRemove(ids, this);
-        ids.forEach(customByIdCache::remove);
+        if (customByIdCache != null)
+            ids.forEach(customByIdCache::remove);
     }
 
     protected Predicate<RedisEntity> getFilterPredicate() {
