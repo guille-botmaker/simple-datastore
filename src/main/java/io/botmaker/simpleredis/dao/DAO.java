@@ -8,10 +8,7 @@ import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class is a wrapper for Datastore operations. Supports most of the DatastoreService and DatastoreAsyncService operations adding features such as:
@@ -68,7 +65,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     }
 
     public List<P> getAll() {
-        return getRetryingHandler().tryDSGetAll(this);
+        return new ArrayList<>(getRetryingHandler().tryDSGetAll(this));
     }
 
     public P findById(final String id) {
@@ -91,7 +88,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     }
 
     public Map<String, P> findUniqueIdMultiple(final Collection<String> ids) {
-        return getRetryingHandler().tryDSGetMultiple(ids, this);
+        return new HashMap<>(getRetryingHandler().tryDSGetMultiple(ids, this));
     }
 
     public void massiveUpload(final Collection<P> list) {
@@ -187,14 +184,14 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
 
         final List<P> cached = customByIdCache == null ? Collections.emptyList() : customByIdCache.getByParams(propertyName, id);
         if (cached != null && !cached.isEmpty())
-            return cached;
+            return new ArrayList<>(cached);
 
         final List<P> result = getRetryingHandler().tryDSGetByIndexableProperty(propertyName, id, this);
 
         if (customByIdCache != null)
             customByIdCache.putByParams(result, propertyName, id);
 
-        return result;
+        return new ArrayList<>(result);
     }
 
     @Override
@@ -202,7 +199,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         if (id == null || id.trim().length() == 0) {
             return Collections.emptyList();
         }
-        return getRetryingHandler().tryDSGetLastOccurrencesByIndexableProperty(propertyName, id, ocurrences, this);
+        return new ArrayList<>(getRetryingHandler().tryDSGetLastOccurrencesByIndexableProperty(propertyName, id, ocurrences, this));
     }
 
     @Override
@@ -210,7 +207,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         if (id == null || id.trim().length() == 0) {
             return Collections.emptyList();
         }
-        return getRetryingHandler().tryDSGetFromToByIndexableProperty(propertyName, id, from, to, this);
+        return new ArrayList<>(getRetryingHandler().tryDSGetFromToByIndexableProperty(propertyName, id, from, to, this));
     }
 
     @Override
@@ -221,14 +218,14 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
 
         final List<P> cached = customByIdCache == null ? null : customByIdCache.getByParams(propertyNameAndValueMap);
         if (cached != null && !cached.isEmpty())
-            return cached;
+            return new ArrayList<>(cached);
 
         final List<P> result = getRetryingHandler().tryDSGetIntersectionOfIndexableProperties(this, propertyNameAndValueMap);
 
         if (customByIdCache != null)
             customByIdCache.putByParams(result, propertyNameAndValueMap);
 
-        return result;
+        return new ArrayList<>(result);
     }
 
     @Override
@@ -236,6 +233,6 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
         if (propertyNameAndValuePair == null || propertyNameAndValuePair.size() == 0) {
             return Collections.emptyList();
         }
-        return getRetryingHandler().tryDSGetUnionOfIndexableProperties(this, propertyNameAndValuePair);
+        return new ArrayList<>(getRetryingHandler().tryDSGetUnionOfIndexableProperties(this, propertyNameAndValuePair));
     }
 }
