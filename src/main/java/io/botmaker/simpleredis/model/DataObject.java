@@ -29,6 +29,10 @@ public class DataObject extends JSONObject implements Serializable {
         super(map);
     }
 
+    public DataObject(final JSONObject json) {
+        this.mergeWith(json);
+    }
+
     public DataObject(final String source) throws JSONException {
         super(source);
     }
