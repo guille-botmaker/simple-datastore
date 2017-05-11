@@ -37,10 +37,9 @@ public final class RetryingExecutor<TPARAM> {
     }
 
     private void handleError(final Exception exception) {
-        maxRetries = maxRetries - 1;
-
-        if (maxRetries == 0)
+        if (maxRetries <= 0)
             throw new NoMoreRetriesException(exception);
+        maxRetries = maxRetries - 1;
 
         RetryingHandler.sleep(timeBetweenRetries);
     }
