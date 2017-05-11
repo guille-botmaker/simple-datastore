@@ -17,8 +17,8 @@ public final class RedisServer {
         this.appId = appId;
 
         final GenericObjectPoolConfig config = new GenericObjectPoolConfig();
-        config.setMaxTotal(10);
-        config.setMaxIdle(3);
+        config.setMaxTotal(40);
+        config.setMaxIdle(10);
         config.setTestWhileIdle(true);
         config.setTestOnCreate(false);
 
