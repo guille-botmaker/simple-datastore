@@ -1,9 +1,10 @@
 package io.botmaker.simpleredis.service;
 
-import io.botmaker.simpleredis.util.TimeUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+
+import java.util.Collections;
 
 public final class RedisServer {
 
@@ -138,9 +139,9 @@ public final class RedisServer {
 //        }
 //    }
 
-    public boolean tryToLock(final String key, final int expirationSeconds) {
+    public boolean tryToLock(final String key, final String locker, final int expirationSeconds) {
         try (final Jedis jedis = getPool().getResource()) {
-            if ("ok".equalsIgnoreCase(jedis.set(key, TimeUtils.getCurrentAsISO(), "NX", "EX", expirationSeconds))) {
+            if ("ok".equalsIgnoreCase(jedis.set(key, locker, "NX", "EX", expirationSeconds))) {
                 // if lock adquired
                 return true;
             }
@@ -148,9 +149,16 @@ public final class RedisServer {
         return false;
     }
 
-    public void releaseLock(final String key) {
+    public boolean releaseLock(final String key, final String locker) {
+
+        final String script = "if redis.call(\"get\",KEYS[1]) == ARGV[1] then\n" +
+                "        return redis.call(\"del\",KEYS[1])\n" +
+                "else\n" +
+                "        return 0\n" +
+                "end";
+
         try (final Jedis jedis = getPool().getResource()) {
-            jedis.del(key);
+            return 0 != (Long) jedis.eval(script, Collections.singletonList(key), Collections.singletonList(locker));
         }
     }
 }
