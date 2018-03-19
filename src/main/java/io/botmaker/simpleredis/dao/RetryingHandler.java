@@ -30,8 +30,8 @@ public final class RetryingHandler implements Serializable {
     public static final String DEFAULT = "prod";
     private static final long serialVersionUID = 472842924253314234L;
     private static final Logger LOGGER = Logger.getLogger(RetryingHandler.class.getName());
-    private static final int MAX_RETRIES = 3;
-    private static final int WAIT_MS = 800;
+    private static final int MAX_RETRIES = 2;
+    private static final int WAIT_MS = 100;
 
     public static void sleep(final int millis) {
         try {
