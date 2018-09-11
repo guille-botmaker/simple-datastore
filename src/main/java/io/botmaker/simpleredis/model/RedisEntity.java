@@ -11,6 +11,7 @@ import io.botmaker.simpleredis.util.RandomUtils;
 import io.botmaker.simpleredis.util.TimeUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -197,7 +198,7 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         final DataObject result = new DataObject();
         final DataObject source = getDataObject();
 
-        result.mergeWith(source);
+        result.mergeWith(new JSONObject(source));
 
         for (final Map.Entry<String, PropertyMeta> entry : getPropertiesMetadata().entrySet()) {
             final PropertyMeta propertyMeta = entry.getValue();
