@@ -141,7 +141,7 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
                         !Objects.equals(this.LAST_MODIFICATION.get(), other.LAST_MODIFICATION.get()) ||
                         this.propertiesMetadata.size() != other.propertiesMetadata.size() ||
                         !comparePropertiesWith(other)
-                ) {
+        ) {
             return false;
         }
 
@@ -198,7 +198,7 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
         final DataObject result = new DataObject();
         final DataObject source = getDataObject();
 
-        result.mergeWith(new JSONObject(source));
+        if (source != null) result.mergeWith(new JSONObject(source.getInternalMap()));
 
         for (final Map.Entry<String, PropertyMeta> entry : getPropertiesMetadata().entrySet()) {
             final PropertyMeta propertyMeta = entry.getValue();
