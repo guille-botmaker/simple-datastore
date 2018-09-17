@@ -11,6 +11,7 @@ public abstract class PersistentObject implements Serializable {
     public static final String DATE_FORMAT = "yyMMddHHmmssSSS";
     protected static final Logger LOGGER = Logger.getLogger(PersistentObject.class.getName());
     private static final long serialVersionUID = 6181606486836703354L;
+    private boolean isPersisted;
 
     public abstract String getId();
 
@@ -40,5 +41,13 @@ public abstract class PersistentObject implements Serializable {
         final String id = getId();
 
         return id != null ? id.hashCode() : 0;
+    }
+
+    public void isPersisted(final boolean isPersisted) {
+        this.isPersisted = isPersisted;
+    }
+
+    public boolean isPersisted() {
+        return isPersisted;
     }
 }

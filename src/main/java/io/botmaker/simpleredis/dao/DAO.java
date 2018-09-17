@@ -139,6 +139,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     @Override
     public P buildPersistentObjectInstanceFromPersistedStringData(final String persistedStringData) {
         final P result = buildPersistentObjectInstance();
+        result.isPersisted(true);
         result.getDataObject().mergeWith(new DataObject(persistedStringData));
 
         return result;
