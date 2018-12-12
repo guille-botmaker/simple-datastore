@@ -11,6 +11,7 @@ public final class RandomUtils {
     private final static char[] SAFE_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
     private final static char[] SAFE_NUMBERS = "0123456789".toCharArray();
     private final static char[] SAFE_ALPHANUMBERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+    private final static char[] SAFE_ALPHANUMBERS_CASE = ("ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toLowerCase() + "0123456789").toCharArray();
     private static final Object INIT_LOCK_OBJECT = new Object();
     private static RandomUtils instance;
     private final SecureRandom random;
@@ -98,6 +99,10 @@ public final class RandomUtils {
 
     public String getRandomSafeAlphaNumberString(final int size) {
         return getRandomVaryingSymbols(size, SAFE_ALPHANUMBERS);
+    }
+
+    public String getRandomSafeAlphaCaseNumberString(final int size) {
+        return getRandomVaryingSymbols(size, SAFE_ALPHANUMBERS_CASE);
     }
 
     public List<?> shuffle(final List<?> choices) {
