@@ -1,6 +1,7 @@
 package io.botmaker.tests.sample;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.model.config.*;
 import io.botmaker.simpleredis.property.*;

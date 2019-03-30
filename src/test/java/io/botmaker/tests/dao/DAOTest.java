@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.botmaker.simpleredis.dao.RetryingHandler;
 import io.botmaker.simpleredis.model.RedisEntity;
@@ -13,6 +14,7 @@ import io.botmaker.tests.sample.ABean;
 import io.botmaker.tests.sample.User;
 import io.botmaker.tests.sample.UserDAO;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -487,11 +489,13 @@ public class DAOTest extends AbstractTest {
         };
 
         try {
-            final String user = getObjectMapper().writerFor(userTypeReference).writeValueAsString(theUser);
-            System.err.println("User: " + user);
-//            final ObjectMapper objectMapper = getObjectMapper();
-//            final Object userCopy = objectMapper.readValue(user, userTypeReference);
+            final ObjectWriter objectWriter = getObjectMapper().writerFor(userTypeReference);
+            final String userString = objectWriter.writeValueAsString(theUser);
+            System.err.println("User: " + userString);
+            final ObjectMapper objectMapper = getObjectMapper();
+            final Object userCopy = objectMapper.readValue(userString, userTypeReference);
 
+            Assert.assertEquals(userString, objectWriter.writeValueAsString(userCopy));
         } catch (final java.io.IOException e) {
             throw new RuntimeException(e);
         }
