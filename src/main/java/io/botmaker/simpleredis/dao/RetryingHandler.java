@@ -583,7 +583,7 @@ public final class RetryingHandler implements Serializable {
         String args = buildLuaParameters("ARGV", argNames);
         args = (args.length() > 0 ? "," : "") + args;
 
-        final int BATCH_COUNT = 8;
+        final int BATCH_COUNT = 15;
         final int BATCH_SIZE = 5000;
         final int LIMIT = BATCH_COUNT * BATCH_SIZE;
 
