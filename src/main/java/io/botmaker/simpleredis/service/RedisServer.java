@@ -3,6 +3,8 @@ package io.botmaker.simpleredis.service;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisSentinelPool;
+import redis.clients.util.Pool;
 
 import java.util.Collections;
 
@@ -10,7 +12,7 @@ public final class RedisServer {
 
 //    private static final Logger LOGGER = Logger.getLogger(RedisServer.class.getName());
 
-    private JedisPool pool;
+    private Pool<Jedis> pool;
     //    private final JedisSentinelPool pool;
     private String appId;
 
@@ -27,7 +29,19 @@ public final class RedisServer {
 //        pool = new JedisSentinelPool(MASTER_NAME, Collections.singleton(new HostAndPort(host, port).toString()), config, 2000);
     }
 
-    public JedisPool getPool() {
+    public void configureSentinel(final String sentinelHost, final int sentinelPort, final String masterName, final String appId, final String redisAuthPassword) {
+        this.appId = appId;
+
+        final GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+        config.setMaxTotal(40);
+        config.setMaxIdle(10);
+        config.setTestWhileIdle(true);
+        config.setTestOnCreate(false);
+
+        pool = new JedisSentinelPool(masterName, Collections.singleton(sentinelHost + ":" + sentinelPort));
+    }
+
+    public Pool<Jedis> getPool() {
         return pool;
     }
 
