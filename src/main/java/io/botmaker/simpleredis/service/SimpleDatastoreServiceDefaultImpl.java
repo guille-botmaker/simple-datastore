@@ -45,6 +45,12 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     }
 
     @Override
+    public void configureSentinel(final String masterName, final String appId, final String sentinelHost, final int sentinelPort, final boolean isProductionEnvironment, final String redisAuthPassword) {
+        this.redisServer.configureSentinel(sentinelHost, sentinelPort, masterName, appId, redisAuthPassword);
+        this.isProductionEnvironment = isProductionEnvironment;
+    }
+
+    @Override
     public RedisServer getRedisServer() {
         return redisServer;
     }

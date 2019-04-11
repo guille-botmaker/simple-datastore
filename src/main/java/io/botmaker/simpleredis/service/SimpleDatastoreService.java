@@ -24,5 +24,7 @@ public interface SimpleDatastoreService {
 
     void configRedisServer(final String appId, final String redisHost, final int redisPort, final boolean isProductionEnvironment, final String redisAuthPassword);
 
+    void configureSentinel(final String masterName, final String appId, final String sentinelHost, final int sentinelPort, final boolean isProductionEnvironment, final String redisAuthPassword);
+
     RedisServer getRedisServer();
 }
