@@ -1,6 +1,6 @@
 package io.botmaker.simpleredis.service;
 
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
@@ -34,7 +34,7 @@ public final class RedisServer {
     }
 
     public void configureSentinel(final String sentinelHost, final int sentinelPort, final String masterName, final String appId, final String redisAuthPassword,
-                                  final List<Pair<Pair<String, Integer>, Pair<String, Integer>>> addressTranslators) {
+                                  final List<ImmutablePair<ImmutablePair<String, Integer>, ImmutablePair<String, Integer>>> addressTranslators) {
         this.appId = appId;
 
         final GenericObjectPoolConfig config = new GenericObjectPoolConfig();

@@ -1,5 +1,6 @@
 package redis.clients.jedis;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,7 @@ import java.util.List;
 public final class HostAndPort implements Serializable {
 
     private static final long serialVersionUID = -519876229978427751L;
-    private static final List<Pair<Pair<String, Integer>, Pair<String, Integer>>> addressTranslators = new ArrayList<>();
+    private static final List<ImmutablePair<ImmutablePair<String, Integer>, ImmutablePair<String, Integer>>> addressTranslators = new ArrayList<>();
 
 
     public static volatile String localhost;
@@ -33,7 +34,7 @@ public final class HostAndPort implements Serializable {
         this.port = translated != null ? translated.getRight() : port;
     }
 
-    public static void setAddressTranslator(final List<Pair<Pair<String, Integer>, Pair<String, Integer>>> v) {
+    public static void setAddressTranslator(final List<ImmutablePair<ImmutablePair<String, Integer>, ImmutablePair<String, Integer>>> v) {
         addressTranslators.clear();
         addressTranslators.addAll(v);
     }
