@@ -1,12 +1,16 @@
 package io.botmaker.simpleredis.service;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisSentinelPool;
-import redis.clients.util.Pool;
+import redis.clients.jedis.params.SetParams;
+import redis.clients.jedis.util.Pool;
 
 import java.util.Collections;
+import java.util.List;
 
 public final class RedisServer {
 
@@ -29,7 +33,8 @@ public final class RedisServer {
 //        pool = new JedisSentinelPool(MASTER_NAME, Collections.singleton(new HostAndPort(host, port).toString()), config, 2000);
     }
 
-    public void configureSentinel(final String sentinelHost, final int sentinelPort, final String masterName, final String appId, final String redisAuthPassword) {
+    public void configureSentinel(final String sentinelHost, final int sentinelPort, final String masterName, final String appId, final String redisAuthPassword,
+                                  final List<Pair<Pair<String, Integer>, Pair<String, Integer>>> addressTranslators) {
         this.appId = appId;
 
         final GenericObjectPoolConfig config = new GenericObjectPoolConfig();
@@ -37,6 +42,8 @@ public final class RedisServer {
         config.setMaxIdle(10);
         config.setTestWhileIdle(true);
         config.setTestOnCreate(false);
+
+        HostAndPort.setAddressTranslator(addressTranslators);
 
         pool = new JedisSentinelPool(masterName, Collections.singleton(sentinelHost + ":" + sentinelPort));
     }
@@ -155,7 +162,8 @@ public final class RedisServer {
 
     public boolean tryToLock(final String key, final String locker, final int expirationSeconds) {
         try (final Jedis jedis = getPool().getResource()) {
-            if ("ok".equalsIgnoreCase(jedis.set(key, locker, "NX", "EX", expirationSeconds))) {
+
+            if ("ok".equalsIgnoreCase(jedis.set(key, locker, new SetParams().nx().ex(expirationSeconds)))) {
                 // if lock adquired
                 return true;
             }

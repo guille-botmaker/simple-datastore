@@ -2,8 +2,10 @@ package io.botmaker.simpleredis.service;
 
 import io.botmaker.simpleredis.dao.DAO;
 import io.botmaker.simpleredis.dao.ResourceDAO;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreService {
@@ -45,8 +47,9 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     }
 
     @Override
-    public void configureSentinel(final String masterName, final String appId, final String sentinelHost, final int sentinelPort, final boolean isProductionEnvironment, final String redisAuthPassword) {
-        this.redisServer.configureSentinel(sentinelHost, sentinelPort, masterName, appId, redisAuthPassword);
+    public void configureSentinel(final String masterName, final String appId, final String sentinelHost, final int sentinelPort, final boolean isProductionEnvironment,
+                                  final String redisAuthPassword, final List<Pair<Pair<String, Integer>, Pair<String, Integer>>> addressTranslators) {
+        this.redisServer.configureSentinel(sentinelHost, sentinelPort, masterName, appId, redisAuthPassword, addressTranslators);
         this.isProductionEnvironment = isProductionEnvironment;
     }
 

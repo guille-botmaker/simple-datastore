@@ -1,6 +1,9 @@
 package io.botmaker.simpleredis.service;
 
 import io.botmaker.simpleredis.dao.DAO;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.List;
 
 /**
  * Entry point for service access
@@ -24,7 +27,7 @@ public interface SimpleDatastoreService {
 
     void configRedisServer(final String appId, final String redisHost, final int redisPort, final boolean isProductionEnvironment, final String redisAuthPassword);
 
-    void configureSentinel(final String masterName, final String appId, final String sentinelHost, final int sentinelPort, final boolean isProductionEnvironment, final String redisAuthPassword);
+    void configureSentinel(final String masterName, final String appId, final String sentinelHost, final int sentinelPort, final boolean isProductionEnvironment, final String redisAuthPassword, final List<Pair<Pair<String, Integer>, Pair<String, Integer>>> addressTranslators);
 
     RedisServer getRedisServer();
 }
