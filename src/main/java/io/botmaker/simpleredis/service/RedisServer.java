@@ -45,7 +45,7 @@ public final class RedisServer {
 
         HostAndPort.setAddressTranslator(addressTranslators);
 
-        pool = new JedisSentinelPool(masterName, Collections.singleton(sentinelHost + ":" + sentinelPort));
+        pool = new JedisSentinelPool(masterName, Collections.singleton(sentinelHost + ":" + sentinelPort), config, 10000);
     }
 
     public Pool<Jedis> getPool() {
