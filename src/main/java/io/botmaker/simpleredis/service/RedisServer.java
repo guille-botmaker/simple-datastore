@@ -1,5 +1,6 @@
 package io.botmaker.simpleredis.service;
 
+import io.botmaker.simpleredis.dao.RetryingHandler;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.HostAndPort;
@@ -11,6 +12,7 @@ import redis.clients.jedis.util.Pool;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class RedisServer {
 
@@ -161,26 +163,42 @@ public final class RedisServer {
 //    }
 
     public boolean tryToLock(final String key, final String locker, final int expirationSeconds) {
-        try (final Jedis jedis = getPool().getResource()) {
 
-            if ("ok".equalsIgnoreCase(jedis.set(key, locker, new SetParams().nx().ex(expirationSeconds)))) {
-                // if lock adquired
-                return true;
+        final AtomicBoolean result = new AtomicBoolean(false);
+
+        new RetryingHandler().tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
+
+            try (final Jedis jedis = redisServer.getPool().getResource()) {
+
+                if ("ok".equalsIgnoreCase(jedis.set(key, locker, new SetParams().nx().ex(expirationSeconds)))) {
+                    // if lock adquired
+                    result.set(true);
+                }
             }
-        }
-        return false;
+
+        }, null);
+
+        return result.get();
     }
 
     public boolean releaseLock(final String key, final String locker) {
 
-        final String script = "if redis.call(\"get\",KEYS[1]) == ARGV[1] then\n" +
-                "        return redis.call(\"del\",KEYS[1])\n" +
-                "else\n" +
-                "        return 0\n" +
-                "end";
+        final AtomicBoolean result = new AtomicBoolean(false);
 
-        try (final Jedis jedis = getPool().getResource()) {
-            return 0 != (Long) jedis.eval(script, Collections.singletonList(key), Collections.singletonList(locker));
-        }
+        new RetryingHandler().tryClosure((redisServer, results, loggingActivated, isProductionEnvironment) -> {
+
+            final String script = "if redis.call(\"get\",KEYS[1]) == ARGV[1] then\n" +
+                    "        return redis.call(\"del\",KEYS[1])\n" +
+                    "else\n" +
+                    "        return 0\n" +
+                    "end";
+
+            try (final Jedis jedis = getPool().getResource()) {
+                result.set(0 != (Long) jedis.eval(script, Collections.singletonList(key), Collections.singletonList(locker)));
+            }
+
+        }, null);
+
+        return result.get();
     }
 }
