@@ -30,8 +30,8 @@ public final class RetryingHandler implements Serializable {
     public static final String DEFAULT = "prod";
     private static final long serialVersionUID = 472842924253314234L;
     private static final Logger LOGGER = Logger.getLogger(RetryingHandler.class.getName());
-    private static final int MAX_RETRIES = 2;
-    private static final int WAIT_MS = 100;
+    private static final int MAX_RETRIES = 4;
+    private static final int WAIT_MS = 200;
 
 //    public static void main(String[] args) {
 //        final RedisServer redisServer1 = SimpleDatastoreServiceFactory.getSimpleDatastoreService().getRedisServer();
@@ -57,7 +57,7 @@ public final class RetryingHandler implements Serializable {
     }
 
     public static String buildKey(final String entityName, final String entityKey, final boolean entityUsesAppIdPrefix, final boolean isProductionEnvironment,
-                           final RedisServer redisServer) {
+                                  final RedisServer redisServer) {
 
         return (entityUsesAppIdPrefix ? redisServer.getAppId() : (isProductionEnvironment ? DEFAULT : redisServer.getAppId())) +
                 ":" +
