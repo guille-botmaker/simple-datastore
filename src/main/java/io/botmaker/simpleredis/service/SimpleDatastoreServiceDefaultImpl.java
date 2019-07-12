@@ -10,7 +10,7 @@ import java.util.Map;
 
 public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreService {
 
-    private final Map<Class, DAO> daoMap = new HashMap<>();
+    public final Map<Class, DAO> daoMap = new HashMap<>();
     private final Map<String, DAO> daoByEntityNameMap = new HashMap<>();
     private final RedisServer redisServer = new RedisServer();
     private boolean loggingDatastoreCalls = false;
