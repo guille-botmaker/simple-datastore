@@ -4,14 +4,16 @@ import io.botmaker.simpleredis.dao.DAO;
 import io.botmaker.simpleredis.dao.ResourceDAO;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreService {
 
-    public final Map<Class, DAO> daoMap = new HashMap<>();
-    private final Map<String, DAO> daoByEntityNameMap = new HashMap<>();
+    public final Map<Class, DAO> daoMap = new ConcurrentHashMap<>();
+    private final Map<String, DAO> daoByEntityNameMap = new ConcurrentHashMap<>();
     private final RedisServer redisServer = new RedisServer();
     private boolean loggingDatastoreCalls = false;
     private boolean isProductionEnvironment = false;
