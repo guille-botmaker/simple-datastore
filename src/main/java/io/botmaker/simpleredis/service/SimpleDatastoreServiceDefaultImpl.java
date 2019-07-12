@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreService {
 
-    public final Map<Class, DAO> daoMap = new ConcurrentHashMap<>();
+    private final Map<Class, DAO> daoMap = new ConcurrentHashMap<>();
     private final Map<String, DAO> daoByEntityNameMap = new ConcurrentHashMap<>();
     private final RedisServer redisServer = new RedisServer();
     private boolean loggingDatastoreCalls = false;
