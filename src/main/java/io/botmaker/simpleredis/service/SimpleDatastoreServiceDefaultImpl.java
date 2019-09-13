@@ -3,9 +3,9 @@ package io.botmaker.simpleredis.service;
 import io.botmaker.simpleredis.dao.DAO;
 import io.botmaker.simpleredis.dao.ResourceDAO;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.util.Pool;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,6 +40,11 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     @Override
     public void configRedisServer(final String appId, final String redisHost, final int redisPort, final boolean isProductionEnvironment) {
         this.configRedisServer(appId, redisHost, redisPort, isProductionEnvironment, null);
+    }
+
+    @Override
+    public void overridePool(final Pool<Jedis> pool) {
+        this.redisServer.overridePool(pool);
     }
 
     @Override
