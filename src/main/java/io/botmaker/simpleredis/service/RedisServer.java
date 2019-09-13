@@ -50,6 +50,10 @@ public final class RedisServer {
         pool = new JedisSentinelPool(masterName, Collections.singleton(sentinelHost + ":" + sentinelPort), config, 10000);
     }
 
+    public void overridePool(final Pool<Jedis> pool) {
+        this.pool = pool;
+    }
+
     public Pool<Jedis> getPool() {
         return pool;
     }
