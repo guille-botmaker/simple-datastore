@@ -31,7 +31,7 @@ public interface SimpleDatastoreService {
 
     void configureSentinel(final String masterName, final String appId, final String sentinelHost, final int sentinelPort, final boolean isProductionEnvironment, final String redisAuthPassword, final List<ImmutablePair<ImmutablePair<String, Integer>, ImmutablePair<String, Integer>>> addressTranslators);
 
-    void overridePool(final Pool<Jedis> pool);
+    void overridePool(final String appId, final Pool<Jedis> pool);
 
     RedisServer getRedisServer();
 }
