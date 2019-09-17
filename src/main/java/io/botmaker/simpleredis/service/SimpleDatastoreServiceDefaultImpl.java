@@ -45,6 +45,7 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     @Override
     public void overridePool(final String appId, final Pool<Jedis> pool) {
         this.redisServer.overridePool(appId, pool);
+        this.isProductionEnvironment = true;
     }
 
     @Override
