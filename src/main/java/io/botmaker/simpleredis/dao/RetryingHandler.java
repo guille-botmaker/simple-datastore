@@ -1,5 +1,6 @@
 package io.botmaker.simpleredis.dao;
 
+import io.botmaker.simpleredis.audit.SpanTracing;
 import io.botmaker.simpleredis.exception.NoMoreRetriesException;
 import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
@@ -556,10 +557,13 @@ public final class RetryingHandler implements Serializable {
         final RedisServer redisServer = simpleDatastoreService.getRedisServer();
         final boolean loggingActivated = simpleDatastoreService.isDatastoreCallsLoggingActivated();
         final boolean isProductionEnvironment = simpleDatastoreService.isProductionEnvironment();
+        final SpanTracing spanTracing = simpleDatastoreService.getSpanTracing();
 
         while (true) {
             try {
+                final Object span = spanTracing.startSpan(closure.getClass().getName());
                 closure.execute(redisServer, results, loggingActivated, isProductionEnvironment);
+                spanTracing.endSpan(span);
                 break;
             } catch (final Exception exception) {
                 handleError(values, exception);
@@ -578,7 +582,6 @@ public final class RetryingHandler implements Serializable {
     }
 
     private List<String> executeRedisLuaCommandForMultipleRawEntities(final RedisServer redisServer, final String redisCommand, final List<String> keyNames, final List<String> argNames) {
-
         final String keys = buildLuaParameters("KEYS", keyNames);
         String args = buildLuaParameters("ARGV", argNames);
         args = (args.length() > 0 ? "," : "") + args;
@@ -616,10 +619,19 @@ public final class RetryingHandler implements Serializable {
 
 
         List<String> resultList;
+        final SpanTracing spanTracing = SimpleDatastoreServiceFactory.getSimpleDatastoreService().getSpanTracing();
+
         try (final Jedis jedis = redisServer.getPool().getResource()) {
+
+            final Object span = spanTracing.startSpan(redisCommand);
+
             resultList = (List<String>) jedis.eval(script, keyNames, argNames);
+
+            spanTracing.endSpan(span);
         }
+
         if (resultList == null) return Collections.emptyList();
+
         if (resultList.size() >= LIMIT)
             throw new RuntimeException("ERROR more than [" + LIMIT + "] entities on redis query!");
 
@@ -719,9 +731,9 @@ public final class RetryingHandler implements Serializable {
 
     public static final class IndexablePropertyInfoContainer {
 
+        public final PropertyMeta property;
         final String entityKey;
         final String propertyKey;
-        public final PropertyMeta property;
 
         IndexablePropertyInfoContainer(final String entityKey, final String propertyKey, final PropertyMeta property) {
             this.entityKey = entityKey;

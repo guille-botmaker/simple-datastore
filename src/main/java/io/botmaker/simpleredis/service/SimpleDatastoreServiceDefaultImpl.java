@@ -1,5 +1,7 @@
 package io.botmaker.simpleredis.service;
 
+import io.botmaker.simpleredis.audit.DefaultEmptySpanTracing;
+import io.botmaker.simpleredis.audit.SpanTracing;
 import io.botmaker.simpleredis.dao.DAO;
 import io.botmaker.simpleredis.dao.ResourceDAO;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -17,6 +19,7 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     private final RedisServer redisServer = new RedisServer();
     private boolean loggingDatastoreCalls = false;
     private boolean isProductionEnvironment = false;
+    private SpanTracing spanTracing = new DefaultEmptySpanTracing();
 
     public SimpleDatastoreServiceDefaultImpl() {
         registerDAO(new ResourceDAO());
@@ -43,6 +46,11 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
     }
 
     @Override
+    public void useSpanTracing(final SpanTracing spanTracing) {
+        this.spanTracing = spanTracing;
+    }
+
+    @Override
     public void overridePool(final String appId, final Pool<Jedis> pool) {
         this.redisServer.overridePool(appId, pool);
         this.isProductionEnvironment = true;
@@ -59,6 +67,11 @@ public final class SimpleDatastoreServiceDefaultImpl implements SimpleDatastoreS
                                   final String redisAuthPassword, final List<ImmutablePair<ImmutablePair<String, Integer>, ImmutablePair<String, Integer>>> addressTranslators) {
         this.redisServer.configureSentinel(sentinelHost, sentinelPort, masterName, appId, redisAuthPassword, addressTranslators);
         this.isProductionEnvironment = isProductionEnvironment;
+    }
+
+    @Override
+    public SpanTracing getSpanTracing() {
+        return this.spanTracing;
     }
 
     @Override

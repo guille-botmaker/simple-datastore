@@ -1,5 +1,6 @@
 package io.botmaker.simpleredis.service;
 
+import io.botmaker.simpleredis.audit.SpanTracing;
 import io.botmaker.simpleredis.dao.DAO;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import redis.clients.jedis.Jedis;
@@ -24,6 +25,8 @@ public interface SimpleDatastoreService {
 
     DAO getDAO(final String entityName);
 
+    SpanTracing getSpanTracing();
+
     // Redis methods
     void configRedisServer(final String appId, final String redisHost, final int redisPost, final boolean isProductionEnvironment);
 
@@ -32,6 +35,8 @@ public interface SimpleDatastoreService {
     void configureSentinel(final String masterName, final String appId, final String sentinelHost, final int sentinelPort, final boolean isProductionEnvironment, final String redisAuthPassword, final List<ImmutablePair<ImmutablePair<String, Integer>, ImmutablePair<String, Integer>>> addressTranslators);
 
     void overridePool(final String appId, final Pool<Jedis> pool);
+
+    void useSpanTracing(final SpanTracing spanTracing);
 
     RedisServer getRedisServer();
 }
