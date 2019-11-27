@@ -225,7 +225,11 @@ public class DAOTest extends AbstractTest {
         final User u = new User();
         u.getDataObject().put(u.ADDRESS.getPropertyName(), JSONObject.NULL);
 
-        u.ADDRESS.get(); // this use to failed, to fix it we add an override of "has" method in DataObject
+        u.ADDRESS.get(); // this used to fail, to fix it we have added an override of "has" method in DataObject
+
+        u.getDataObject().getInternalMap().put(u.ADDRESS.getPropertyName(), null);
+
+        u.ADDRESS.get(); // this used to fail, to fix it we have added an override of "has" method in DataObject
     }
 
     @Test
