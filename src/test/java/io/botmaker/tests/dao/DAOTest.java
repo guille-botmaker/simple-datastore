@@ -14,6 +14,7 @@ import io.botmaker.tests.sample.ABean;
 import io.botmaker.tests.sample.User;
 import io.botmaker.tests.sample.UserDAO;
 import org.apache.commons.lang3.tuple.Pair;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -216,6 +217,15 @@ public class DAOTest extends AbstractTest {
         assertEquals(user3, userDAO.findById(id3));
         assertEquals(1, userDAO.findByState("new").size());
         assertEquals(1, userDAO.findByState("old").size());
+    }
+
+    @Test
+    public void testNULLPlaceholderProperty() {
+
+        final User u = new User();
+        u.getDataObject().put(u.ADDRESS.getPropertyName(), JSONObject.NULL);
+
+        u.ADDRESS.get(); // this use to failed, to fix it we add an override of "has" method in DataObject
     }
 
     @Test
