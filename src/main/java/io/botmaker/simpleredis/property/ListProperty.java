@@ -65,12 +65,14 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
                     tempList.add(convertedItem);
                 }
 
-                result.clear();
-                result.addAll(tempList);
+                synchronized (result) {
+                    result.clear();
+                    result.addAll(tempList);
+                }
             }
         }
         return (List<V>) result;
-//        return new CopyOnWriteArrayList((List<V>) result);
+//        return new ArrayList((List<V>) result);
     }
 
     @Override
