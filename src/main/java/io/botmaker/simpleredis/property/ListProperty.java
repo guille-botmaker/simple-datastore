@@ -47,8 +47,7 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
         final List result = getJSONArrayFrom(dataObject);
 
         if (!result.isEmpty() && itemClass != null) {
-            final Object firstValue = result.get(0);
-            final boolean isSameType = itemClass.isInstance(firstValue);
+            final boolean isSameType = itemClass.isInstance(result.get(0));
 
             if (!isSameType) {
                 final List<DataObject> tempList = new ArrayList<>(result.size());
@@ -70,7 +69,8 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
                 result.addAll(tempList);
             }
         }
-        return new CopyOnWriteArrayList((List<V>) result);
+        return (List<V>) result;
+//        return new CopyOnWriteArrayList((List<V>) result);
     }
 
     @Override
