@@ -46,9 +46,12 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
         final List result = getJSONArrayFrom(dataObject);
 
         if (!result.isEmpty() && itemClass != null) {
-            final boolean isSameType = itemClass.isInstance(result.get(0));
+            final Object firstValue = result.get(0);
+            final boolean isSameType = itemClass.isInstance(firstValue);
 
             if (!isSameType) {
+                new RuntimeException("[FER] ListProperty getValueImpl itemClass [" + itemClass + "] firstValue [" + firstValue + "]").printStackTrace();
+
                 final List<DataObject> tempList = new ArrayList<>(result.size());
 
                 for (final Object v : result) {
