@@ -65,10 +65,12 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
                     tempList.add(convertedItem);
                 }
 
+                System.err.println("Antes lock " + hashCode());
                 synchronized (result) {
                     result.clear();
                     result.addAll(tempList);
                 }
+                System.err.println("Después lock " + hashCode());
             }
         }
         return (List<V>) result;
