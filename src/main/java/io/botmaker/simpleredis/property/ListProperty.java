@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class ListProperty<V> extends PropertyMeta<List<V>> implements Serializable, List<V> {
 
@@ -50,11 +51,6 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
             final boolean isSameType = itemClass.isInstance(firstValue);
 
             if (!isSameType) {
-                if (!(firstValue instanceof String) && firstValue != null)
-                    new RuntimeException("[FER] ListProperty getValueImpl itemClass [" + itemClass +
-                            "] firstValue.getClass [" + firstValue.getClass() + "]" +
-                            "] firstValue [" + firstValue + "]").printStackTrace();
-
                 final List<DataObject> tempList = new ArrayList<>(result.size());
 
                 for (final Object v : result) {
@@ -74,7 +70,7 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
                 result.addAll(tempList);
             }
         }
-        return (List<V>) result;
+        return new CopyOnWriteArrayList((List<V>) result);
     }
 
     @Override
