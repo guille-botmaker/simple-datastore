@@ -50,8 +50,10 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
             final boolean isSameType = itemClass.isInstance(firstValue);
 
             if (!isSameType) {
-                if (!(firstValue instanceof String))
-                    new RuntimeException("[FER] ListProperty getValueImpl itemClass [" + itemClass + "] firstValue [" + firstValue + "]").printStackTrace();
+                if (!(firstValue instanceof String) && firstValue != null)
+                    new RuntimeException("[FER] ListProperty getValueImpl itemClass [" + itemClass +
+                            "] firstValue.getClass [" + firstValue.getClass() + "]" +
+                            "] firstValue [" + firstValue + "]").printStackTrace();
 
                 final List<DataObject> tempList = new ArrayList<>(result.size());
 
