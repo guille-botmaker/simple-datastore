@@ -149,7 +149,8 @@ public class JSONObject {
      * Construct an empty JSONObject.
      */
     public JSONObject() {
-        this.map = new HashMap();
+//        this.map = new HashMap();
+        this.map = new ConcurrentHashMap();
     }
 
     /**
@@ -234,7 +235,8 @@ public class JSONObject {
      * @throws JSONException
      */
     public JSONObject(Map map) {
-        this.map = new HashMap();
+//        this.map = new HashMap();
+        this.map = new ConcurrentHashMap();
         if (map != null) {
             Iterator i = map.entrySet().iterator();
             while (i.hasNext()) {
