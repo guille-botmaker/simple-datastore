@@ -5,7 +5,7 @@
 
     <groupId>io.botmaker</groupId>
     <artifactId>simpleredis</artifactId>
-    <version>2.0.95</version>
+    <version>2.0.96</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -100,6 +100,12 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
+            <!-- NOTE: if you update this version, remember to change overriden class JSONObject
+            and replace:
+                this.map = new HashMap();
+            with this:
+                this.map = new ConcurrentHashMap();
+            -->
             <version>20140107</version>
         </dependency>
 

@@ -4,12 +4,16 @@ import io.botmaker.simpleredis.model.DataObject;
 import io.botmaker.simpleredis.model.DataObjectSerializer;
 import io.botmaker.simpleredis.util.RandomUtils;
 import io.botmaker.tests.AbstractTest;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RunWith(Parameterized.class)
 public class DataObjectTest extends AbstractTest {
@@ -20,6 +24,42 @@ public class DataObjectTest extends AbstractTest {
     @Parameterized.Parameters
     public static java.util.List<Object[]> data() {
         return Arrays.asList(new Object[2][0]);
+    }
+
+    @Test
+    public void testConcurrentModificationExceptionWhileCopyingDataObject() throws InterruptedException {
+
+        final DataObject dataObject = new DataObject();
+        dataObject.put("1", "1");
+        dataObject.put("2", "2");
+        dataObject.put("3", "3");
+
+        final AtomicReference<RuntimeException> error = new AtomicReference<>();
+        final List<Thread> threads = new ArrayList<>();
+        for (int index = 0; index < 5000; index++) {
+
+            final Thread thread = new Thread(() -> {
+                try {
+                    dataObject.put("4", "4");
+                    dataObject.remove("4");
+
+                    // NOTE this should not throw ConcurrentModificationException
+                    final JSONObject copy = new JSONObject(dataObject.getInternalMap());
+                    System.err.println(copy);
+                } catch (final Exception e) {
+                    error.set(new RuntimeException(e));
+                }
+            });
+            threads.add(thread);
+            thread.start();
+        }
+
+        while (error.get() == null && threads.stream().anyMatch(t -> t.isAlive() && !t.isInterrupted())) {
+            Thread.sleep(100);
+        }
+
+        if (error.get() != null)
+            throw error.get();
     }
 
     @Test
