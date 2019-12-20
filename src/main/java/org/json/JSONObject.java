@@ -528,7 +528,8 @@ public class JSONObject {
             return (JSONArray) object;
         }
         throw new JSONException("JSONObject[" + quote(key)
-                + "] is not a JSONArray.");
+                + "] is not a JSONArray. Real type is [" +
+                ((object != null) ? object.getClass() : "null") + "]");
     }
 
     /**
