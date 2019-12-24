@@ -5,7 +5,7 @@ import io.botmaker.simpleredis.model.config.PropertyMeta;
 import io.botmaker.simpleredis.model.config.STRING;
 import io.botmaker.simpleredis.property.ByteArrayProperty;
 import io.botmaker.simpleredis.property.DateProperty;
-import io.botmaker.simpleredis.property.ListProperty;
+import io.botmaker.simpleredis.property.ListPrimitiveObjectProperty;
 import io.botmaker.simpleredis.property.StringProperty;
 import io.botmaker.simpleredis.util.RandomUtils;
 import io.botmaker.simpleredis.util.TimeUtils;
@@ -181,7 +181,7 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
                 if (!ArrayUtils.isEquals(object1, object2)) {
                     return false;
                 }
-            } else if (object1Property instanceof ListProperty) {
+            } else if (object1Property instanceof ListPrimitiveObjectProperty) {
                 if (!ListUtils.isEqualList((Collection<?>) object1, (Collection<?>) object2)) {
                     return false;
                 }

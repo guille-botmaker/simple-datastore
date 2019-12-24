@@ -5,27 +5,19 @@ import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.model.config.PropertyMeta;
 import org.apache.commons.collections4.list.SetUniqueList;
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-public final class ListProperty<V> extends PropertyMeta<List<V>> implements Serializable, List<V> {
+public class ListPrimitiveObjectProperty<V> extends PropertyMeta<List<V>> implements Serializable, List<V> {
 
     private static final long serialVersionUID = 6181606486836703354L;
 
-    private final Class<? extends DataObject> itemClass;
     private final boolean keepUniqueElements;
 
-    public ListProperty(final RedisEntity owner, final Class<? extends DataObject> _itemClass, final boolean _keepUniqueElements) {
+    public ListPrimitiveObjectProperty(final RedisEntity owner, final boolean _keepUniqueElements) {
         super(owner);
-        itemClass = _itemClass;
         keepUniqueElements = _keepUniqueElements;
-    }
-
-    public Class<? extends DataObject> getItemClass() {
-        return itemClass;
     }
 
     @Override
@@ -44,37 +36,7 @@ public final class ListProperty<V> extends PropertyMeta<List<V>> implements Seri
 
     @Override
     protected List<V> getValueImpl(final DataObject dataObject) {
-        final List result = getJSONArrayFrom(dataObject);
-
-        if (!result.isEmpty() && itemClass != null) {
-            final boolean isSameType = itemClass.isInstance(result.get(0));
-
-            if (!isSameType) {
-                final List<DataObject> tempList = new ArrayList<>(result.size());
-
-                for (final Object v : result) {
-                    final DataObject convertedItem;
-
-                    try {
-                        convertedItem = itemClass.newInstance();
-                    } catch (final Exception _exception) {
-                        throw new RuntimeException("Could not instantiate object of class [" + itemClass.getName() + "]. Maybe missing empty constructor?: " + _exception.getMessage(), _exception);
-                    }
-
-                    convertedItem.mergeWith((JSONObject) v);
-                    tempList.add(convertedItem);
-                }
-
-//                System.err.println("[ListProperty] Antes lock " + hashCode());
-//                synchronized (result) {
-                result.clear();
-                result.addAll(tempList);
-//                }
-//                System.err.println("[ListProperty] Después lock " + hashCode());
-            }
-        }
-        return (List<V>) result;
-//        return new ArrayList((List<V>) result);
+        return getJSONArrayFrom(dataObject);
     }
 
     @Override

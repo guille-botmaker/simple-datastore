@@ -9,7 +9,6 @@ import io.botmaker.tests.sample.User;
 import io.botmaker.tests.sample.UserDAO;
 import org.junit.After;
 import org.junit.Before;
-import redis.clients.jedis.Protocol;
 
 import java.io.Serializable;
 import java.util.ArrayList;

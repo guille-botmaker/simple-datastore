@@ -7,13 +7,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.botmaker.simpleredis.dao.RetryingHandler;
+import io.botmaker.simpleredis.model.DataObject;
 import io.botmaker.simpleredis.model.RedisEntity;
 import io.botmaker.simpleredis.util.RandomUtils;
 import io.botmaker.tests.AbstractTest;
 import io.botmaker.tests.sample.ABean;
+import io.botmaker.tests.sample.Address;
 import io.botmaker.tests.sample.User;
 import io.botmaker.tests.sample.UserDAO;
 import org.apache.commons.lang3.tuple.Pair;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
@@ -59,6 +62,40 @@ public class DAOTest extends AbstractTest {
         for (final User user : buildUsers(lastNameUniqueId)) {
             userDAO.save(user);
         }
+    }
+
+    @Test
+    public void testListJSONObjectPropertyGetItems() {
+
+        final User user = new User();
+
+        final Address address1 = new Address();
+        address1.setStreet("Sesamo Street");
+        address1.setNumber("1st");
+        address1.setOrder(222);
+
+        final DataObject address2 = new DataObject();
+        address2.mergeWith(address1);
+
+        address1.setOrder(111);
+
+        user.ADDRESSES.add(address1);
+
+        final JSONArray jsonArray = user.getDataObject().getJSONArray(user.ADDRESSES.getPropertyName());
+        jsonArray.put(address2);
+
+        Assert.assertEquals(111, address1.getOrder());
+        Assert.assertEquals(222, address2.get("o"));
+
+        for (final Address item : user.ADDRESSES.getItemsReadonly()) {
+            System.err.println(item.getStreet() + " " + item.getNumber());
+            if (item.getOrder() == 222) {
+                item.setOrder(333); // change converted object (dataobject to address)
+            }
+        }
+
+        Assert.assertEquals(111, address1.getOrder());
+        Assert.assertEquals(333, address2.get("o"));
     }
 
     @Test
@@ -227,7 +264,7 @@ public class DAOTest extends AbstractTest {
 
         u.ADDRESS.get(); // this used to fail, to fix it we have added an override of "has" method in DataObject
 
-        u.getDataObject().getInternalMap().put(u.ADDRESS.getPropertyName(), null);
+        u.getDataObject().getInternalMap().put(u.ADDRESS.getPropertyName(), JSONObject.NULL);
 
         u.ADDRESS.get(); // this used to fail, to fix it we have added an override of "has" method in DataObject
     }

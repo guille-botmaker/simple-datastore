@@ -135,7 +135,11 @@ public class JSONObject {
     /**
      * The map where the JSONObject's properties are kept.
      */
-    private final Map map;
+    private /*final*/ Map map;
+
+    public void changeInnerMap(final JSONObject jsonObject) {
+        map = jsonObject.map;
+    }
 
     /**
      * It is sometimes more convenient and less ambiguous to have a

@@ -19,16 +19,16 @@ public class User extends RedisEntity {
     public BooleanProperty IS_FAKE;
     public DateProperty LAST_ACCESS_TIME;
 
-    public ListProperty<String> LIST_STRING;
-    public ListProperty<Integer> LIST_INT;
-    public ListProperty<Long> LIST_LONG;
+    public ListPrimitiveObjectProperty<String> LIST_STRING;
+    public ListPrimitiveObjectProperty<Integer> LIST_INT;
+    public ListPrimitiveObjectProperty<Long> LIST_LONG;
 
     public MapProperty<String> MAP_STRING_STRING;
     public MapProperty<Long> MAP_STRING_LONG;
     public MapProperty<Integer> MAP_STRING_INTEGER;
 
     public DataObjectProperty<Address> ADDRESS;
-    public ListProperty<Address> ADDRESSES;
+    public ListJSONObjectProperty<Address> ADDRESSES;
     public MapProperty<Address> ADDRESSES_MAP;
     public ComplexAnyProperty<Map<String, String>> COMPLEX_MAP_STRING_STRING; // slow implementation but supports anything serializable
 
@@ -63,7 +63,7 @@ public class User extends RedisEntity {
         MAP_STRING_INTEGER = new MAP<Integer>(this).build();
 
         ADDRESS = new DATA_OBJECT<>(this, Address.class).build();
-        ADDRESSES = new LIST<Address>(this, Address.class).build();
+        ADDRESSES = new LIST_JSON<>(this, Address.class).build();
         ADDRESSES_MAP = new MAP<Address>(this, Address.class).build();
         COMPLEX_MAP_STRING_STRING = new COMPLEX_ANY<>(this).build();
 
