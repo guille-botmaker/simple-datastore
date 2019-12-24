@@ -1,8 +1,11 @@
 package io.botmaker.simpleredis.property;
 
 import io.botmaker.simpleredis.model.RedisEntity;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.json.JSONObject;
 
+import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,7 +44,10 @@ public final class ListJSONObjectProperty<V extends JSONObject> extends ListPrim
         if (!itemClass.isInstance(value)) {
             try {
                 convertedItem = itemClass.newInstance();
-                convertedItem.changeInnerMap((JSONObject) value);
+
+                final Field field = JSONObject.class.getDeclaredField("map");
+                field.setAccessible(true);
+                field.set(convertedItem, field.get(value));
             } catch (final Exception _exception) {
                 throw new RuntimeException("Could not instantiate object of class [" + itemClass.getName() + "]. Maybe missing empty constructor?: " + _exception.getMessage(), _exception);
             }
