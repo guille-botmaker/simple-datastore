@@ -15,7 +15,7 @@ public class StringProperty extends PropertyMeta<String> implements Serializable
     }
 
     protected String getValueImpl(final DataObject dataObject) {
-        return dataObject.has(name) ? dataObject.getString(name) : null;
+        return dataObject.optString(name, null);
     }
 
     protected void setValueImpl(final String value, final DataObject dataObject) {

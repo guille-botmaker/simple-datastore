@@ -15,7 +15,12 @@ public final class LongProperty extends PropertyMeta<Long> implements Serializab
     }
 
     protected Long getValueImpl(final DataObject dataObject) {
-        return dataObject.has(name) ? dataObject.getLong(name) : null;
+        // NOTE using same implementation that opt method (with try/catch)
+        try {
+            return dataObject.optLong(name);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     protected void setValueImpl(final Long value, final DataObject dataObject) {
