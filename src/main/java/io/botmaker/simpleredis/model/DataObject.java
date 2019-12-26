@@ -229,15 +229,6 @@ public class DataObject extends JSONObject implements Serializable {
     }
 
     @Override
-    public boolean has(final String key) {
-        final Map map = getInternalMap();
-        // NOTE this is an easy fix intead of check everywhere that the value is not NULL
-        if (map.get(key) == NULL || map.get(key) == null)
-            map.remove(key);
-        return map.containsKey(key);
-    }
-
-    @Override
     public boolean equals(final Object other) {
         return other != null && other instanceof DataObject && compareJSONS(this, (JSONObject) other);
     }
