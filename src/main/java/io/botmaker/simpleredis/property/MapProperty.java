@@ -29,7 +29,7 @@ public final class MapProperty<V> extends PropertyMeta<Map<String, V>> implement
 
     @Override
     protected Map<String, V> getValueImpl(final DataObject dataObject) {
-        final Map result = (Map) getMapImpl(dataObject);
+        final Map result = getMapImpl(dataObject);
 
         if (!result.isEmpty() && valueClass != null) {
             final boolean isSameType = valueClass.isInstance(result.values().iterator().next());
