@@ -24,11 +24,10 @@ public class DataObjectProperty<T extends DataObject> extends PropertyMeta<T> im
 
     @Override
     protected T getValueImpl(final DataObject dataObject) {
-        final JSONObject jsonObject;
-
-        if (dataObject.has(name)) {
-            jsonObject = dataObject.getJSONObject(name);
-        } else {
+        // NOTE: in multithread evironment, previously checking with "dataObject.has(name)" can get problems
+        // so use opt instead
+        JSONObject jsonObject = dataObject.optJSONObject(name);
+        if (jsonObject == null || jsonObject == JSONObject.NULL) {
             jsonObject = new JSONObject();
             dataObject.put(name, jsonObject);
         }
