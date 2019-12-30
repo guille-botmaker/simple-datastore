@@ -5,7 +5,7 @@
 
     <groupId>io.botmaker</groupId>
     <artifactId>simpleredis</artifactId>
-    <version>3.0.06</version>
+    <version>3.0.07</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -96,18 +96,6 @@
         <!--</dependency>-->
 
         <!-- =============== App Engine Dependencies END =============== -->
-
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <!-- NOTE: if you update this version, remember to change overriden class JSONObject
-            and replace:
-                this.map = new HashMap();
-            with this:
-                this.map = new ConcurrentHashMap();
-            -->
-            <version>20140107</version>
-        </dependency>
 
         <dependency>
             <groupId>commons-codec</groupId>
