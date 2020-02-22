@@ -1,5 +1,10 @@
 package io.botmaker.simpleredis.model;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,6 +22,10 @@ public class DataObject extends JSONObject implements Serializable {
 
     private static final long serialVersionUID = 471847964351314234L;
     private static final String LIST_KEY = "_list_";
+
+    private static final ObjectMapper mapper = new ObjectMapper(new JsonFactory())
+            .enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES)
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
     public DataObject() {
     }
@@ -137,6 +146,15 @@ public class DataObject extends JSONObject implements Serializable {
         objectInputStream.defaultReadObject();
 
         this.mergeWith(new DataObject(objectInputStream.readUTF()));
+    }
+
+    @Override
+    public String toString(int indentFactor) throws JSONException {
+        try {
+            return mapper.writeValueAsString(getInternalMap());
+        } catch (final JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean isFullyEquals(final DataObject another) {
