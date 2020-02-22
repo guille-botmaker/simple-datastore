@@ -49,10 +49,10 @@ public class ObjectProperty<T> extends PropertyMeta<T> implements Serializable {
             final boolean compressed = string.charAt(0) == 'C';
 
             if (compressed) {
-                return mapper.readValue(jsonFactory.createParser(new GZIPInputStream(new ByteArrayInputStream(Base64.decodeBase64(string.substring(1))))),
+                return (T) mapper.readValue(jsonFactory.createParser(new GZIPInputStream(new ByteArrayInputStream(Base64.decodeBase64(string.substring(1))))),
                         typeReference.apply(mapper));
             } else {
-                return mapper.readValue(jsonFactory.createParser(new StringReader(string.substring(1))), typeReference.apply(mapper));
+                return (T) mapper.readValue(jsonFactory.createParser(new StringReader(string.substring(1))), typeReference.apply(mapper));
             }
         } catch (final IOException e) {
             Logger.getLogger(ObjectProperty.class.getName()).log(Level.SEVERE, "dataObject [" + dataObject + "]: " + e.getMessage(), e);
