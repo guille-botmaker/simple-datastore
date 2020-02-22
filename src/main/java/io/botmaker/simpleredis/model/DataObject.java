@@ -2,7 +2,6 @@ package io.botmaker.simpleredis.model;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.json.JSONArray;
@@ -146,15 +145,6 @@ public class DataObject extends JSONObject implements Serializable {
         objectInputStream.defaultReadObject();
 
         this.mergeWith(new DataObject(objectInputStream.readUTF()));
-    }
-
-    @Override
-    public String toString(int indentFactor) throws JSONException {
-        try {
-            return mapper.writeValueAsString(getInternalMap());
-        } catch (final JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public boolean isFullyEquals(final DataObject another) {
