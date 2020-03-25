@@ -159,7 +159,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     }
 
     @Override
-    public P findUniqueByIndexableProperty(final String propertyName, final String id) {
+    public P findUniqueByIndexableProperty(final String optBusinessIdForCache, final String propertyName, final String id) {
         if (id == null || id.trim().length() == 0) {
             return null;
         }
@@ -178,7 +178,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     }
 
     @Override
-    public List<P> findMultipleByIndexableProperty(final String propertyName, final String id) {
+    public List<P> findMultipleByIndexableProperty(final String optBusinessIdForCache, final String propertyName, final String id) {
         if (id == null || id.trim().length() == 0) {
             return Collections.emptyList();
         }
@@ -196,7 +196,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     }
 
     @Override
-    public List<P> findMultipleLastOccurrencesByIndexableProperty(final String propertyName, final int ocurrences, final String id) {
+    public List<P> findMultipleLastOccurrencesByIndexableProperty(final String optBusinessIdForCache, final String propertyName, final int ocurrences, final String id) {
         if (id == null || id.trim().length() == 0) {
             return Collections.emptyList();
         }
@@ -204,7 +204,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     }
 
     @Override
-    public List<P> findMultipleSortedFromToByIndexableProperty(final String propertyName, final String id, final int from, final int to) {
+    public List<P> findMultipleSortedFromToByIndexableProperty(final String optBusinessIdForCache, final String propertyName, final String id, final int from, final int to) {
         if (id == null || id.trim().length() == 0) {
             return Collections.emptyList();
         }
@@ -212,7 +212,7 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
     }
 
     @Override
-    public List<P> findMultipleIntersectionOfIndexableProperty(final Map<String, String> propertyNameAndValueMap) {
+    public List<P> findMultipleIntersectionOfIndexableProperty(final String optBusinessIdForCache, final Map<String, String> propertyNameAndValueMap) {
         if (propertyNameAndValueMap == null || propertyNameAndValueMap.size() == 0) {
             return Collections.emptyList();
         }

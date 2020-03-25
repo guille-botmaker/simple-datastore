@@ -280,7 +280,7 @@ public class DAOTest extends AbstractTest {
             userDAO.save(u);
         }
 
-        final List<User> result = userDAO.findMultipleLastOccurrencesByIndexableProperty(userDAO.getSample().AGE.getPropertyName(), 2, "150");
+        final List<User> result = userDAO.findMultipleLastOccurrencesByIndexableProperty(null, userDAO.getSample().AGE.getPropertyName(), 2, "150");
         assertEquals(2, result.size());
         assertEquals("TestUserLastName9", result.get(1).LASTNAME.get());
     }
@@ -346,7 +346,7 @@ public class DAOTest extends AbstractTest {
         HashMap<String, String> propertyNameAndValueMap = new HashMap<>(2);
         propertyNameAndValueMap.put(user1.STATE.getPropertyName(), "old");
         propertyNameAndValueMap.put(user1.AGE.getPropertyName(), "150");
-        List<User> userList = userDAO.findMultipleIntersectionOfIndexableProperty(propertyNameAndValueMap);
+        List<User> userList = userDAO.findMultipleIntersectionOfIndexableProperty(null, propertyNameAndValueMap);
         assertEquals(2, userList.size());
         assertTrue(userList.contains(user1));
         assertFalse(userList.contains(user2));
@@ -355,7 +355,7 @@ public class DAOTest extends AbstractTest {
         propertyNameAndValueMap = new HashMap<>(2);
         propertyNameAndValueMap.put(user1.STATE.getPropertyName(), "new");
         propertyNameAndValueMap.put(user1.AGE.getPropertyName(), "150");
-        userList = userDAO.findMultipleIntersectionOfIndexableProperty(propertyNameAndValueMap);
+        userList = userDAO.findMultipleIntersectionOfIndexableProperty(null, propertyNameAndValueMap);
         assertEquals(1, userList.size());
         assertFalse(userList.contains(user1));
         assertTrue(userList.contains(user2));
@@ -501,7 +501,7 @@ public class DAOTest extends AbstractTest {
     @Test
     public void testFindUnique() {
         final User sample = new User();
-        final User result = userDAO.findUniqueByIndexableProperty(sample.LASTNAME.getPropertyName(), "liendo" + lastNameUniqueId);
+        final User result = userDAO.findUniqueByIndexableProperty(null, sample.LASTNAME.getPropertyName(), "liendo" + lastNameUniqueId);
 
         assertEquals(result.LASTNAME.get(), "liendo" + lastNameUniqueId);
     }
