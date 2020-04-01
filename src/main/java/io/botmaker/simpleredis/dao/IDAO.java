@@ -49,7 +49,7 @@ public interface IDAO<P extends RedisEntity> extends Serializable {
 
     void massiveUpload(final Collection<P> list);
 
-    void remove(final String id);
+    void remove(final P persistentObject);
 
-    void remove(final Collection<String> ids);
+    void remove(final Collection<P> persistentObjects);
 }

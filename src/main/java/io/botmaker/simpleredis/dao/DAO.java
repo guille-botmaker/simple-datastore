@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This class is a wrapper for Datastore operations. Supports most of the DatastoreService and DatastoreAsyncService operations adding features such as:
@@ -105,15 +106,17 @@ public class DAO<P extends RedisEntity> implements Serializable, IDAO<P> {
                 simpleDatastoreService.getRedisServer());
     }
 
-    public void remove(final String id) {
+    public void remove(final P persistentObject) {
 
+        final String id = persistentObject.getId();
         getRetryingHandler().tryDSRemove(id, this);
         if (customByIdCache != null)
             customByIdCache.remove(id);
     }
 
-    public void remove(final Collection<String> ids) {
+    public void remove(final Collection<P> persistentObjects) {
 
+        final Set<String> ids = persistentObjects.stream().map(RedisEntity::getId).collect(Collectors.toSet());
         getRetryingHandler().tryDSRemove(ids, this);
         if (customByIdCache != null)
             ids.forEach(customByIdCache::remove);

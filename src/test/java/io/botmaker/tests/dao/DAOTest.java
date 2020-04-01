@@ -57,7 +57,7 @@ public class DAOTest extends AbstractTest {
         super.setUp();
         userDAO = service.getDAO(UserDAO.class);
 
-        userDAO.remove(userDAO.getAll().stream().map(e -> e.getId()).collect(Collectors.toList()));
+        userDAO.remove(userDAO.getAll());
 
         for (final User user : buildUsers(lastNameUniqueId)) {
             userDAO.save(user);
@@ -473,7 +473,7 @@ public class DAOTest extends AbstractTest {
         User theuser = userDAO.findByLastName("liendo" + lastNameUniqueId);
         assertNotNull(theuser);
 
-        userDAO.remove(theuser.getId());
+        userDAO.remove(theuser);
 
         theuser = userDAO.findByLastName("liendo" + lastNameUniqueId);
         assertNull(theuser);
@@ -484,17 +484,14 @@ public class DAOTest extends AbstractTest {
         User theuser = userDAO.findByLastName("liendo" + lastNameUniqueId);
         assertNotNull(theuser);
 
-        final List<String> ids = new ArrayList<>();
-        ids.add(theuser.getId());
-
-        userDAO.remove(ids);
+        userDAO.remove(Collections.singletonList(theuser));
 
         theuser = userDAO.findByLastName("liendo" + lastNameUniqueId);
         assertNull(theuser);
 
         // test remove all
         assertEquals(5, userDAO.getAll().size());
-        userDAO.remove(userDAO.getAll().stream().map(e -> e.getId()).collect(Collectors.toList()));
+        userDAO.remove(userDAO.getAll());
         assertEquals(0, userDAO.getAll().size());
     }
 
