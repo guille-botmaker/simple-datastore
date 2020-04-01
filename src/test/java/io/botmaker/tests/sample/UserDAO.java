@@ -11,14 +11,14 @@ public final class UserDAO extends DAO<User> {
     }
 
     public User findByLastName(final String lastName) {
-        return findUniqueByIndexableProperty(sample.LASTNAME.getPropertyName(), lastName);
+        return findUniqueByIndexableProperty(null, sample.LASTNAME.getPropertyName(), lastName);
     }
 
     public List<User> findByAge(final int age) {
-        return findMultipleByIndexableProperty(sample.AGE.getPropertyName(), "" + age);
+        return findMultipleByIndexableProperty(null, sample.AGE.getPropertyName(), "" + age);
     }
 
     public List<User> findByState(final String state) {
-        return findMultipleByIndexableProperty(sample.STATE.getPropertyName(), state);
+        return findMultipleByIndexableProperty(null, sample.STATE.getPropertyName(), state);
     }
 }

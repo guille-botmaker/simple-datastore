@@ -33,23 +33,23 @@ public interface IDAO<P extends RedisEntity> extends Serializable {
 
     List<P> getAll();
 
-    P findUniqueByIndexableProperty(final String propertyName, final String id);
+    P findUniqueByIndexableProperty(final String optBusinessIdForCache, final String propertyName, final String id);
 
-    List<P> findMultipleByIndexableProperty(final String propertyName, final String id);
+    List<P> findMultipleByIndexableProperty(final String optBusinessIdForCache, final String propertyName, final String id);
 
-    List<P> findMultipleIntersectionOfIndexableProperty(final Map<String, String> propertyNameAndValueMap);
+    List<P> findMultipleIntersectionOfIndexableProperty(final String optBusinessIdForCache, final Map<String, String> propertyNameAndValueMap);
 
-    List<P> findMultipleLastOccurrencesByIndexableProperty(final String propertyName, final int ocurrences, final String id);
+    List<P> findMultipleLastOccurrencesByIndexableProperty(final String optBusinessIdForCache, final String propertyName, final int ocurrences, final String id);
 
     List<P> findMultipleUnionOfIndexableProperty(final List<Pair<String, String>> propertyNameAndValuePair);
 
-    List<P> findMultipleSortedFromToByIndexableProperty(final String propertyName, final String id, final int from, final int to);
+    List<P> findMultipleSortedFromToByIndexableProperty(final String optBusinessIdForCache, final String propertyName, final String id, final int from, final int to);
 
     void save(final P persistentObject);
 
     void massiveUpload(final Collection<P> list);
 
-    void remove(final String id);
+    void remove(final P persistentObject);
 
-    void remove(final Collection<String> ids);
+    void remove(final Collection<P> persistentObjects);
 }
