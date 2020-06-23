@@ -27,10 +27,10 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     public T initialValue;
     public Closure<T> inlinePrePropertyChangeObserver;
     public Closure<T> inlinePosPropertyChangeObserver;
+    public boolean compressGzip;
     protected boolean indexable;
     protected boolean uniqueIndex;
     protected boolean auditable;
-    protected boolean compressGzip;
 
     protected AbstractPropertyBuilder(final P propertyMeta, final T initialValue) {
         this.propertyMeta = propertyMeta;
