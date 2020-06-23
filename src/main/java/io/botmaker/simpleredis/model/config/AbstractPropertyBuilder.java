@@ -30,6 +30,7 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     protected boolean indexable;
     protected boolean uniqueIndex;
     protected boolean auditable;
+    protected boolean compressGzip;
 
     protected AbstractPropertyBuilder(final P propertyMeta, final T initialValue) {
         this.propertyMeta = propertyMeta;
@@ -88,6 +89,13 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
 
         return this;
     }
+
+    public AbstractPropertyBuilder<P, T> compressGzip() {
+        this.compressGzip = true;
+
+        return this;
+    }
+
 
     public AbstractPropertyBuilder<P, T> numberInclusiveMin(final long v) {
         this.numberInclusiveMin = v;

@@ -47,6 +47,7 @@ public abstract class PropertyMeta<E> implements Serializable {
                 !Objects.equals(options.initialValue, other.options.initialValue) ||
                 options.sendToClient != other.options.sendToClient ||
                 options.auditable != other.options.auditable ||
+                options.compressGzip != other.options.compressGzip ||
                 options.indexable != other.options.indexable ||
                 options.uniqueIndex != other.options.uniqueIndex);
     }
