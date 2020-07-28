@@ -18,6 +18,7 @@ import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public abstract class RedisEntity extends PersistentObject implements Serializable {
@@ -36,7 +37,7 @@ public abstract class RedisEntity extends PersistentObject implements Serializab
     public static final int EXPIRING_NEVER = 0;
 
     private static final long serialVersionUID = 6181606486836703354L;
-    protected final Map<String, PropertyMeta> propertiesMetadata = new HashMap<>();
+    protected final Map<String, PropertyMeta> propertiesMetadata = new ConcurrentHashMap<>();
     // persistent state
     private final DataObject dataObject = new DataObject();
     private final String entityName;
