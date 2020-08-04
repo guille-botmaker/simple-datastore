@@ -20,7 +20,7 @@ import java.util.Objects;
 public class DataObject extends JSONObject implements Serializable {
 
     private static final long serialVersionUID = 471847964351314234L;
-    private static final String LIST_KEY = "_list_";
+//    private static final String LIST_KEY = "_list_";
 
     private static final ObjectMapper mapper = new ObjectMapper(new JsonFactory())
             .enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES)
@@ -73,27 +73,27 @@ public class DataObject extends JSONObject implements Serializable {
         }
     }
 
-    public void addChild(final DataObject item) {
-        final JSONArray array = getJsonArray(LIST_KEY);
-
-        array.put(item);
-    }
-
-    public void addChildren(final List<DataObject> items) {
-        if (items != null && !items.isEmpty()) {
-            final JSONArray array = getJsonArray(LIST_KEY);
-
-            for (final DataObject item : items) {
-                array.put(item);
-            }
-        }
-    }
-
-    public List<DataObject> getChildren() {
-        final JSONArray array = getJsonArray(LIST_KEY);
-
-        return getInternalListFromJSONArray(array);
-    }
+//    public void addChild(final DataObject item) {
+//        final JSONArray array = getJsonArray(LIST_KEY);
+//
+//        array.put(item);
+//    }
+//
+//    public void addChildren(final List<DataObject> items) {
+//        if (items != null && !items.isEmpty()) {
+//            final JSONArray array = getJsonArray(LIST_KEY);
+//
+//            for (final DataObject item : items) {
+//                array.put(item);
+//            }
+//        }
+//    }
+//
+//    public List<DataObject> getChildren() {
+//        final JSONArray array = getJsonArray(LIST_KEY);
+//
+//        return getInternalListFromJSONArray(array);
+//    }
 
     public <V> List<V> getItemsForList(final String listKey) {
         final JSONArray array = getJsonArray(listKey);
