@@ -126,12 +126,12 @@ public class DataObjectTest extends AbstractTest {
 
         fillDataObject(dataObject);
 
-        for (int i = 0; i < 1000; i++) {
-            final DataObject item = new DataObject();
-            fillDataObject(item);
-
-            dataObject.addChild(item);
-        }
+//        for (int i = 0; i < 1000; i++) {
+//            final DataObject item = new DataObject();
+//            fillDataObject(item);
+//
+//            dataObject.addChild(item);
+//        }
         return dataObject;
     }
 
