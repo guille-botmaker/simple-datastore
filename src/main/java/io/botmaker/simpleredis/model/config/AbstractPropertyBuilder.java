@@ -28,7 +28,7 @@ public abstract class AbstractPropertyBuilder<P extends PropertyMeta, T> impleme
     public Closure<T> inlinePrePropertyChangeObserver;
     public Closure<T> inlinePosPropertyChangeObserver;
     public boolean compressGzip;
-    protected boolean indexable;
+    public boolean indexable;
     protected boolean uniqueIndex;
     protected boolean auditable;
 
